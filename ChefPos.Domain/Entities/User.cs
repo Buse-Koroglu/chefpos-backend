@@ -3,7 +3,7 @@ using ChefPos.Domain.Enums;
 
 namespace ChefPos.Domain.Entities;
 
-public class Users :  BaseEntity
+public class User :  BaseEntity
 {
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
@@ -11,6 +11,6 @@ public class Users :  BaseEntity
     public bool IsFirstLogin { get; set; } = true;
     public Role Role { get; private set; }
     public Guid LocationId { get; private set; }
-    public Locations Locations { get; private set; } = null!;
-    public ICollection<Orders> Orders { get; private set; } = new List<Orders>();
+    public Location Location { get; private set; } = null!;
+    public ICollection<Order> Orders { get; private set; } = new List<Order>();
 }
