@@ -2,6 +2,6 @@ namespace ChefPos.Domain.Enums;
 
 public enum OrderType
 {
-    PERSONAL,
+    CASH,
     SELF_SERVICE
 }
