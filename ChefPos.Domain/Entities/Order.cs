@@ -22,8 +22,11 @@ public class Order : BaseEntity
     Order()
     {
     }
+    
+    private void CalculateTotalPrice() => TotalPrice = _items.Sum(i => i.Price * i.Quantity);
 
-    public static Order CreateByCashier(int orderNumber, Guid locationId, Guid cashierId, string customerName, decimal totalPrice)
+
+    public static Order CreateByCashier(int orderNumber, Guid locationId, Guid cashierId, string customerName)
     {
         return new Order
         {
@@ -31,12 +34,11 @@ public class Order : BaseEntity
             CashierId = cashierId,
             LocationId = locationId,
             CustomerName = string.IsNullOrEmpty(customerName) ? "Müşteri" : customerName,
-            TotalPrice = totalPrice,
-            OrderType = OrderType.CASH,
+            OrderType = OrderType.CASHIER,
         };
     }
 
-    public static Order CreateByKiosk(int orderNumber, Guid locationId, string customerName, decimal totalPrice)
+    public static Order CreateByKiosk(int orderNumber, Guid locationId, string customerName)
     {
         if (string.IsNullOrWhiteSpace(customerName))
         {
@@ -48,9 +50,76 @@ public class Order : BaseEntity
             CashierId = null,
             LocationId = locationId,
             CustomerName = customerName,
-            TotalPrice = totalPrice,
             OrderType = OrderType.SELF_SERVICE,
         };
     }
+    
+    public void AddItem(Guid productId, int quantity, decimal unitPrice, string productName)
+    {
+        if (OrderStatus != OrderStatus.PENDING)
+        {
+            throw new InvalidOperationException("Sadece bekleyen siparişler değişitirilebilir.");
+        }
+        
+        if (quantity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(quantity), "Adet 0'dan büyük olmalı.");
+        if (unitPrice < 0)
+            throw new ArgumentOutOfRangeException(nameof(unitPrice));
+        
+        var existingItem = _items.FirstOrDefault(i => i.ProductId == productId);
+        if (existingItem is not null)
+        {
+            existingItem.IncreaseQuantity(quantity);
+        }
+        else
+        {
+            _items.Add(new OrderItem(productId,productName,unitPrice,quantity));
+        }
+        CalculateTotalPrice();
+        Touch();
+    }
+
+    public void RemoveItem(Guid orderItemId)
+    {
+        if (OrderStatus != OrderStatus.PENDING)
+        {
+            throw new InvalidOperationException("Sadece bekleyen siparişler değişitirilebilir.");
+        }
+        var item = _items.FirstOrDefault(i => i.Id == orderItemId);
+        if (item is null) return;
+        _items.Remove(item);
+        CalculateTotalPrice();
+        Touch();    
+    }
+    
+    public void Complete()
+    {
+        if (!_items.Any())
+            throw new InvalidOperationException("Boş sipariş tamamlanamaz.");
+        if (OrderStatus != OrderStatus.PENDING)
+            throw new InvalidOperationException($"Sipariş tamamlandığı ve iptal edildiği durumundayken tamamlanamaz.");
+
+        OrderStatus = OrderStatus.COMPLETED;
+        Touch();
+    }
+
+    public void Cancel()
+    {
+        if (OrderStatus == OrderStatus.COMPLETED)
+            throw new InvalidOperationException("Tamamlanmış sipariş iptal edilemez.");
+
+        OrderStatus = OrderStatus.CANCELLED;
+        Touch();
+    }
+
+    public void MarkAsPaid()
+    {
+        if (PaymentStatus == PaymentStatus.PAID)
+            throw new InvalidOperationException("Sipariş zaten ödenmiş.");
+
+        PaymentStatus = PaymentStatus.PAID;
+        Touch();
+    }
+
 }
         
