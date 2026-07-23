@@ -40,7 +40,7 @@ public class Order : BaseEntity
 
     public static Order CreateByKiosk(int orderNumber, Guid locationId, string customerName)
     {
-        if (string.IsNullOrWhiteSpace(customerName))
+        if (string.IsNullOrEmpty(customerName))
         {
             throw new ArgumentException("Kiosk siparişlerinde isim-soyisim girmek zorunludur.", nameof(customerName));
         }

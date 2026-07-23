@@ -4,7 +4,7 @@ namespace ChefPos.Domain.Entities;
 
 public class Location : BaseEntity
 {
-    public string Name { get; private set; }
+    public string Name { get; private set; } = null!;
     public bool IsActive { get; private set; } = true;
     public ICollection<Order> Orders { get; private set; } = new List<Order>();
     public ICollection<Product> Products { get; private set; } = new List<Product>();
