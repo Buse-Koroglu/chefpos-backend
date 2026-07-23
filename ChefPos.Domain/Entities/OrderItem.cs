@@ -7,7 +7,7 @@ public class OrderItem : BaseEntity
     public Guid OrderId { get; private set; } 
     public Order Order { get; private set; } = null!;
     public Guid? ProductId { get; private set; }
-    public string Name { get; private set; } = null!;
+    public string Name { get; private set; } = default!;
     public decimal Price { get; private set; }
     public int Quantity { get; private set; }
     

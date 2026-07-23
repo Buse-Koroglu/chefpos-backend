@@ -23,7 +23,7 @@ public class ProductItem : BaseEntity
 
         if (unitPrice < 0)
         {
-            throw new ArgumentOutOfRangeException("Fiyat negatif olamaz.", nameof(unitPrice));
+            throw new ArgumentOutOfRangeException( nameof(unitPrice),"Fiyat negatif olamaz.");
         } 
         
         Name = name;

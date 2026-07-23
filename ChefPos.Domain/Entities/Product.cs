@@ -4,7 +4,7 @@ namespace ChefPos.Domain.Entities;
 
 public class Product : BaseEntity
 {
-    public string Name { get; private set; } = null!;
+    public string Name { get; private set; } = default!;
     public decimal Price { get; private set; }
     public string? Description { get; private set; }
     public string? ImageUrl { get; private set; }

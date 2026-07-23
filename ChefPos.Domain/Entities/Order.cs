@@ -33,14 +33,14 @@ public class Order : BaseEntity
             OrderNumber = orderNumber,
             CashierId = cashierId,
             LocationId = locationId,
-            CustomerName = string.IsNullOrEmpty(customerName) ? "Müşteri" : customerName,
+            CustomerName = string.IsNullOrWhiteSpace(customerName) ? "Müşteri" : customerName,
             OrderType = OrderType.CASHIER,
         };
     }
 
     public static Order CreateByKiosk(int orderNumber, Guid locationId, string customerName)
     {
-        if (string.IsNullOrEmpty(customerName))
+        if (string.IsNullOrWhiteSpace(customerName))
         {
             throw new ArgumentException("Kiosk siparişlerinde isim-soyisim girmek zorunludur.", nameof(customerName));
         }

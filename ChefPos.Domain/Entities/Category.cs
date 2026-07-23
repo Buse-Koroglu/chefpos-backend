@@ -4,7 +4,7 @@ namespace ChefPos.Domain.Entities;
 
 public class Category : BaseEntity
 {
-    public string Name { get; private set; } = null!;
+    public string Name { get; private set; } = default!;
     public string? Icon { get; private set; }
     public bool IsActive { get; private set; } = true;
     public Guid LocationId { get; private set; }

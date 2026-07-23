@@ -11,6 +11,7 @@ public class User :  BaseEntity
     public string Password { get; private set; } = default!;
     public bool IsFirstLogin { get; private set; } = true;
     public Role Role { get; private set; }
+    
     public Guid LocationId { get; private set; }
     public Location Location { get; private set; } = null!;
     public bool IsActive { get; private set; } = true;
@@ -21,7 +22,7 @@ public class User :  BaseEntity
     private readonly List<UserLocation> _locations = new();
     public IReadOnlyCollection<UserLocation> Locations => _locations;
     
-      private User() { }
+    private User() { }
 
     public User(string personalId, string firstName, string lastName,
         string password, Role role, Guid LocationId)
@@ -52,7 +53,7 @@ public class User :  BaseEntity
         Touch();
     }
 
-    public void GiveLocationAccess(Guid locationId, bool makePrimary = false)
+    public void GiveLocationAccess(Guid locationId)
     {
         if (_locations.Any(l => l.LocationId == locationId))
             throw new InvalidOperationException("Kullanıcı zaten bu yerleşkede yetkilidir.");
