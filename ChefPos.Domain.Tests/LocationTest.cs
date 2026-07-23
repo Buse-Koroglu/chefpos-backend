@@ -29,7 +29,7 @@ public class LocationTest
     {
         var location = new Location(Name);
  
-        Assert.Throws<ArgumentException>(() => location.Rename(name));
+        Assert.Throws<ArgumentException>(() => location.Rename(name!));
     }
     
     [Fact]
