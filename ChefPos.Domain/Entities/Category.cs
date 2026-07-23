@@ -24,6 +24,6 @@ public class Category : BaseEntity
         Icon = icon;
     }
     
-    public void DeactivateCategory() => IsActive = false;
-    public void ActivateCategory() => IsActive = true;
+    public void DeactivateCategory() { IsActive = false; Touch(); }
+    public void ActivateCategory() { IsActive = true; Touch(); }
 }

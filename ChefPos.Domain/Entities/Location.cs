@@ -15,11 +15,19 @@ public class Location : BaseEntity
 
     public Location(string name)
     {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace.", nameof(name));
+        }
         Name = name;
     }
     
     public void Rename(string newName)
     {
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            throw new ArgumentException($"'{nameof(newName)}' cannot be null or whitespace.", nameof(newName));
+        }
         Name = newName;
         Touch();
     }
