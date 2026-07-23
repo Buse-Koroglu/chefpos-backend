@@ -11,9 +11,7 @@ public class User :  BaseEntity
     public string Password { get; private set; } = default!;
     public bool IsFirstLogin { get; private set; } = true;
     public Role Role { get; private set; }
-    
-    public Guid LocationId { get; private set; }
-    public Location Location { get; private set; } = null!;
+
     public bool IsActive { get; private set; } = true;
     
     private readonly List<Order> _orders = new();
