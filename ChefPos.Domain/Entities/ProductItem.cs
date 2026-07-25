@@ -13,7 +13,7 @@ public class ProductItem : BaseEntity
     private  ProductItem()
     {}
 
-    public ProductItem(Guid productId, string name, decimal unitPrice)
+    internal ProductItem(Guid productId, string name, decimal unitPrice)
     {
     
         if (string.IsNullOrWhiteSpace(name))
