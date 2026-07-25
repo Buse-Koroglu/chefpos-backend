@@ -26,11 +26,10 @@ public class Order : BaseEntity
     private void CalculateTotalPrice() => TotalPrice = _items.Sum(i => i.Price * i.Quantity);
 
 
-    public static Order CreateByCashier(int orderNumber, Guid locationId, Guid cashierId, string customerName)
+    public static Order CreateByCashier( Guid locationId, Guid cashierId, string customerName)
     {
         return new Order
         {
-            OrderNumber = orderNumber,
             CashierId = cashierId,
             LocationId = locationId,
             CustomerName = string.IsNullOrWhiteSpace(customerName) ? "Müşteri" : customerName,
@@ -38,7 +37,7 @@ public class Order : BaseEntity
         };
     }
 
-    public static Order CreateByKiosk(int orderNumber, Guid locationId, string customerName)
+    public static Order CreateByKiosk(Guid locationId, string customerName)
     {
         if (string.IsNullOrWhiteSpace(customerName))
         {
@@ -46,7 +45,6 @@ public class Order : BaseEntity
         }
         return new Order
         {
-            OrderNumber = orderNumber,
             CashierId = null,
             LocationId = locationId,
             CustomerName = customerName,
