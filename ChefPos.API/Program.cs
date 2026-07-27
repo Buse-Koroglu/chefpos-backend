@@ -1,4 +1,5 @@
 using ChefPos.Infastructure;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfastructure(builder.Configuration);
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ChefPos.Application.AssemblyReference).Assembly));
 
 var app = builder.Build();
 
