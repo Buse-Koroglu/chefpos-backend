@@ -1,5 +1,6 @@
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Infastructure.Persistence;
+using ChefPos.Infastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,9 +15,9 @@ public static class DependencyInjection
 
       services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 
-      services.AddScoped<IOrderRepository, IOrderRepository>();
-      services.AddScoped<IProductRepository, IProductRepository>();
-      services.AddScoped<IUserRepository, IUserRepository>();
+      services.AddScoped<IOrderRepository, OrderRepository>();
+      services.AddScoped<IProductRepository, ProductRepository>();
+      services.AddScoped<IUserRepository, UserRepository>();
       
       return services;
    } 
