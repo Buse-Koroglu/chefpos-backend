@@ -1,5 +1,6 @@
 using ChefPos.Application.Orders.Commands;
 using ChefPos.Application.Orders.DTOs;
+using ChefPos.Application.Orders.Queries.GetOrderById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,14 @@ public class OrdersController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult> GetOrderById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetOrderByIdQuery(id), cancellationToken);
+        return Ok(result);
+    }
+        
     
 
 }
