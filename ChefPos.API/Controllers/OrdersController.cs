@@ -1,5 +1,6 @@
 using ChefPos.Application.Orders.Commands;
 using ChefPos.Application.Orders.Commands.CompleteOrder;
+using ChefPos.Application.Orders.Commands.MakePaidOrder;
 using ChefPos.Application.Orders.DTOs;
 using ChefPos.Application.Orders.Queries.GetOrderById;
 using MediatR;
@@ -35,6 +36,13 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult> CompleteOrder(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new CompleteOrderCommand(id), cancellationToken);
+        return Ok(result);
+    }
+    
+    [HttpPost("{id}/paid")]
+    public async Task<ActionResult> MakePaidOrder(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new MakePaidOrderCommand(id), cancellationToken);
         return Ok(result);
     }
         
