@@ -24,7 +24,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
     public async Task<OrderResponseDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         var cashier = await _userRepository.GetByIdAsync(request.CashierId, cancellationToken);
-        if (cashier == null)
+        if (cashier is null)
         {
             throw new InvalidOperationException("Kasiyer bulunamadı.");
         }
@@ -38,7 +38,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         foreach (var itemRequest in request.Items)
         {
             var product = await _productRepository.GetByIdAsync(itemRequest.ProductId, cancellationToken);
-            if (product == null)
+            if (product is null)
             {
                 throw new InvalidOperationException("Ürün bulunamadı");
             }
@@ -49,23 +49,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         await _orderRepository.AddAsync(order, cancellationToken);
         await _orderRepository.SaveAllChangesAsync(cancellationToken);
 
-        return new OrderResponseDto()
-        {
-            Id = order.Id,
-            OrderNumber = order.OrderNumber,
-            CustomerName = order.CustomerName,
-            TotalPrice = order.TotalPrice,
-            Status = order.OrderStatus.ToString(),
-            Type = order.OrderType.ToString(),
-            PaymentStatus = order.PaymentStatus.ToString(),
-            Items = order.Items.Select(i => new OrderItemResponseDto
-            {
-                Id = i.Id,
-                Name = i.Name,
-                Price = i.Price,
-                Quantity = i.Quantity,
-            }).ToList()
-        };
+       
+        return OrderResponseDto.FromEntity(order);
 
     }
 }

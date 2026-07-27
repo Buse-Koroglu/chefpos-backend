@@ -21,8 +21,4 @@
     <ProjectReference Include="..\ChefPos.Infastructure\ChefPos.Infastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>
