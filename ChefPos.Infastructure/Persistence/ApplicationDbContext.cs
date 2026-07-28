@@ -1,5 +1,6 @@
 using ChefPos.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ChefPos.Infastructure.Persistence;
 
@@ -21,5 +22,14 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            var idProperty = entityType.FindProperty("Id");
+            if (idProperty is not null)
+            {
+                idProperty.ValueGenerated = ValueGenerated.Never;
+            }
+        }
     }
 }

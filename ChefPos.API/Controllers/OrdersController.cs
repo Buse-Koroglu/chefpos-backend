@@ -1,8 +1,10 @@
 using ChefPos.Application.Orders.Commands;
+using ChefPos.Application.Orders.Commands.AddOrderItem;
 using ChefPos.Application.Orders.Commands.CancelOrder;
 using ChefPos.Application.Orders.Commands.CompleteOrder;
 using ChefPos.Application.Orders.Commands.CreateKioskOrder;
 using ChefPos.Application.Orders.Commands.MakePaidOrder;
+using ChefPos.Application.Orders.Commands.RemoveOrderItem;
 using ChefPos.Application.Orders.DTOs;
 using ChefPos.Application.Orders.Queries.GetOrderById;
 using MediatR;
@@ -62,6 +64,18 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
         
-    
+    [HttpPost("add-order-item")]
+    public async Task<ActionResult> AddOrderItem(AddOrderItemCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("remove-order-item")]
+    public async Task<ActionResult> RemoveOrderItem(RemoveOrderItemCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
 
 }
