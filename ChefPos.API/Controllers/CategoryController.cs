@@ -1,3 +1,4 @@
+using ChefPos.Application.Categories.Commands.ActivateCategory;
 using ChefPos.Application.Categories.Commands.CreateCategory;
 using ChefPos.Application.Categories.Commands.RemoveCategory;
 using MediatR;
@@ -23,7 +24,14 @@ public class CategoryController : ControllerBase
     }
     
     [HttpPost("deactivate")]
-    public async Task<ActionResult> RemoveCategory(DeactivateCategoryCommand command,CancellationToken cancellationToken)
+    public async Task<ActionResult> DeactivateCategory(DeactivateCategoryCommand command,CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
+    [HttpPost("activate")]
+    public async Task<ActionResult> ActivateCategory(ActivateCategoryCommand command,CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
