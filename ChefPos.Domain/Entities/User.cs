@@ -23,7 +23,7 @@ public class User :  BaseEntity
     private User() { }
 
     public User(string personalId, string firstName, string lastName,
-        string password, Role role, Guid LocationId)
+        string password, Role role)
     {
         if (string.IsNullOrWhiteSpace(personalId))
             throw new ArgumentException("Personel ID boş olamaz.", nameof(personalId));
@@ -37,8 +37,6 @@ public class User :  BaseEntity
         Role = role;
         IsFirstLogin = true;
         IsActive = true;
-
-        _locations.Add(new UserLocation(Id,LocationId));
     }
 
     public void ChangePassword(string newPassword)
@@ -61,11 +59,11 @@ public class User :  BaseEntity
 
     public void RevokeLocationAccess(Guid locationId)
     {
-        if (_locations.Count == 1)
-            throw new InvalidOperationException("Kullanıcının en az bir yetkili yerleşkesi olmalı.");
+        var link = _locations.FirstOrDefault(
+            x => x.LocationId == locationId);
 
-        var link = _locations.FirstOrDefault(l => l.LocationId == locationId);
-        if (link is null) return;
+        if (link is null)
+            return;
 
         _locations.Remove(link);
         Touch();
