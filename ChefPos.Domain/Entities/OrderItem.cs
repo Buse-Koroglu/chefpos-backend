@@ -27,4 +27,14 @@ public class OrderItem : BaseEntity
     {
         Quantity += amount;
     }
+    
+    internal void DecreaseQuantity(int amount)
+    {
+        if (amount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(amount), "Azaltma miktarı 0'dan büyük olmalı.");
+        if (amount > Quantity)
+            throw new ArgumentOutOfRangeException(nameof(amount), "Azaltma miktarı mevcut miktardan büyük olamaz.");
+
+        Quantity -= amount;
+    }
 }

@@ -118,6 +118,24 @@ public class Order : BaseEntity
         PaymentStatus = PaymentStatus.PAID;
         Touch();
     }
+    
+    public void DecreaseQuantity(Guid orderItemId,int amount)
+    {
+        if (OrderStatus != OrderStatus.PENDING)
+        {
+            throw new InvalidOperationException("Sadece bekleyen siparişler değiştirilebilir.");
+        }
+        var item = _items.FirstOrDefault(i => i.Id == orderItemId);
+        if (item is null) return;
+        
+        item.DecreaseQuantity(amount);
+        if (item.Quantity == 0)
+            _items.Remove(item); 
+        
+        CalculateTotalPrice();
+        Touch();
+        
+    }
 
 }
         
