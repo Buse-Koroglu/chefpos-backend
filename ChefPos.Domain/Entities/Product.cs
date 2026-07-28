@@ -62,6 +62,18 @@ public class Product : BaseEntity
         Touch();
     }
     
+    public void UpdateDetails(string name, string? description, string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Ürün adı boş olamaz.", nameof(name));
+        }
+        Name = name;
+        Description = description;
+        ImageUrl = imageUrl;
+        Touch();
+    }
+    
     public void DeactivateProduct() { IsActive = false; Touch(); }
     public void ActivateProduct() { IsActive = true; Touch(); }
 }

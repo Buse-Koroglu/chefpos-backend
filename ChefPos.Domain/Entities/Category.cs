@@ -24,6 +24,17 @@ public class Category : BaseEntity
         Icon = icon;
     }
     
+    public void UpdateDetails(string name, string? icon)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Kategori adı boş bırakılamaz.", nameof(name));
+        }
+        Name = name;
+        Icon = icon;
+        Touch();
+    }
+    
     public void DeactivateCategory() { IsActive = false; Touch(); }
     public void ActivateCategory() { IsActive = true; Touch(); }
 }
