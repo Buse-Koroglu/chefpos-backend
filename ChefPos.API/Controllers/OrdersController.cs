@@ -6,6 +6,7 @@ using ChefPos.Application.Orders.Commands.CreateKioskOrder;
 using ChefPos.Application.Orders.Commands.DecreaseOrderItem;
 using ChefPos.Application.Orders.Commands.MakePaidOrder;
 using ChefPos.Application.Orders.Commands.RemoveOrderItem;
+using ChefPos.Application.Orders.DTOs;
 using ChefPos.Application.Orders.Queries.GetOrderById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -64,24 +65,27 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
         
-    [HttpPost("add-item")]
-    public async Task<ActionResult> AddOrderItem(AddOrderItemCommand command, CancellationToken cancellationToken)
+    [HttpPost("{id}/items")]
+    public async Task<ActionResult> AddOrderItem(Guid id, AddOrderItemRequest body, CancellationToken cancellationToken)
     {
+        var command = new AddOrderItemCommand(id, body.Quantity, body.ProductId);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
 
-    [HttpPost("remove-item")]
-    public async Task<ActionResult> RemoveOrderItem(RemoveOrderItemCommand command, CancellationToken cancellationToken)
+    [HttpDelete("{orderId}/items/{orderItemId}")]
+    public async Task<ActionResult> RemoveOrderItem(Guid orderId, Guid orderItemId, CancellationToken cancellationToken)
     {
+        var command = new RemoveOrderItemCommand(orderId, orderItemId);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
     
     
-    [HttpPost("decrease-quantity")]
-    public async Task<ActionResult> DecreaseItemQuantity(DecreaseOrderItemCommand command, CancellationToken cancellationToken)
+    [HttpPatch("{id}/items/{itemId}/decrease")]
+    public async Task<ActionResult> DecreaseItemQuantity(Guid id, Guid itemId,DecreaseOrderItemRequest request, CancellationToken cancellationToken)
     {
+        var command = new DecreaseOrderItemCommand(id, itemId, request.Quantity);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }

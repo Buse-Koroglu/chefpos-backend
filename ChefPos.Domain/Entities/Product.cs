@@ -56,7 +56,10 @@ public class Product : BaseEntity
     public void RemoveIngredient(Guid productItemId)
     {
         var item = _productItems.FirstOrDefault(i => i.Id == productItemId);
-        if (item is null) return;
+        if (item is null)
+        {
+            throw new KeyNotFoundException("Ham madde bu ürünün reçetesinde bulunamadı.");
+        };
 
         _productItems.Remove(item);
         Touch();
