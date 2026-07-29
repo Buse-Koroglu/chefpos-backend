@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Orders.DTOs;
 using ChefPos.Domain.Entities;
@@ -19,24 +20,16 @@ public class CreateKioskOrderCommandHandler : IRequestHandler<CreateKioskOrderCo
     public async Task<OrderResponseDto> Handle(CreateKioskOrderCommand request, CancellationToken cancellationToken)
     {
         var order = Order.CreateByKiosk(request.LocationId, request.CustomerName!);
-        if (order is null)
-        {
-                throw new KeyNotFoundException($"Sipariş bulunamadı");
-        }
+
         foreach (var itemRequest in request.Items)
         {
-            var product = await _productRepository.GetByIdAsync(itemRequest.ProductId, cancellationToken);
-            if (product is null)
-            {
-                throw new InvalidOperationException("Ürün bulunamadı");
-            }
+            var product = await _productRepository.GetByIdAsync(itemRequest.ProductId, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {itemRequest.ProductId}");
 
             order.AddItem(product.Id, itemRequest.Quantity, product.Price, product.Name);
         }
         await _orderRepository.AddAsync(order, cancellationToken);
         await _orderRepository.SaveAllChangesAsync(cancellationToken);
-
-       
+        
         return OrderResponseDto.FromEntity(order);
     }
 }

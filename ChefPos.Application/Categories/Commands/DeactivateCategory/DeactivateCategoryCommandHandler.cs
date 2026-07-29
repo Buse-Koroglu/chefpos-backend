@@ -1,4 +1,5 @@
 using ChefPos.Application.Categories.DTOs;
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using MediatR;
 
@@ -18,18 +19,9 @@ public class DeactivateCategoryCommandHandler : IRequestHandler<DeactivateCatego
 
     public async Task<CategoryResponseDto> Handle(DeactivateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var location = await _locationRepository.GetByIdAsync(request.LocationId,cancellationToken);
-        if (location is null)
-        {
-            throw new KeyNotFoundException("Yerleşke bulunamadı.");
-        }
+        await _locationRepository.GetByIdAsync(request.LocationId,cancellationToken).OrThrowNotFoundAsync($"Yerleşke Bulunamadı : {request.LocationId}");
         
-        var category = await _categoryRepository.GetByIdAsync(request.Id,cancellationToken);
-        if (category is null)
-        {
-            throw new KeyNotFoundException("Kategori bulunamadı.");
-        }
-        
+        var category = await _categoryRepository.GetByIdAsync(request.Id,cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı : {request.Id}");
         
         if (category.LocationId != request.LocationId)
         {

@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Orders.DTOs;
 using ChefPos.Domain.Entities;
@@ -23,11 +24,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
 
     public async Task<OrderResponseDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var cashier = await _userRepository.GetByIdAsync(request.CashierId, cancellationToken);
-        if (cashier is null)
-        {
-            throw new InvalidOperationException("Kasiyer bulunamadı.");
-        }
+        var cashier = await _userRepository.GetByIdAsync(request.CashierId, cancellationToken).OrThrowNotFoundAsync($"Kasiyer bulunamadı: {request.CashierId}");
         
         if (!cashier.HasAccessToLocation(request.LocationId))
             throw new UnauthorizedAccessException("Bu kasiyerin belirtilen yerleşkede işlem yapma yetkisi yok.");
@@ -37,19 +34,14 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
 
         foreach (var itemRequest in request.Items)
         {
-            var product = await _productRepository.GetByIdAsync(itemRequest.ProductId, cancellationToken);
-            if (product is null)
-            {
-                throw new InvalidOperationException("Ürün bulunamadı");
-            }
+            var product = await _productRepository.GetByIdAsync(itemRequest.ProductId, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {itemRequest.ProductId}");
 
             order.AddItem(product.Id, itemRequest.Quantity, product.Price, product.Name);
         }
 
         await _orderRepository.AddAsync(order, cancellationToken);
         await _orderRepository.SaveAllChangesAsync(cancellationToken);
-
-       
+        
         return OrderResponseDto.FromEntity(order);
 
     }

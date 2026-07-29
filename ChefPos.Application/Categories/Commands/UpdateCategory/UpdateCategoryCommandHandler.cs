@@ -1,4 +1,5 @@
 using ChefPos.Application.Categories.DTOs;
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using MediatR;
 
@@ -15,11 +16,8 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
 
     public async Task<CategoryResponseDto> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
-        if (category is null)
-        {
-            throw new KeyNotFoundException("Kategori bulunamadı.");
-        }
+        var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken).OrThrowNotFoundAsync($"Kategori Bulunamadı: {request.CategoryId}");
+
         category.UpdateDetails(request.Name,request.Icon);
         await _categoryRepository.SaveAllChangesAsync(cancellationToken);
         return CategoryResponseDto.FromEntity(category);

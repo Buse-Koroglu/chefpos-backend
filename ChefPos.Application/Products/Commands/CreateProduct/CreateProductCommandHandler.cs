@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
 using ChefPos.Domain.Entities;
@@ -20,17 +21,9 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
     public async Task<ProductResponseDto> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
-        var location = await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken);
-        if (location is null)
-        {
-            throw new KeyNotFoundException("Yerleşke bulunamadı.");
-        }
+        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
 
-        var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
-        if (category is null)
-        {
-            throw new KeyNotFoundException("Kategori bulunamadı.");
-        }
+        var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı: {request.CategoryId}");
                 
         if (!category.IsActive)
         {

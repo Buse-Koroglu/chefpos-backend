@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Orders.DTOs;
 using MediatR;
@@ -17,18 +18,10 @@ public class AddOrderItemCommandHandler : IRequestHandler<AddOrderItemCommand, O
 
     public async Task<OrderResponseDto> Handle(AddOrderItemCommand request, CancellationToken cancellationToken)
     {
-        var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
-        if (order is null)
-            throw new KeyNotFoundException($"Sipariş bulunamadı: {request.OrderId}");
-
-        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);
-        if (product is null)
-            throw new KeyNotFoundException($"Ürün bulunamadı: {request.ProductId}");
-
+        var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken).OrThrowNotFoundAsync($"Sipariş bulunamadı: {request.OrderId}");
+        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {request.ProductId}");
         order.AddItem(request.ProductId, request.Quantity, product.Price, product.Name);
-
         await _orderRepository.SaveAllChangesAsync(cancellationToken);
-
         return OrderResponseDto.FromEntity(order);
     }
 }

@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
 using MediatR;
@@ -15,11 +16,7 @@ public class UpdatePriceCommandHandler : IRequestHandler<UpdatePriceCommand,Prod
 
     public async Task<ProductResponseDto> Handle(UpdatePriceCommand request, CancellationToken cancellationToken)
     {
-        var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (product is null)
-        {
-            throw new KeyNotFoundException("Ürün bulunamadı.");
-        }
+        var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {request.Id}");
         product.UpdatePrice(request.NewPrice);
         await _productRepository.SaveAllChangesAsync(cancellationToken);
         return ProductResponseDto.FromEntity(product);

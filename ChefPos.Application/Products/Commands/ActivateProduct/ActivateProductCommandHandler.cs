@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
 using MediatR;
@@ -17,17 +18,9 @@ public class ActivateProductCommandHandler : IRequestHandler<ActivateProductComm
 
     public async Task<ProductResponseDto> Handle(ActivateProductCommand request, CancellationToken cancellationToken)
     {
-        var location =await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken);
-        if (location is null)
-        {
-            throw new KeyNotFoundException("Yerleşke bulunamadı.");
-        }
+        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı : {request.LocationId}");
 
-        var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (product is null)
-        {
-            throw new KeyNotFoundException("Ürün bulunamadı.");
-        }
+        var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı : {request.Id}");
         
         product.ActivateProduct();
         await _productRepository.SaveAllChangesAsync(cancellationToken);
