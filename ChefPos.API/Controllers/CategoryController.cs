@@ -1,6 +1,8 @@
 using ChefPos.Application.Categories.Commands.ActivateCategory;
 using ChefPos.Application.Categories.Commands.CreateCategory;
 using ChefPos.Application.Categories.Commands.RemoveCategory;
+using ChefPos.Application.Categories.Commands.UpdateCategory;
+using ChefPos.Application.Categories.DTOs;
 using ChefPos.Application.Categories.Queries.GetCategories;
 using ChefPos.Application.Categories.Queries.GetCategoryById;
 using MediatR;
@@ -47,11 +49,20 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetAllCategoriesWithLocation([FromQuery] Guid locationId,[FromQuery]bool includeInactive,CancellationToken cancellationToken)
+    public async Task<ActionResult> GetAllCategoriesWithLocation([FromQuery] Guid locationId,
+        [FromQuery] bool includeInactive, CancellationToken cancellationToken)
     {
         var query = new GetCategoriesQuery(locationId, includeInactive);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
+
+    [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateCategory(Guid id, UpdateCategoryRequestDto body, CancellationToken cancellationToken)
+        {
+            var command = new UpdateCategoryCommand(id,body.Name, body.Icon!);
+            var result = await _mediator.Send(command, cancellationToken);
+            return Ok(result);
+        }
+    }
     
-}
