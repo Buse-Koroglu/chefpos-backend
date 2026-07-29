@@ -1,6 +1,7 @@
 using ChefPos.Application.Categories.Commands.ActivateCategory;
 using ChefPos.Application.Categories.Commands.CreateCategory;
 using ChefPos.Application.Categories.Commands.RemoveCategory;
+using ChefPos.Application.Categories.Queries.GetCategoryById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,13 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult> CreateCategory(CreateCategoryCommand command,CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<ActionResult> GetCategoryById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetCategoryByIdQuery(id), cancellationToken);
         return Ok(result);
     }
     
