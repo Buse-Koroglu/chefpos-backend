@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Orders.DTOs;
 using MediatR;
@@ -15,13 +16,7 @@ public class RemoveOrderItemCommandHandler : IRequestHandler<RemoveOrderItemComm
 
     public async Task<OrderResponseDto> Handle(RemoveOrderItemCommand request, CancellationToken cancellationToken)
     {
-        var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
-        if (order is null)
-        {
-            throw new KeyNotFoundException($"Sipariş bulunamadı: {request.OrderId}");
-
-        }
-        
+        var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken).OrThrowNotFoundAsync($"Sipariş bulunamadı : {request.OrderId}");
         order.RemoveItem(request.OrderItemId);
         await _orderRepository.SaveAllChangesAsync(cancellationToken);
 

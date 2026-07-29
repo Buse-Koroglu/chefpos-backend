@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
 using MediatR;
@@ -22,17 +23,9 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
     {
         if (request.CategoryId.HasValue)
         {
-            var category = await _categoryRepository.GetByIdAsync(request.CategoryId.Value, cancellationToken);
-            if (category is null)
-            {
-                throw new KeyNotFoundException($"Kategori bulunamadı: {request.CategoryId.Value}");
-            }
+            await _categoryRepository.GetByIdAsync(request.CategoryId.Value, cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı: {request.CategoryId}");
         }
-        var location = await _locationRepository.GetByIdAsync(request.LocationId,cancellationToken);
-        if (location is null)
-        {
-            throw new KeyNotFoundException("Yerleşke bulunamadı.");
-        }
+        await _locationRepository.GetByIdAsync(request.LocationId,cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
 
         var products = await _productRepository.GetAllByLocationAsync(
             request.LocationId,

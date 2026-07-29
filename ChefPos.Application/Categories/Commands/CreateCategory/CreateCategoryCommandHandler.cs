@@ -1,4 +1,5 @@
 using ChefPos.Application.Categories.DTOs;
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using MediatR;
@@ -19,11 +20,7 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
 
     public async Task<CategoryResponseDto> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var location = await _locationRepository.GetByIdAsync(request.LocationId,cancellationToken);
-        if (location is null)
-        {
-            throw new KeyNotFoundException("Yerleşke bulunamadı.");
-        }
+        await _locationRepository.GetByIdAsync(request.LocationId,cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı : {request.LocationId}");
 
         var category = new Category(request.Name,request.LocationId,request.Icon);
 

@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
 using MediatR;
@@ -15,11 +16,7 @@ public class RemoveProductIngredientCommandHandler : IRequestHandler<RemoveProdu
 
     public async Task<ProductResponseDto> Handle(RemoveProductIngredientCommand request, CancellationToken cancellationToken)
     {
-        var product =await _productRepository.GetByIdAsync(request.ProductId,cancellationToken);
-        if (product is null)
-        {
-            throw new KeyNotFoundException("Ürün bulunamadı.");
-        }
+        var product =await _productRepository.GetByIdAsync(request.ProductId,cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı:  {request.ProductId}");
         product.RemoveIngredient(request.IngredientId);
         await _productRepository.SaveAllChangesAsync(cancellationToken);
         return ProductResponseDto.FromEntity(product);
