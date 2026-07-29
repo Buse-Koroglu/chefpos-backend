@@ -8,6 +8,7 @@ using ChefPos.Application.Products.Commands.UpdatePrice;
 using ChefPos.Application.Products.Commands.UpdateProduct;
 using ChefPos.Application.Products.DTOs;
 using ChefPos.Application.Products.Queries.GetProductById;
+using ChefPos.Application.Products.Queries.GetProducts;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 
@@ -83,6 +84,14 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> GetProductById(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetProductByIdQuery(id), cancellationToken);
+        return Ok(result);
+    }
+    
+    [HttpGet]
+    public async Task<ActionResult> GetProducts( [FromQuery] Guid locationId, [FromQuery] Guid? categoryId, [FromQuery] bool includeInactive = false, CancellationToken cancellationToken = default)
+    {
+        var query = new GetProductsQuery(locationId, categoryId, includeInactive);
+        var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
 }
