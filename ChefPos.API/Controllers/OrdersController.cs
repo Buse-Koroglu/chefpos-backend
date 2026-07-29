@@ -6,7 +6,6 @@ using ChefPos.Application.Orders.Commands.CreateKioskOrder;
 using ChefPos.Application.Orders.Commands.DecreaseOrderItem;
 using ChefPos.Application.Orders.Commands.MakePaidOrder;
 using ChefPos.Application.Orders.Commands.RemoveOrderItem;
-using ChefPos.Application.Orders.DTOs;
 using ChefPos.Application.Orders.Queries.GetOrderById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
