@@ -1,6 +1,10 @@
 using ChefPos.Application.Categories.Commands.ActivateCategory;
 using ChefPos.Application.Categories.Commands.CreateCategory;
 using ChefPos.Application.Categories.Commands.RemoveCategory;
+using ChefPos.Application.Categories.Commands.UpdateCategory;
+using ChefPos.Application.Categories.DTOs;
+using ChefPos.Application.Categories.Queries.GetCategories;
+using ChefPos.Application.Categories.Queries.GetCategoryById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,6 +27,13 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
     
+    [HttpGet("{id}")]
+    public async Task<ActionResult> GetCategoryById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetCategoryByIdQuery(id), cancellationToken);
+        return Ok(result);
+    }
+    
     [HttpPost("deactivate")]
     public async Task<ActionResult> DeactivateCategory(DeactivateCategoryCommand command,CancellationToken cancellationToken)
     {
@@ -36,5 +47,22 @@ public class CategoryController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
+
+    [HttpGet]
+    public async Task<ActionResult> GetAllCategoriesWithLocation([FromQuery] Guid locationId,
+        [FromQuery] bool includeInactive, CancellationToken cancellationToken)
+    {
+        var query = new GetCategoriesQuery(locationId, includeInactive);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateCategory(Guid id, UpdateCategoryRequestDto body, CancellationToken cancellationToken)
+        {
+            var command = new UpdateCategoryCommand(id,body.Name, body.Icon!);
+            var result = await _mediator.Send(command, cancellationToken);
+            return Ok(result);
+        }
+    }
     
-}
