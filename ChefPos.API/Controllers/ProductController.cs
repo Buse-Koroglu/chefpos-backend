@@ -1,9 +1,13 @@
+using ChefPos.Application.Orders.Commands.RemoveOrderItem;
 using ChefPos.Application.Products.Commands.ActivateProduct;
+using ChefPos.Application.Products.Commands.AddProductIngredient;
 using ChefPos.Application.Products.Commands.CreateProduct;
 using ChefPos.Application.Products.Commands.DeactivateProduct;
+using ChefPos.Application.Products.Commands.RemoveProductIngredient;
 using ChefPos.Application.Products.Commands.UpdatePrice;
 using ChefPos.Application.Products.Commands.UpdateProduct;
 using ChefPos.Application.Products.DTOs;
+using ChefPos.Application.Products.Queries.GetProductById;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 
@@ -59,5 +63,26 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
-    
+    [HttpPost("{id}/ingredients")]
+    public async Task<ActionResult> AddIngredient(Guid id, AddProductIngredientRequestDto body, CancellationToken cancellationToken)
+    {
+     var command = new AddProductIngredientCommand(id,body.Name,body.UnitPrice);
+     var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpDelete("{id}/ingredients/{ingredientId}")]
+    public async Task<ActionResult> RemoveIngredient(Guid id, Guid ingredientId, CancellationToken cancellationToken)
+    {
+        var command = new RemoveProductIngredientCommand(id,ingredientId);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+            
+    [HttpGet("{id}")]
+    public async Task<ActionResult> GetProductById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetProductByIdQuery(id), cancellationToken);
+        return Ok(result);
+    }
 }

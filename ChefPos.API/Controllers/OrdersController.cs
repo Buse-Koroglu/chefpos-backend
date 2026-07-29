@@ -71,9 +71,10 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("remove-item")]
-    public async Task<ActionResult> RemoveOrderItem(RemoveOrderItemCommand command, CancellationToken cancellationToken)
+    [HttpDelete("{orderId}/items/{orderItemId}")]
+    public async Task<ActionResult> RemoveOrderItem(Guid orderId, Guid orderItemId, CancellationToken cancellationToken)
     {
+        var command = new RemoveOrderItemCommand(orderId, orderItemId);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
