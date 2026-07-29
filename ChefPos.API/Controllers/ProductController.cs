@@ -1,4 +1,6 @@
+using ChefPos.Application.Products.Commands.ActivateProduct;
 using ChefPos.Application.Products.Commands.CreateProduct;
+using ChefPos.Application.Products.Commands.DeactivateProduct;
 using ChefPos.Application.Products.Commands.UpdatePrice;
 using ChefPos.Application.Products.Commands.UpdateProduct;
 using ChefPos.Application.Products.DTOs;
@@ -34,11 +36,28 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
-    [HttpPut("{id}/price")]
+    [HttpPatch("{id}/price")]
     public async Task<ActionResult> UpdateProductPrice(Guid id,UpdateProductPriceRequestDto body, CancellationToken cancellationToken)
     {
         var command = new UpdatePriceCommand(id,body.NewPrice);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
+
+
+    [HttpPost("deactivate")]
+    public async Task<ActionResult> DeactivateProduct(DeactivateProductCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
+    [HttpPost("activate")]
+    public async Task<ActionResult> ActivateProduct(ActivateProductCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
+    
 }
