@@ -39,4 +39,12 @@ public class IngredientRepository : IIngredientRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+    
+    public async Task<List<Ingredient>> GetLowStockAsync(Guid locationId, CancellationToken cancellationToken)
+    {
+        return await _context.Ingredients
+            .Where(i => i.LocationId == locationId && i.IsActive && i.CurrentStock < i.MinStockThreshold)
+            .OrderBy(i => i.Name)
+            .ToListAsync(cancellationToken);
+    }
 }

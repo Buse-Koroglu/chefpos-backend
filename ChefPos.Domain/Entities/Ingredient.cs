@@ -103,7 +103,7 @@ public class Ingredient : BaseEntity
         Touch();
     }
         
-    public bool IsBellowThreshold => CurrentStock > MinStockThreshold;
+    public bool IsBellowThreshold => CurrentStock < MinStockThreshold;
 
     public void DeactivateIngredient()
     {

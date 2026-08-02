@@ -1,6 +1,7 @@
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Orders.DTOs;
+using ChefPos.Domain.Entities;
 using MediatR;
 
 namespace ChefPos.Application.Orders.Commands.CompleteOrder;
@@ -21,6 +22,8 @@ public class CompleteOrderCommandHandler : IRequestHandler<CompleteOrderCommand,
         var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken).OrThrowNotFoundAsync($"Sipariş bulunamadı : {request.OrderId}");
         order.Complete();
 
+        var productCache = new Dictionary<Guid, Product>();
+
         foreach (var item in order.Items)
         {
             if (item.ProductId is null)
@@ -28,11 +31,21 @@ public class CompleteOrderCommandHandler : IRequestHandler<CompleteOrderCommand,
                 continue;
             }
 
-            var product = await _productRepository.GetByIdAsync(item.ProductId.Value, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {item.ProductId}");
+            if (!productCache.TryGetValue(item.ProductId.Value, out var product))
+            {
+                product = await _productRepository.GetByIdAsync(item.ProductId.Value, cancellationToken);
+                if (product is null)
+                {
+                    throw new KeyNotFoundException($"Ürün bulunamadı: {item.ProductId.Value}");
+                }
+
+                productCache[item.ProductId.Value] = product;
+            }
+
             foreach (var recipeLine in product.ProductItems)
             {
-                var amoutnToDeduct = item.Quantity * recipeLine.QuantityPerServing;
-                recipeLine.Ingredient.DecreaseStock(amoutnToDeduct);
+                var amountToDeduct = item.Quantity * recipeLine.QuantityPerServing;
+                recipeLine.Ingredient.DecreaseStock(amountToDeduct);
             }
         }
         await _orderRepository.SaveAllChangesAsync(cancellationToken);
