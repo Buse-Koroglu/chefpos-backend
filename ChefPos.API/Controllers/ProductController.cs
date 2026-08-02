@@ -72,10 +72,10 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
-    [HttpDelete("{id}/ingredients/{ingredientId}")]
-    public async Task<ActionResult> RemoveIngredient(Guid id, Guid ingredientId, CancellationToken cancellationToken)
+    [HttpDelete("{id}/ingredients/{productItemId}")]
+    public async Task<ActionResult> RemoveIngredient(Guid id, Guid productItemId, CancellationToken cancellationToken)
     {
-        var command = new RemoveProductIngredientCommand(id,ingredientId);
+        var command = new RemoveProductIngredientCommand(id,productItemId);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
