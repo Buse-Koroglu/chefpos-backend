@@ -6,12 +6,12 @@ namespace ChefPos.Application.Products.Commands.RemoveProductIngredient;
 public class RemoveProductIngredientCommand : IRequest<ProductResponseDto>
 {
     public Guid ProductId { get; set; }
-    public Guid IngredientId { get; set; }
+    public Guid ProductItemId { get; set; }
 
-    public RemoveProductIngredientCommand(Guid productId, Guid ingredientId)
+    public RemoveProductIngredientCommand(Guid productId, Guid productItemId)
     {
         ProductId = productId;
-        IngredientId = ingredientId;
+        ProductItemId = productItemId;
     }
     
 }
