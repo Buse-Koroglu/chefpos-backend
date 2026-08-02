@@ -1,19 +1,18 @@
+namespace ChefPos.Application.Products.Commands.AddProductIngredient;
+
 using ChefPos.Application.Products.DTOs;
 using MediatR;
-
-namespace ChefPos.Application.Products.Commands.AddProductIngredient;
 
 public class AddProductIngredientCommand : IRequest<ProductResponseDto>
 {
     public Guid ProductId { get; set; }
-    public string Name { get; set; } = default!;
-    public decimal UnitPrice { get; set; }
+    public Guid IngredientId { get; set; }
+    public decimal QuantityPerServing { get; set; }
 
-    public AddProductIngredientCommand(Guid productId, string name, decimal unitPrice)
+    public AddProductIngredientCommand(Guid productId, Guid ingredientId, decimal quantityPerServing)
     {
         ProductId = productId;
-        Name = name;
-        UnitPrice = unitPrice;    
+        IngredientId = ingredientId;
+        QuantityPerServing = quantityPerServing;
     }
-    
 }

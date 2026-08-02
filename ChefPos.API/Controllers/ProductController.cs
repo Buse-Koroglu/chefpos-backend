@@ -65,10 +65,10 @@ public class ProductController : ControllerBase
     }
     
     [HttpPost("{id}/ingredients")]
-    public async Task<ActionResult> AddIngredient(Guid id, AddProductIngredientRequestDto body, CancellationToken cancellationToken)
+    public async Task<ActionResult> AddIngredient(Guid id, AddIngredientRequest body, CancellationToken cancellationToken)
     {
-     var command = new AddProductIngredientCommand(id,body.Name,body.UnitPrice);
-     var result = await _mediator.Send(command, cancellationToken);
+        var command = new AddProductIngredientCommand(id, body.IngredientId, body.QuantityPerServing);
+        var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
 
