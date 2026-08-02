@@ -44,12 +44,26 @@ public class Product : BaseEntity
         Touch();
     }
     
-    public void AddIngredient(string name, decimal unitPrice)
+    public void AddIngredient(Guid ingredientId, decimal quantityPerServing)
     {
-        if (_productItems.Any(i => i.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        if (_productItems.Any(i => i.IngredientId == ingredientId))
+        {
             throw new InvalidOperationException("Bu ham madde zaten reçetede mevcut.");
+        }
 
-        _productItems.Add(new ProductItem(Id, name, unitPrice));
+        _productItems.Add(new ProductItem(Id, ingredientId, quantityPerServing));
+        Touch();
+    }
+    
+    public void UpdateIngredientQuantity(Guid productItemId, decimal newQuantityPerServing)
+    {
+        var item = _productItems.FirstOrDefault(i => i.Id == productItemId);
+        if (item is null)
+        {
+            throw new KeyNotFoundException("Ham madde bu ürünün reçetesinde bulunamadı.");
+        }
+ 
+        item.UpdateQuantity(newQuantityPerServing);
         Touch();
     }
 
@@ -59,8 +73,7 @@ public class Product : BaseEntity
         if (item is null)
         {
             throw new KeyNotFoundException("Ham madde bu ürünün reçetesinde bulunamadı.");
-        };
-
+        }
         _productItems.Remove(item);
         Touch();
     }

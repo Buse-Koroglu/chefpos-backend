@@ -1,4 +1,5 @@
 using ChefPos.Domain.Entities;
+using ChefPos.Domain.Enums;
 
 namespace ChefPos.Application.Products.DTOs;
 
@@ -12,7 +13,7 @@ public class ProductResponseDto
     public bool IsActive { get; set; }
     public Guid LocationId { get; set; }
     public Guid CategoryId { get; set; }
-    public List<ProductItemResponseDto> ProductItems { get; set; } = new();
+    public List<ProductItemResponseDto> Ingredients { get; set; } = new();
 
     public static ProductResponseDto FromEntity(Product product)
     {
@@ -26,24 +27,28 @@ public class ProductResponseDto
             IsActive = product.IsActive,
             LocationId = product.LocationId,
             CategoryId = product.CategoryId,
-            ProductItems = product.ProductItems.Select(ProductItemResponseDto.FromEntity).ToList()
+            Ingredients = product.ProductItems.Select(ProductItemResponseDto.FromEntity).ToList()
         };
     }
-    
-    public class ProductItemResponseDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = default!;
-        public decimal UnitPrice { get; set; }
+}
 
-        public static ProductItemResponseDto FromEntity(ProductItem item)
+public class ProductItemResponseDto
+{
+    public Guid Id { get; set; }
+    public Guid IngredientId { get; set; }
+    public string IngredientName { get; set; } = default!;
+    public StockUnit Unit { get; set; }
+    public decimal QuantityPerServing { get; set; }
+
+    public static ProductItemResponseDto FromEntity(ProductItem item)
+    {
+        return new ProductItemResponseDto
         {
-            return new ProductItemResponseDto
-            {
-                Id = item.Id,
-                Name = item.Name,
-                UnitPrice = item.UnitPrice
-            };
-        }
+            Id = item.Id,
+            IngredientId = item.IngredientId,
+            IngredientName = item.Ingredient.Name,
+            Unit = item.Ingredient.Unit,
+            QuantityPerServing = item.QuantityPerServing
+        };
     }
 }

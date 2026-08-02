@@ -15,13 +15,16 @@ public class ProductRepository : IProductRepository
     }
     public async Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Products.Include(p => p.ProductItems).FirstOrDefaultAsync(p=>p.Id == id, cancellationToken);
-    }
+        return await _context.Products
+            .Include(p => p.ProductItems).ThenInclude(pi => pi.Ingredient)
+            .FirstOrDefaultAsync(p=>p.Id == id, cancellationToken);    }
 
     public async Task<List<Product>> GetAllByLocationAsync(Guid locationId, Guid? categoryId, bool includeInactive, CancellationToken cancellationToken)
     {
-        var query = _context.Products.Include(p => p.ProductItems).Where(p => p.LocationId == locationId);
-
+        var query = _context.Products
+            .Include(p => p.ProductItems).ThenInclude(pi => pi.Ingredient)
+            .Where(p => p.LocationId == locationId);
+        
         if (categoryId.HasValue)
         {
             query = query.Where(p => p.CategoryId == categoryId.Value);

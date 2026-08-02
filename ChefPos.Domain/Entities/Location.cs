@@ -11,6 +11,7 @@ public class Location : BaseEntity
     public ICollection<UserLocation> AuthorizedUsers { get; private set; } = new List<UserLocation>();
     public ICollection<Category> Categories { get; private set; } = new List<Category>();
     
+    public ICollection<Ingredient> Ingredients { get; private set; } = new List<Ingredient>();
     private Location() {}
 
     public Location(string name)
