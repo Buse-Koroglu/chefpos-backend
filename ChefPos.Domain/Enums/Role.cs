@@ -4,4 +4,6 @@ public enum Role
 {
     ADMIN,
     CASHIER,
+    WAITER,
+    STOCK_MANAGER
 }

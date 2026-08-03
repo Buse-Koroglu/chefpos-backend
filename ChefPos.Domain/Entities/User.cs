@@ -29,6 +29,8 @@ public class User :  BaseEntity
             throw new ArgumentException("Personel ID boş olamaz.", nameof(personalId));
         if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
             throw new ArgumentException("Ad/Soyad boş olamaz.");
+        if (personalId.Trim().Length != 11 || !personalId.Trim().All(char.IsDigit))
+            throw new ArgumentException("Personel ID 11 haneli, sadece rakamlardan oluşmalı.", nameof(personalId));
 
         PersonalId = personalId;
         FirstName = firstName;

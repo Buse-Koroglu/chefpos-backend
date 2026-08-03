@@ -1,6 +1,7 @@
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Infastructure.Persistence;
 using ChefPos.Infastructure.Repositories;
+using ChefPos.Infastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,7 @@ public static class DependencyInjection
       services.AddScoped<ICategoryRepository, CategoryRepository>();
       services.AddScoped<ILocationRepository, LocationRepository>();
       services.AddScoped<IIngredientRepository, IngredientRepository>();
+      services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
       
       return services;
    } 
