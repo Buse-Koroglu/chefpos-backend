@@ -30,6 +30,10 @@ public class StockRequestConfiguration : IEntityTypeConfiguration<StockRequest>
             .HasForeignKey(sr => sr.DecidedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasIndex(sr => new { sr.IngredientId, sr.LocationId })
+            .IsUnique()
+            .HasFilter("\"Status\" = 0");
+
         builder.ToTable(sr => sr.HasCheckConstraint("CK_StockRequest_RequestedQuantity_Positive", "\"RequestedQuantity\" > 0"));
     }
 }

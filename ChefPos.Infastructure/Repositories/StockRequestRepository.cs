@@ -33,6 +33,14 @@ public class StockRequestRepository : IStockRequestRepository
         return await query.OrderByDescending(sr => sr.CreatedAt).ToListAsync(cancellationToken);
     }
 
+    public async Task<bool> HasPendingAsync(Guid ingredientId, Guid locationId, CancellationToken cancellationToken)
+    {
+        return await _context.StockRequests.AnyAsync(sr =>
+            sr.IngredientId == ingredientId &&
+            sr.LocationId == locationId &&
+            sr.Status == StockRequestStatus.PENDING, cancellationToken);
+    }
+
     public async Task AddAsync(StockRequest stockRequest, CancellationToken cancellationToken)
     {
         await _context.StockRequests.AddAsync(stockRequest, cancellationToken);

@@ -35,6 +35,11 @@ public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockReque
             throw new InvalidOperationException("Bu kullanıcının, hammaddenin bulunduğu yerleşkeye erişimi yok.");
         }
 
+        if (await _stockRequestRepository.HasPendingAsync(request.IngredientId, ingredient.LocationId, cancellationToken))
+        {
+            throw new InvalidOperationException("Bu hammadde için bu lokasyonda zaten bekleyen bir stok talebi var.");
+        }
+
         var stockRequest = new StockRequest(request.IngredientId, ingredient.LocationId, request.RequestedByUserId, request.RequestedQuantity);
 
         await _stockRequestRepository.AddAsync(stockRequest, cancellationToken);
