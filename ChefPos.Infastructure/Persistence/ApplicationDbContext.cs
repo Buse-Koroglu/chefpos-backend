@@ -19,6 +19,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductItem>  ProductItems => Set<ProductItem>();
     
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
+    
+    public DbSet<StockRequest>  StockRequests => Set<StockRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

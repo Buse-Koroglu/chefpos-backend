@@ -23,6 +23,7 @@ public static class DependencyInjection
       services.AddScoped<ILocationRepository, LocationRepository>();
       services.AddScoped<IIngredientRepository, IngredientRepository>();
       services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+      services.AddScoped<IStockRequestRepository,StockRequestRepository>();
       
       return services;
    } 
