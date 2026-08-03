@@ -1,5 +1,5 @@
 using ChefPos.Domain.Entities;
-
+using ChefPos.Domain.Enums;
 
 public class OrderTest
 {
@@ -10,6 +10,22 @@ public class OrderTest
     {
         Assert.Throws<ArgumentException>(() =>
             Order.CreateByKiosk(Guid.NewGuid(), ""));
+    }
+
+    [Fact]
+    public void ShouldSetOrderTypeForCashier()
+    {
+        var order = Order.CreateByCashier(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+
+        Assert.Equal(OrderType.CASHIER, order.OrderType);
+    }
+
+    [Fact]
+    public void ShouldSetOrderTypeForWaiter()
+    {
+        var order = Order.CreateByWaiter(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+
+        Assert.Equal(OrderType.WAITER, order.OrderType);
     }
     
     [Fact]
@@ -39,7 +55,7 @@ public class OrderTest
     [Fact]
     public void ShouldCalculateCorrectPriceAfterRemovingItem()
     {
-        var order = Order.CreateByCashier( Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+        var order = Order.CreateByCashier(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
  
         order.AddItem(Guid.NewGuid(), 1, 90, ProductName);   
         order.AddItem(Guid.NewGuid(), 2, 10, ProductName);
@@ -60,7 +76,7 @@ public class OrderTest
     [Fact]
     public void ShouldThrowAnExceptionWithCompletedOrder()
     {
-        var order = Order.CreateByCashier( Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+        var order = Order.CreateByCashier(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
         order.AddItem(Guid.NewGuid(), 1, 10, ProductName);
         order.Complete();
  
@@ -71,7 +87,7 @@ public class OrderTest
     [Fact]
     public void ShouldThrowAnExceptionWhenCompletedOrderIsCancelled()
     {
-        var order = Order.CreateByCashier( Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+        var order = Order.CreateByCashier(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
         order.AddItem(Guid.NewGuid(), 1, 10, ProductName);
         order.Complete();
  
@@ -103,6 +119,4 @@ public class OrderTest
 
         Assert.Throws<InvalidOperationException>(() => order.MarkAsPaid());
     }
-
-
 }

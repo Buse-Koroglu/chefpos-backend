@@ -13,8 +13,8 @@ public class Order : BaseEntity
     public decimal TotalPrice { get; private set; }
     public Guid LocationId { get; private set; }
     public Location Location { get; private set; } = null!;
-    public Guid? CashierId { get; private set; }
-    public User? Cashier { get; private set; }
+    public Guid? CreatedByUserId { get; private set; }
+    public User? CreatedByUser { get; private set; }
 
     private readonly List<OrderItem> _items = new();
     public IReadOnlyCollection<OrderItem> Items => _items;
@@ -24,16 +24,21 @@ public class Order : BaseEntity
     }
     
     private void CalculateTotalPrice() => TotalPrice = _items.Sum(i => i.Price * i.Quantity);
-
-
-    public static Order CreateByCashier( Guid locationId, Guid cashierId, string customerName)
+    
+    public static Order CreateByCashier(Guid locationId, Guid cashierId, string customerName)
+        => CreateByStaff(locationId, cashierId, customerName, OrderType.CASHIER);
+ 
+    public static Order CreateByWaiter(Guid locationId, Guid waiterId, string customerName)
+        => CreateByStaff(locationId, waiterId, customerName, OrderType.WAITER);
+ 
+    private static Order CreateByStaff(Guid locationId, Guid createdByUserId, string customerName, OrderType orderType)
     {
         return new Order
         {
-            CashierId = cashierId,
+            CreatedByUserId = createdByUserId,
             LocationId = locationId,
             CustomerName = string.IsNullOrWhiteSpace(customerName) ? "Müşteri" : customerName,
-            OrderType = OrderType.CASHIER,
+            OrderType = orderType,
         };
     }
 
@@ -45,7 +50,7 @@ public class Order : BaseEntity
         }
         return new Order
         {
-            CashierId = null,
+            CreatedByUserId = null,
             LocationId = locationId,
             CustomerName = customerName,
             OrderType = OrderType.SELF_SERVICE,
