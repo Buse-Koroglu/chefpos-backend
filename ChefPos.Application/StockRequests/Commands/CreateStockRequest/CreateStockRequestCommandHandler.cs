@@ -2,6 +2,7 @@ using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.StockRequests.DTOs;
 using ChefPos.Domain.Entities;
+using ChefPos.Domain.Enums;
 using MediatR;
 
 namespace ChefPos.Application.StockRequests.Commands.CreateStockRequest;
@@ -29,6 +30,11 @@ public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockReque
 
         var requestedByUser = await _userRepository.GetByIdAsync(request.RequestedByUserId, cancellationToken)
             .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {request.RequestedByUserId}");
+
+        if (requestedByUser.Role != Role.INVENTORY_STAFF)
+        {
+            throw new InvalidOperationException("Sadece envanter (INVENTORY_STAFF) personeli stok talebi oluşturabilir.");
+        }
 
         if (!requestedByUser.HasAccessToLocation(ingredient.LocationId))
         {
