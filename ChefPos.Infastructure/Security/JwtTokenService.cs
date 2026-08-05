@@ -1,0 +1,47 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using ChefPos.Application.Common.Interfaces;
+using ChefPos.Domain.Entities;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+
+namespace ChefPos.Infastructure.Security;
+
+public class JwtTokenService : IJwtTokenService
+{
+    private readonly IConfiguration _configuration;
+
+    public JwtTokenService(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+    public string GenerateToken(User user)
+    {
+        var jwtSection = _configuration.GetSection("Jwt");
+        var secret = jwtSection["Secret"]!;
+        var issuer = jwtSection["Issuer"];
+        var audience = jwtSection["Audience"];
+        var expiryMinutes = int.Parse(jwtSection["ExpiryMinutes"]!);
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.PersonalId),
+            new(ClaimTypes.Role, user.Role.ToString())
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: issuer,
+            audience: audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+            signingCredentials: creds);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+}

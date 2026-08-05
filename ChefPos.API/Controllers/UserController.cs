@@ -2,6 +2,7 @@ using ChefPos.Application.Users.Commands.AssignLocationAccess;
 using ChefPos.Application.Users.Commands.CreateUser;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/users")]
@@ -12,7 +13,8 @@ public class UsersController : ControllerBase
     {
         _mediator = mediator;
     }
-
+    
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateUser(CreateUserCommand command, CancellationToken cancellationToken)
     {

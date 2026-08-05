@@ -6,6 +6,7 @@ using ChefPos.Application.StockRequests.Queries.GetStockRequestById;
 using ChefPos.Application.StockRequests.Queries.GetStockRequests;
 using ChefPos.Domain.Enums;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChefPos.API.Controllers;
@@ -19,7 +20,7 @@ public class StockRequestsController : ControllerBase
     {
         _mediator = mediator;
     }
-
+    
     [HttpPost]
     public async Task<ActionResult> CreateStockRequest(CreateStockRequestCommand command, CancellationToken cancellationToken)
     {
@@ -27,6 +28,7 @@ public class StockRequestsController : ControllerBase
         return Ok(result);
     }
 
+    
     [HttpGet("{id}")]
     public async Task<ActionResult> GetStockRequestById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -43,7 +45,7 @@ public class StockRequestsController : ControllerBase
         return Ok(result);
     }
 
-
+    [Authorize(Roles = "STOCK_MANAGER")]
     [HttpPost("{id}/approve")]
     public async Task<ActionResult> ApproveStockRequest([FromRoute] Guid id, ApproveStockRequestDto body, CancellationToken cancellationToken)
     {
@@ -51,7 +53,8 @@ public class StockRequestsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-
+    
+    [Authorize(Roles = "STOCK_MANAGER")]
     [HttpPost("{id}/reject")]
     public async Task<ActionResult> RejectStockRequest([FromRoute] Guid id, RejectStockRequestDto body, CancellationToken cancellationToken)
     {
