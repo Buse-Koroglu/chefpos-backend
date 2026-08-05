@@ -9,12 +9,14 @@ using ChefPos.Application.Orders.Commands.RemoveOrderItem;
 using ChefPos.Application.Orders.DTOs;
 using ChefPos.Application.Orders.Queries.GetOrderById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChefPos.API.Controllers;
 
 [ApiController]
 [Route("api/orders")]
+[Authorize]
 public class OrdersController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -23,6 +25,7 @@ public class OrdersController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = "CASHIER,WAITER")]
     [HttpPost]
     public async Task<ActionResult> CreateOrder(CreateOrderCommand command,CancellationToken cancellationToken)
     {
@@ -30,13 +33,15 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
     
+    [AllowAnonymous]
     [HttpPost("kiosk")]
     public async Task<ActionResult> CreateKioskOrder(CreateKioskOrderCommand command,CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-
+    
+    [Authorize(Roles = "CASHIER,WAITER,ADMIN")]
     [HttpGet("{id}")]
     public async Task<ActionResult> GetOrderById(Guid id, CancellationToken cancellationToken)
     {
@@ -44,6 +49,7 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "CASHIER")]
     [HttpPost("{id}/complete")]
     public async Task<ActionResult> CompleteOrder(Guid id, CancellationToken cancellationToken)
     {
@@ -51,6 +57,7 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "CASHIER")]
     [HttpPost("{id}/paid")]
     public async Task<ActionResult> MakePaidOrder(Guid id, CancellationToken cancellationToken)
     {
@@ -58,6 +65,7 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "CASHIER,WAITER")]
     [HttpPost("{id}/cancel")]
     public async Task<ActionResult> CancelOrder(Guid id, CancellationToken cancellationToken)
     {
@@ -65,6 +73,7 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
         
+    [Authorize(Roles = "CASHIER,WAITER")]
     [HttpPost("{id}/items")]
     public async Task<ActionResult> AddOrderItem(Guid id, AddOrderItemRequest body, CancellationToken cancellationToken)
     {
@@ -73,6 +82,7 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "CASHIER,WAITER")]
     [HttpDelete("{orderId}/items/{orderItemId}")]
     public async Task<ActionResult> RemoveOrderItem(Guid orderId, Guid orderItemId, CancellationToken cancellationToken)
     {
@@ -82,6 +92,7 @@ public class OrdersController : ControllerBase
     }
     
     
+    [Authorize(Roles = "CASHIER,WAITER")]
     [HttpPatch("{id}/items/{itemId}/decrease")]
     public async Task<ActionResult> DecreaseItemQuantity(Guid id, Guid itemId,DecreaseOrderItemRequest request, CancellationToken cancellationToken)
     {

@@ -6,24 +6,32 @@ using ChefPos.Application.StockRequests.DTOs;
 using ChefPos.Domain.Enums;
 using MediatR;
 
+namespace ChefPos.Application.StockRequests.Commands.RejectStockRequest;
+
 public class RejectStockRequestCommandHandler : IRequestHandler<RejectStockRequestCommand, StockRequestResponseDto>
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly IStockRequestRepository _stockRequestRepository;
     private readonly IUserRepository _userRepository;
 
-    public RejectStockRequestCommandHandler(IStockRequestRepository stockRequestRepository, IUserRepository userRepository)
+    public RejectStockRequestCommandHandler(
+        ICurrentUserService currentUserService,
+        IStockRequestRepository stockRequestRepository,
+        IUserRepository userRepository)
     {
+        _currentUserService = currentUserService;
         _stockRequestRepository = stockRequestRepository;
         _userRepository = userRepository;
     }
 
     public async Task<StockRequestResponseDto> Handle(RejectStockRequestCommand request, CancellationToken cancellationToken)
     {
+        var currentUserId = _currentUserService.UserId;
         var stockRequest = await _stockRequestRepository.GetByIdAsync(request.StockRequestId, cancellationToken)
             .OrThrowNotFoundAsync($"Stok talebi bulunamadı: {request.StockRequestId}");
 
-        var decidedByUser = await _userRepository.GetByIdAsync(request.DecidedByUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {request.DecidedByUserId}");
+        var decidedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
+            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
         if (decidedByUser.Role != Role.STOCK_MANAGER)
         {
@@ -35,7 +43,7 @@ public class RejectStockRequestCommandHandler : IRequestHandler<RejectStockReque
             throw new ValidationException("Bu kullanıcının, stok talebinin ait olduğu yerleşkede yetkisi yok.");
         }
 
-        stockRequest.Reject(request.DecidedByUserId, request.Reason);
+        stockRequest.Reject(currentUserId, request.Reason);
 
         await _stockRequestRepository.SaveAllChangesAsync(cancellationToken);
 

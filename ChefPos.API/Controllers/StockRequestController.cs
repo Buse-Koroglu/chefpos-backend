@@ -13,6 +13,7 @@ namespace ChefPos.API.Controllers;
 
 [ApiController]
 [Route("api/stock-requests")]
+[Authorize]
 public class StockRequestsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -20,7 +21,8 @@ public class StockRequestsController : ControllerBase
     {
         _mediator = mediator;
     }
-    
+
+    [Authorize(Roles = "INVENTORY_STAFF")]
     [HttpPost]
     public async Task<ActionResult> CreateStockRequest(CreateStockRequestCommand command, CancellationToken cancellationToken)
     {
@@ -29,6 +31,7 @@ public class StockRequestsController : ControllerBase
     }
 
     
+    [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("{id}")]
     public async Task<ActionResult> GetStockRequestById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -37,6 +40,7 @@ public class StockRequestsController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet]
     public async Task<ActionResult> GetStockRequests([FromQuery] Guid locationId, [FromQuery] StockRequestStatus? status,CancellationToken cancellationToken)
     {
@@ -47,9 +51,9 @@ public class StockRequestsController : ControllerBase
 
     [Authorize(Roles = "STOCK_MANAGER")]
     [HttpPost("{id}/approve")]
-    public async Task<ActionResult> ApproveStockRequest([FromRoute] Guid id, ApproveStockRequestDto body, CancellationToken cancellationToken)
+    public async Task<ActionResult> ApproveStockRequest([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var command = new ApproveStockRequestCommand(id, body.DecidedByUserId);
+        var command = new ApproveStockRequestCommand(id);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
@@ -58,7 +62,7 @@ public class StockRequestsController : ControllerBase
     [HttpPost("{id}/reject")]
     public async Task<ActionResult> RejectStockRequest([FromRoute] Guid id, RejectStockRequestDto body, CancellationToken cancellationToken)
     {
-        var command = new RejectStockRequestCommand(id, body.DecidedByUserId, body.Reason);
+        var command = new RejectStockRequestCommand(id, body.Reason);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }

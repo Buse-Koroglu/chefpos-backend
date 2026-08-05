@@ -1,5 +1,6 @@
 using ChefPos.Application.Auth.Commands.Login;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChefPos.API.Controllers;
@@ -15,6 +16,7 @@ public class AuthController : ControllerBase
         _mediator = mediator;
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult> Login(LoginCommand command, CancellationToken cancellationToken)
     {

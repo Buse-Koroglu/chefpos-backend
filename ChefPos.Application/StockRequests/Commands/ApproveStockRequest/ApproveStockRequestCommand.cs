@@ -6,11 +6,9 @@ namespace ChefPos.Application.StockRequests.Commands.ApproveStockRequest;
 public class ApproveStockRequestCommand : IRequest<StockRequestResponseDto>
 {
     public Guid StockRequestId { get; set; }
-    public Guid DecidedByUserId { get; set; }
- 
-    public ApproveStockRequestCommand(Guid stockRequestId, Guid decidedByUserId)
+
+    public ApproveStockRequestCommand(Guid stockRequestId)
     {
         StockRequestId = stockRequestId;
-        DecidedByUserId = decidedByUserId;
     }
 }

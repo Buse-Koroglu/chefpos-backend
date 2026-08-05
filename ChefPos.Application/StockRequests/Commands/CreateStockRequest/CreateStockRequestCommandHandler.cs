@@ -10,15 +10,18 @@ namespace ChefPos.Application.StockRequests.Commands.CreateStockRequest;
 
 public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockRequestCommand, StockRequestResponseDto>
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly IStockRequestRepository _stockRequestRepository;
     private readonly IIngredientRepository _ingredientRepository;
     private readonly IUserRepository _userRepository;
 
     public CreateStockRequestCommandHandler(
+        ICurrentUserService currentUserService,
         IStockRequestRepository stockRequestRepository,
         IIngredientRepository ingredientRepository,
         IUserRepository userRepository)
     {
+        _currentUserService = currentUserService;
         _stockRequestRepository = stockRequestRepository;
         _ingredientRepository = ingredientRepository;
         _userRepository = userRepository;
@@ -26,11 +29,12 @@ public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockReque
 
     public async Task<StockRequestResponseDto> Handle(CreateStockRequestCommand request, CancellationToken cancellationToken)
     {
+        var currentUserId = _currentUserService.UserId;
         var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
             .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
-        var requestedByUser = await _userRepository.GetByIdAsync(request.RequestedByUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {request.RequestedByUserId}");
+        var requestedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
+            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
         if (requestedByUser.Role != Role.INVENTORY_STAFF)
         {
@@ -47,7 +51,7 @@ public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockReque
             throw new ValidationException("Bu hammadde için bu lokasyonda zaten bekleyen bir stok talebi var.");
         }
 
-        var stockRequest = new StockRequest(request.IngredientId, ingredient.LocationId, request.RequestedByUserId, request.RequestedQuantity);
+        var stockRequest = new StockRequest(request.IngredientId, ingredient.LocationId, currentUserId, request.RequestedQuantity);
 
         await _stockRequestRepository.AddAsync(stockRequest, cancellationToken);
         await _stockRequestRepository.SaveAllChangesAsync(cancellationToken);

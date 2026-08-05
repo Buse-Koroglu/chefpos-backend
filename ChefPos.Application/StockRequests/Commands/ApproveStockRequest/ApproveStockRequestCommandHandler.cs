@@ -9,22 +9,28 @@ namespace ChefPos.Application.StockRequests.Commands.ApproveStockRequest;
 
 public class ApproveStockRequestCommandHandler : IRequestHandler<ApproveStockRequestCommand, StockRequestResponseDto>
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly IStockRequestRepository _stockRequestRepository;
     private readonly IUserRepository _userRepository;
 
-    public ApproveStockRequestCommandHandler(IStockRequestRepository stockRequestRepository, IUserRepository userRepository)
+    public ApproveStockRequestCommandHandler(
+        ICurrentUserService currentUserService,
+        IStockRequestRepository stockRequestRepository,
+        IUserRepository userRepository)
     {
+        _currentUserService = currentUserService;
         _stockRequestRepository = stockRequestRepository;
         _userRepository = userRepository;
     }
 
     public async Task<StockRequestResponseDto> Handle(ApproveStockRequestCommand request, CancellationToken cancellationToken)
     {
+        var currentUserId = _currentUserService.UserId;
         var stockRequest = await _stockRequestRepository.GetByIdAsync(request.StockRequestId, cancellationToken)
             .OrThrowNotFoundAsync($"Stok talebi bulunamadı: {request.StockRequestId}");
 
-        var decidedByUser = await _userRepository.GetByIdAsync(request.DecidedByUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {request.DecidedByUserId}");
+        var decidedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
+            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
         if (decidedByUser.Role != Role.STOCK_MANAGER)
         {
@@ -36,7 +42,7 @@ public class ApproveStockRequestCommandHandler : IRequestHandler<ApproveStockReq
             throw new ValidationException("Bu kullanıcının, stok talebinin ait olduğu yerleşkede yetkisi yok.");
         }
 
-        stockRequest.Approve(request.DecidedByUserId);
+        stockRequest.Approve(currentUserId);
         stockRequest.Ingredient.IncreaseStock(stockRequest.RequestedQuantity);
 
         await _stockRequestRepository.SaveAllChangesAsync(cancellationToken);

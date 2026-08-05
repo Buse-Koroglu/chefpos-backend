@@ -8,12 +8,14 @@ using ChefPos.Application.Ingredients.Queries.GetIngredientById;
 using ChefPos.Application.Ingredients.Queries.GetIngredients;
 using ChefPos.Application.Ingredients.Queries.GetLowStockIngredients;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChefPos.API.Controllers;
 
 [ApiController]
 [Route("api/ingredients")]
+[Authorize]
 public class IngredientsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -22,6 +24,7 @@ public class IngredientsController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateIngredient(CreateIngredientCommand command, CancellationToken cancellationToken)
     {
@@ -45,6 +48,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("low-stock")]
     public async Task<ActionResult> GetLowStockIngredients([FromQuery] Guid locationId, CancellationToken cancellationToken)
     {
@@ -53,7 +57,8 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
     
-    [HttpPut("{id}")]
+    [Authorize(Roles = "ADMIN")]
+    [HttpPatch("{id}")]
     public async Task<ActionResult> UpdateIngredient([FromRoute] Guid id, UpdateIngredientRequest body, CancellationToken cancellationToken)
     {
         var command = new UpdateIngredientCommand(id, body.Name, body.UnitPrice);
@@ -62,6 +67,7 @@ public class IngredientsController : ControllerBase
     }
     
 
+    [Authorize(Roles = "ADMIN,STOCK_MANAGER")]
     [HttpPatch("{id}/min-stock-threshold")]
     public async Task<ActionResult> UpdateMinStockThreshold([FromRoute] Guid id, UpdateMinStockThresholdRequest body, CancellationToken cancellationToken)
     {
@@ -70,6 +76,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/activate")]
     public async Task<ActionResult> ActivateIngredient([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -78,6 +85,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/deactivate")]
     public async Task<ActionResult> DeactivateIngredient([FromRoute] Guid id, CancellationToken cancellationToken)
     {

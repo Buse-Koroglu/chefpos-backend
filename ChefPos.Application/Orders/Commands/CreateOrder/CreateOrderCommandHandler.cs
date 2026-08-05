@@ -10,15 +10,18 @@ namespace ChefPos.Application.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, OrderResponseDto>
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUserRepository  _userRepository;
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
 
     public CreateOrderCommandHandler(
+        ICurrentUserService currentUserService,
         IUserRepository userRepository,
         IOrderRepository orderRepository,
         IProductRepository productRepository)
     {
+        _currentUserService = currentUserService;
         _userRepository = userRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
@@ -26,7 +29,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
 
     public async Task<OrderResponseDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var requestingUser = await _userRepository.GetByIdAsync(request.CreatedByUserId, cancellationToken);
+        var currentUserId = _currentUserService.UserId;
+        var requestingUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
         if (requestingUser is null)
         {
             throw new NotFoundException("Kullanıcı bulunamadı.");
@@ -37,8 +41,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
  
         var order = requestingUser.Role switch
         {
-            Role.CASHIER => Order.CreateByCashier(request.LocationId, request.CreatedByUserId, request.CustomerName!),
-            Role.WAITER => Order.CreateByWaiter(request.LocationId, request.CreatedByUserId, request.CustomerName!),
+            Role.CASHIER => Order.CreateByCashier(request.LocationId, currentUserId, request.CustomerName!),
+            Role.WAITER => Order.CreateByWaiter(request.LocationId, currentUserId, request.CustomerName!),
             _ => throw new ValidationException($"'{requestingUser.Role}' rolündeki bir kullanıcı sipariş oluşturamaz.")
         };
  
@@ -61,4 +65,3 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
  
     }
 }
-

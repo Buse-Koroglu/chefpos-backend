@@ -6,7 +6,6 @@ namespace ChefPos.Application.Orders.Commands;
 public class CreateOrderCommand : IRequest<OrderResponseDto>
 {
     public Guid LocationId { get; set; }
-    public Guid CreatedByUserId { get; set; }
     public string? CustomerName { get; set; }
     public List<CreateOrderItemDto> Items { get; set; } = new();
 }

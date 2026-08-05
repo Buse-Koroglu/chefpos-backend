@@ -1,4 +1,6 @@
 using ChefPos.API.Middleware;
+using ChefPos.API.Services;
+using ChefPos.Application.Common.Interfaces;
 using ChefPos.Infastructure;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -39,10 +42,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddInfastructure(builder.Configuration);
+builder.Services.AddScoped<ICurrentUserService, HttpContextCurrentUserService>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ChefPos.Application.AssemblyReference).Assembly));
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddAuthorization();
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var secret = jwtSection["Secret"]!;
 
