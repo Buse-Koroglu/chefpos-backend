@@ -22,9 +22,9 @@ public static class DependencyInjection
       services.AddScoped<ICategoryRepository, CategoryRepository>();
       services.AddScoped<ILocationRepository, LocationRepository>();
       services.AddScoped<IIngredientRepository, IngredientRepository>();
-      services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
       services.AddScoped<IStockRequestRepository,StockRequestRepository>();
-      
+      services.AddScoped<IJwtTokenService, JwtTokenService>();
+      services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
       return services;
    } 
 }

@@ -5,10 +5,12 @@ using ChefPos.Application.Locations.Commands.UpdateLocation;
 using ChefPos.Application.Locations.DTOs;
 using ChefPos.Application.Locations.Queries.GetLocations;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/locations")]
+[Authorize]
 public class LocationsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -17,6 +19,7 @@ public class LocationsController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateLocation(CreateLocationCommand command, CancellationToken cancellationToken)
     {
@@ -41,6 +44,7 @@ public class LocationsController : ControllerBase
     }
     
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateLocation([FromRoute] Guid id, UpdateLocationRequestDto body, CancellationToken cancellationToken)
     {
@@ -49,6 +53,7 @@ public class LocationsController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/activate")]
     public async Task<ActionResult> ActivateLocation([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -57,6 +62,7 @@ public class LocationsController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/deactivate")]
     public async Task<ActionResult> DeactivateLocation([FromRoute] Guid id, CancellationToken cancellationToken)
     {

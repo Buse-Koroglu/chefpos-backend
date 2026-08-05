@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Orders.DTOs;
@@ -9,15 +10,18 @@ namespace ChefPos.Application.Orders.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, OrderResponseDto>
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUserRepository  _userRepository;
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
 
     public CreateOrderCommandHandler(
+        ICurrentUserService currentUserService,
         IUserRepository userRepository,
         IOrderRepository orderRepository,
         IProductRepository productRepository)
     {
+        _currentUserService = currentUserService;
         _userRepository = userRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
@@ -25,20 +29,21 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
 
     public async Task<OrderResponseDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var requestingUser = await _userRepository.GetByIdAsync(request.CreatedByUserId, cancellationToken);
+        var currentUserId = _currentUserService.UserId;
+        var requestingUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
         if (requestingUser is null)
         {
-            throw new InvalidOperationException("Kullanıcı bulunamadı.");
+            throw new NotFoundException("Kullanıcı bulunamadı.");
         }
         
         if (!requestingUser.HasAccessToLocation(request.LocationId))
-            throw new UnauthorizedAccessException("Bu kullanıcının belirtilen yerleşkede işlem yapma yetkisi yok.");
+            throw new ForbiddenException("Bu kullanıcının belirtilen yerleşkede işlem yapma yetkisi yok.");
  
         var order = requestingUser.Role switch
         {
-            Role.CASHIER => Order.CreateByCashier(request.LocationId, request.CreatedByUserId, request.CustomerName!),
-            Role.WAITER => Order.CreateByWaiter(request.LocationId, request.CreatedByUserId, request.CustomerName!),
-            _ => throw new InvalidOperationException($"'{requestingUser.Role}' rolündeki bir kullanıcı sipariş oluşturamaz.")
+            Role.CASHIER => Order.CreateByCashier(request.LocationId, currentUserId, request.CustomerName!),
+            Role.WAITER => Order.CreateByWaiter(request.LocationId, currentUserId, request.CustomerName!),
+            _ => throw new ValidationException($"'{requestingUser.Role}' rolündeki bir kullanıcı sipariş oluşturamaz.")
         };
  
         foreach (var itemRequest in request.Items)
@@ -46,7 +51,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             var product = await _productRepository.GetByIdAsync(itemRequest.ProductId, cancellationToken);
             if (product is null)
             {
-                throw new InvalidOperationException("Ürün bulunamadı");
+                throw new NotFoundException("Ürün bulunamadı");
             }
  
             order.AddItem(product.Id, itemRequest.Quantity, product.Price, product.Name);
@@ -60,4 +65,3 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
  
     }
 }
-

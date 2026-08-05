@@ -1,4 +1,3 @@
-using ChefPos.Application.Orders.Commands.RemoveOrderItem;
 using ChefPos.Application.Products.Commands.ActivateProduct;
 using ChefPos.Application.Products.Commands.AddProductIngredient;
 using ChefPos.Application.Products.Commands.CreateProduct;
@@ -9,6 +8,7 @@ using ChefPos.Application.Products.Commands.UpdateProduct;
 using ChefPos.Application.Products.DTOs;
 using ChefPos.Application.Products.Queries.GetProductById;
 using ChefPos.Application.Products.Queries.GetProducts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 
@@ -16,6 +16,7 @@ namespace ChefPos.API.Controllers;
 
 [ApiController]
 [Route("api/products")]
+[Authorize]
 public class ProductController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -25,6 +26,7 @@ public class ProductController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateProduct(CreateProductCommand command, CancellationToken cancellationToken)
     {
@@ -33,7 +35,8 @@ public class ProductController : ControllerBase
     }
     
     
-    [HttpPut("{id}")]
+    [Authorize(Roles = "ADMIN")]
+    [HttpPatch("{id}")]
     public async Task<ActionResult> UpdateProduct(Guid id,UpdateProductRequestDto body, CancellationToken cancellationToken)
     {
         var command = new UpdateProductCommand(id,body.Name ,body.Description, body.ImageUrl);
@@ -41,6 +44,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "ADMIN")]
     [HttpPatch("{id}/price")]
     public async Task<ActionResult> UpdateProductPrice(Guid id,UpdateProductPriceRequestDto body, CancellationToken cancellationToken)
     {
@@ -50,6 +54,7 @@ public class ProductController : ControllerBase
     }
 
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("deactivate")]
     public async Task<ActionResult> DeactivateProduct(DeactivateProductCommand command, CancellationToken cancellationToken)
     {
@@ -57,6 +62,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("activate")]
     public async Task<ActionResult> ActivateProduct(ActivateProductCommand command, CancellationToken cancellationToken)
     {
@@ -64,6 +70,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/ingredients")]
     public async Task<ActionResult> AddIngredient(Guid id, AddIngredientRequest body, CancellationToken cancellationToken)
     {
@@ -72,6 +79,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpDelete("{id}/ingredients/{productItemId}")]
     public async Task<ActionResult> RemoveIngredient(Guid id, Guid productItemId, CancellationToken cancellationToken)
     {

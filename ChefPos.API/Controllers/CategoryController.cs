@@ -6,12 +6,14 @@ using ChefPos.Application.Categories.DTOs;
 using ChefPos.Application.Categories.Queries.GetCategories;
 using ChefPos.Application.Categories.Queries.GetCategoryById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChefPos.API.Controllers;
 
 [ApiController]
 [Route("api/category")]
+[Authorize]
 public class CategoryController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -20,6 +22,7 @@ public class CategoryController : ControllerBase
         _mediator = mediator;
     }
     
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateCategory(CreateCategoryCommand command,CancellationToken cancellationToken)
     {
@@ -34,6 +37,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("deactivate")]
     public async Task<ActionResult> DeactivateCategory(DeactivateCategoryCommand command,CancellationToken cancellationToken)
     {
@@ -41,6 +45,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("activate")]
     public async Task<ActionResult> ActivateCategory(ActivateCategoryCommand command,CancellationToken cancellationToken)
     {
@@ -57,7 +62,8 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut("{id}")]
+    [Authorize(Roles = "ADMIN")]
+    [HttpPatch("{id}")]
         public async Task<ActionResult> UpdateCategory(Guid id, UpdateCategoryRequestDto body, CancellationToken cancellationToken)
         {
             var command = new UpdateCategoryCommand(id,body.Name, body.Icon!);

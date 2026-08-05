@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Users.DTOs;
 using ChefPos.Domain.Entities;
@@ -21,7 +22,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserR
         var existing = await _userRepository.GetByPersonalIdAsync(request.PersonalId, cancellationToken);
         if (existing is not null)
         {
-            throw new InvalidOperationException("Bu personel ID ile zaten bir kullanıcı mevcut.");
+            throw new ValidationException("Bu personel ID ile zaten bir kullanıcı mevcut.");
         }
 
         var hashedPassword = _passwordHasher.Hash(request.Password);

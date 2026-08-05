@@ -1,3 +1,5 @@
+using ChefPos.Application.Common.Exceptions;
+
 namespace ChefPos.Application.Common.Behaviors;
 
 public static class TaskExtensions
@@ -7,8 +9,9 @@ public static class TaskExtensions
         var result = await task;
         if (result is null)
         {
-            throw new KeyNotFoundException(message);
+            throw new NotFoundException(message);
         }
+ 
         return result;
     }
 }

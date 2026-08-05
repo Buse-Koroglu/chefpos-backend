@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Ingredients.DTOs;
@@ -24,7 +25,7 @@ public class UpdateIngredientCommandHandler : IRequestHandler<UpdateIngredientCo
             var existing = await _ingredientRepository.GetAllByLocationAsync(ingredient.LocationId, includeInactive: true, cancellationToken);
             if (existing.Any(i => i.Id != ingredient.Id && i.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase)))
             {
-                throw new InvalidOperationException("Bu isimde bir ham madde bu yerleşkede zaten mevcut.");
+                throw new ValidationException("Bu isimde bir ham madde bu yerleşkede zaten mevcut.");
             }
         }
 
