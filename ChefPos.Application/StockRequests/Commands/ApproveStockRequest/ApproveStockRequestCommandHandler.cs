@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.StockRequests.DTOs;
@@ -27,12 +28,12 @@ public class ApproveStockRequestCommandHandler : IRequestHandler<ApproveStockReq
 
         if (decidedByUser.Role != Role.STOCK_MANAGER)
         {
-            throw new InvalidOperationException("Sadece Yerleşke Stok Yetkilisi rolündeki kullanıcılar stok talebi onaylayabilir.");
+            throw new ValidationException("Sadece Yerleşke Stok Yetkilisi rolündeki kullanıcılar stok talebi onaylayabilir.");
         }
 
         if (!decidedByUser.HasAccessToLocation(stockRequest.LocationId))
         {
-            throw new InvalidOperationException("Bu kullanıcının, stok talebinin ait olduğu yerleşkede yetkisi yok.");
+            throw new ValidationException("Bu kullanıcının, stok talebinin ait olduğu yerleşkede yetkisi yok.");
         }
 
         stockRequest.Approve(request.DecidedByUserId);

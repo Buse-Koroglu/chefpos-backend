@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Categories.DTOs;
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
@@ -22,7 +23,7 @@ public class ActivateCategoryCommandHandler : IRequestHandler<ActivateCategoryCo
         var category = await _categoryRepository.GetByIdAsync(request.Id,cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı: {request.Id}");
         if (category.LocationId != request.LocationId)
         {
-            throw new UnauthorizedAccessException("Bu işleme yetkiniz bulunmamaktır.");
+            throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
         }
         category.ActivateCategory();
         await _categoryRepository.SaveAllChangesAsync(cancellationToken);

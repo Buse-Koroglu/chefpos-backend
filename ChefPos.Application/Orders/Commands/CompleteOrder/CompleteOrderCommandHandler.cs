@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Orders.DTOs;
@@ -36,7 +37,7 @@ public class CompleteOrderCommandHandler : IRequestHandler<CompleteOrderCommand,
                 product = await _productRepository.GetByIdAsync(item.ProductId.Value, cancellationToken);
                 if (product is null)
                 {
-                    throw new KeyNotFoundException($"Ürün bulunamadı: {item.ProductId.Value}");
+                    throw new NotFoundException($"Ürün bulunamadı: {item.ProductId.Value}");
                 }
 
                 productCache[item.ProductId.Value] = product;

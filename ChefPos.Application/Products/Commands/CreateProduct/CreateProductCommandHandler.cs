@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
@@ -27,12 +28,12 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
                 
         if (!category.IsActive)
         {
-            throw new InvalidOperationException("Pasif bir kategoriye ürün eklenemez.");
+            throw new ValidationException("Pasif bir kategoriye ürün eklenemez.");
         }
 
         if (category.LocationId != request.LocationId)
         {
-            throw new InvalidOperationException("Kategori bu yerleşkeye ait değil.");
+            throw new ValidationException("Kategori bu yerleşkeye ait değil.");
         }
 
         var product = new Product(request.Name, request.Price, request.CategoryId, request.LocationId,

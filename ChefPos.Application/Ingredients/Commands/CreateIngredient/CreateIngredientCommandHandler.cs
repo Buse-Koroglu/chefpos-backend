@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Ingredients.Commands;
 using ChefPos.Application.Ingredients.DTOs;
@@ -20,13 +21,13 @@ public class CreateIngredientCommandHandler : IRequestHandler<CreateIngredientCo
         var location = await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken);
         if (location is null)
         {
-            throw new KeyNotFoundException("Yerleşke bulunamadı.");
+            throw new NotFoundException("Yerleşke bulunamadı.");
         }
         
         var existing = await _ingredientRepository.GetAllByLocationAsync(request.LocationId, includeInactive: true, cancellationToken);
         if (existing.Any(i => i.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase)))
         {
-            throw new InvalidOperationException("Bu isimde bir ham madde bu yerleşkede zaten mevcut.");
+            throw new ValidationException("Bu isimde bir ham madde bu yerleşkede zaten mevcut.");
         }
 
         var ingredient = new Ingredient(request.Name, request.Unit, request.UnitPrice, request.LocationId, request.InitialStock, request.MinStockThreshold);

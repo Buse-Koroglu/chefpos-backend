@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Categories.DTOs;
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
@@ -25,7 +26,7 @@ public class DeactivateCategoryCommandHandler : IRequestHandler<DeactivateCatego
         
         if (category.LocationId != request.LocationId)
         {
-            throw new UnauthorizedAccessException("Bu işleme yetkiniz bulunmamaktır.");
+            throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
         }
         
         category.DeactivateCategory();

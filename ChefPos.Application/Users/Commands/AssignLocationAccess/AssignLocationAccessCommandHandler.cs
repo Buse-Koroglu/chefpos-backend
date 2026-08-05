@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Users.Commands.AssignLocationAccess;
@@ -29,7 +30,7 @@ public class AssignLocationAccessCommandHandler : IRequestHandler<AssignLocation
             var existingManager = await _userRepository.GetStockManagerByLocationAsync(request.LocationId, cancellationToken);
             if (existingManager is not null && existingManager.Id != user.Id)
             {
-                throw new InvalidOperationException(
+                throw new ValidationException(
                     $"Bu şubede zaten bir Yerleşke Stok Yetkilisi atanmış: {existingManager.FirstName} {existingManager.LastName}.");
             }
         }

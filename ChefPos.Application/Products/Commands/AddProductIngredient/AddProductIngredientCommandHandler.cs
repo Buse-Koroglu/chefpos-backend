@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
 using MediatR;
@@ -20,18 +21,18 @@ public class AddProductIngredientCommandHandler : IRequestHandler<AddProductIngr
         var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);
         if (product is null)
         {
-            throw new KeyNotFoundException("Ürün bulunamadı.");
+            throw new NotFoundException("Ürün bulunamadı.");
         }
 
         var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken);
         if (ingredient is null)
         {
-            throw new KeyNotFoundException("Ham madde bulunamadı.");
+            throw new NotFoundException("Ham madde bulunamadı.");
         }
 
         if (ingredient.LocationId != product.LocationId)
         {
-            throw new InvalidOperationException("Ham madde bu ürünün yerleşkesine ait değil.");
+            throw new ValidationException("Ham madde bu ürünün yerleşkesine ait değil.");
         }
 
         product.AddIngredient(request.IngredientId, request.QuantityPerServing);
