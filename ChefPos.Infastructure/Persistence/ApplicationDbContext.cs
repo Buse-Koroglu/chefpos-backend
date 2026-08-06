@@ -21,6 +21,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
     
     public DbSet<StockRequest>  StockRequests => Set<StockRequest>();
+    
+    public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
