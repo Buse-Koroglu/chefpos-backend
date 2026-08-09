@@ -29,6 +29,16 @@ public class UserRepository : IUserRepository
         await _context.Users.AddAsync(user, cancellationToken);
     }
     
+    public async Task<List<User>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await _context.Users
+            .Include(u => u.Locations)
+            .Include(u => u.UserRoles)
+            .OrderBy(u => u.FirstName)
+            .ThenBy(u => u.LastName)
+            .ToListAsync(cancellationToken);
+    }
+    
     public async Task<User?> GetStockManagerByLocationAsync(Guid locationId, CancellationToken cancellationToken)
     {
         return await _context.Users
