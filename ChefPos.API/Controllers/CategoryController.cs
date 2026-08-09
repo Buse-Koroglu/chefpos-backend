@@ -30,6 +30,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
     
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<ActionResult> GetCategoryById(Guid id, CancellationToken cancellationToken)
     {
@@ -52,7 +53,8 @@ public class CategoryController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-
+    
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult> GetAllCategoriesWithLocation([FromQuery] Guid locationId,
         [FromQuery] bool includeInactive, CancellationToken cancellationToken)

@@ -1,5 +1,6 @@
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
+using ChefPos.Domain.Enums;
 using ChefPos.Infastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,20 @@ public class OrderRepository : IOrderRepository
     public async Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id,cancellationToken);
+    }
+    
+    public async Task<List<Order>> GetAllByLocationAsync(Guid locationId, OrderStatus? status, CancellationToken cancellationToken)
+    {
+        var query = _context.Orders
+            .Include(o => o.Items)
+            .Where(o => o.LocationId == locationId);
+ 
+        if (status.HasValue)
+            query = query.Where(o => o.OrderStatus == status.Value);
+ 
+        return await query
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Order order, CancellationToken cancellationToken)

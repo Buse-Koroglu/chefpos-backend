@@ -8,6 +8,8 @@ using ChefPos.Application.Orders.Commands.MakePaidOrder;
 using ChefPos.Application.Orders.Commands.RemoveOrderItem;
 using ChefPos.Application.Orders.DTOs;
 using ChefPos.Application.Orders.Queries.GetOrderById;
+using ChefPos.Application.Orders.Queries.GetOrders;
+using ChefPos.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,6 +48,14 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult> GetOrderById(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetOrderByIdQuery(id), cancellationToken);
+        return Ok(result);
+    }
+    
+    [Authorize(Roles = "CASHIER,WAITER,ADMIN")]
+    [HttpGet]
+    public async Task<ActionResult> GetOrders([FromQuery] Guid locationId, [FromQuery] OrderStatus? status, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetOrdersQuery(locationId, status), cancellationToken);
         return Ok(result);
     }
 

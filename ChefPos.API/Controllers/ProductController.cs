@@ -87,7 +87,8 @@ public class ProductController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-            
+    
+    [AllowAnonymous]        
     [HttpGet("{id}")]
     public async Task<ActionResult> GetProductById(Guid id, CancellationToken cancellationToken)
     {
@@ -95,6 +96,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult> GetProducts( [FromQuery] Guid locationId, [FromQuery] Guid? categoryId, [FromQuery] bool includeInactive = false, CancellationToken cancellationToken = default)
     {

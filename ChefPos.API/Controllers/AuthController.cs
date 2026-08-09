@@ -1,3 +1,4 @@
+using ChefPos.Application.Auth.Commands.ChangePassword;
 using ChefPos.Application.Auth.Commands.Login;
 using ChefPos.Application.Auth.Commands.RefreshToken;
 using ChefPos.Application.Common.Exceptions;
@@ -29,6 +30,14 @@ public class AuthController : ControllerBase
         SetRefreshTokenCookie(result.RefreshToken, result.RefreshTokenExpiresAt);
 
         return Ok(result);
+    }
+    
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<ActionResult> ChangePassword(ChangePasswordCommand command, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(command, cancellationToken);
+        return NoContent();
     }
 
     [AllowAnonymous]
