@@ -36,7 +36,7 @@ public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockReque
         var requestedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
             .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
-        if (requestedByUser.Role != Role.INVENTORY_STAFF)
+        if (!requestedByUser.HasRole(Role.INVENTORY_STAFF))
         {
             throw new ValidationException("Sadece envanter (INVENTORY_STAFF) personeli stok talebi oluşturabilir.");
         }

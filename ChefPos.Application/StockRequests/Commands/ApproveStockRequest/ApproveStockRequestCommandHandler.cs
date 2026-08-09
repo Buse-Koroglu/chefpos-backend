@@ -32,7 +32,7 @@ public class ApproveStockRequestCommandHandler : IRequestHandler<ApproveStockReq
         var decidedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
             .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
-        if (decidedByUser.Role != Role.STOCK_MANAGER)
+        if (!decidedByUser.HasRole(Role.STOCK_MANAGER))
         {
             throw new ValidationException("Sadece Yerleşke Stok Yetkilisi rolündeki kullanıcılar stok talebi onaylayabilir.");
         }

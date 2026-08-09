@@ -9,6 +9,5 @@ public class CreateUserCommand : IRequest<UserResponseDto>
     public string PersonalId { get; set; } = default!;
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
-    public string Password { get; set; } = default!;
-    public Role Role { get; set; }
+    public List<Role> Roles { get; set; } = new();
 }

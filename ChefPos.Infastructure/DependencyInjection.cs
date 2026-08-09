@@ -23,8 +23,13 @@ public static class DependencyInjection
       services.AddScoped<ILocationRepository, LocationRepository>();
       services.AddScoped<IIngredientRepository, IngredientRepository>();
       services.AddScoped<IStockRequestRepository,StockRequestRepository>();
-      services.AddScoped<IJwtTokenService, JwtTokenService>();
+      services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+      services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+      services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
+      services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+      services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
       services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+      services.AddSingleton<IInitialPasswordGenerator, InitialPasswordGenerator>();
       return services;
    } 
 }

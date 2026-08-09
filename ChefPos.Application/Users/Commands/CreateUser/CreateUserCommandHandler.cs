@@ -10,11 +10,13 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserR
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IInitialPasswordGenerator  _initialPasswordGenerator;
 
-    public CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+    public CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IInitialPasswordGenerator initialPasswordGenerator)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
+        _initialPasswordGenerator = initialPasswordGenerator;
     }
 
     public async Task<UserResponseDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -25,13 +27,16 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserR
             throw new ValidationException("Bu personel ID ile zaten bir kullanıcı mevcut.");
         }
 
-        var hashedPassword = _passwordHasher.Hash(request.Password);
+        var generatedPassword = _initialPasswordGenerator.Generate(request.FirstName, request.PersonalId);
+        var hashedPassword = _passwordHasher.Hash(generatedPassword);
 
-        var user = new User(request.PersonalId, request.FirstName, request.LastName, hashedPassword, request.Role);
+        var user = new User(request.PersonalId, request.FirstName, request.LastName, hashedPassword, request.Roles);
 
         await _userRepository.AddAsync(user, cancellationToken);
         await _userRepository.SaveAllChangesAsync(cancellationToken);
 
-        return UserResponseDto.FromEntity(user);
+        var response = UserResponseDto.FromEntity(user);
+        response.GeneratedPassword = generatedPassword;
+        return response;
     }
 }

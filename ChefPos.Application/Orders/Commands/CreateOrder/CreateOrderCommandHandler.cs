@@ -39,11 +39,14 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         if (!requestingUser.HasAccessToLocation(request.LocationId))
             throw new ForbiddenException("Bu kullanıcının belirtilen yerleşkede işlem yapma yetkisi yok.");
  
-        var order = requestingUser.Role switch
+        var order = request.RequestedAs switch
         {
-            Role.CASHIER => Order.CreateByCashier(request.LocationId, currentUserId, request.CustomerName!),
-            Role.WAITER => Order.CreateByWaiter(request.LocationId, currentUserId, request.CustomerName!),
-            _ => throw new ValidationException($"'{requestingUser.Role}' rolündeki bir kullanıcı sipariş oluşturamaz.")
+            Role.CASHIER when requestingUser.HasRole(Role.CASHIER)
+                => Order.CreateByCashier(request.LocationId, currentUserId, request.CustomerName!),
+            Role.WAITER when requestingUser.HasRole(Role.WAITER)
+                => Order.CreateByWaiter(request.LocationId, currentUserId, request.CustomerName!),
+            _ => throw new ValidationException(
+                $"Kullanıcının '{request.RequestedAs}' rolü olarak sipariş oluşturma yetkisi yok.")
         };
  
         foreach (var itemRequest in request.Items)

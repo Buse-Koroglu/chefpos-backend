@@ -8,29 +8,32 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ChefPos.Infastructure.Security;
 
-public class JwtTokenService : IJwtTokenService
+public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly IConfiguration _configuration;
 
-    public JwtTokenService(IConfiguration configuration)
+    public JwtTokenGenerator(IConfiguration configuration)
     {
         _configuration = configuration;
     }
 
-    public string GenerateToken(User user)
+    public (string Token, DateTime ExpiresAt)  GenerateToken(User user)
     {
         var jwtSection = _configuration.GetSection("Jwt");
         var secret = jwtSection["Secret"]!;
         var issuer = jwtSection["Issuer"];
         var audience = jwtSection["Audience"];
         var expiryMinutes = int.Parse(jwtSection["ExpiryMinutes"]!);
+        
+        var expiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes);
+
 
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.PersonalId),
-            new(ClaimTypes.Role, user.Role.ToString())
         };
+        claims.AddRange(user.Roles.Select(r => new Claim(ClaimTypes.Role, r.ToString())));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -39,9 +42,11 @@ public class JwtTokenService : IJwtTokenService
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+            expires: expiresAt,
             signingCredentials: creds);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return (tokenString, expiresAt);
     }
 }

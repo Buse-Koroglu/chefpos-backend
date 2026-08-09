@@ -11,6 +11,7 @@ public class ApplicationDbContext : DbContext
     
     public DbSet<User> Users => Set<User>();
     public DbSet<UserLocation> UserLocations => Set<UserLocation>();
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
@@ -21,6 +22,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
     
     public DbSet<StockRequest>  StockRequests => Set<StockRequest>();
+    
+    public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

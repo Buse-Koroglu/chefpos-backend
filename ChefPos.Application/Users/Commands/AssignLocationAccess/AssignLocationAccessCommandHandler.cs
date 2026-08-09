@@ -25,7 +25,7 @@ public class AssignLocationAccessCommandHandler : IRequestHandler<AssignLocation
         await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken)
             .OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
 
-        if (user.Role == Role.STOCK_MANAGER)
+        if (user.HasRole(Role.STOCK_MANAGER))
         {
             var existingManager = await _userRepository.GetStockManagerByLocationAsync(request.LocationId, cancellationToken);
             if (existingManager is not null && existingManager.Id != user.Id)
@@ -34,7 +34,6 @@ public class AssignLocationAccessCommandHandler : IRequestHandler<AssignLocation
                     $"Bu şubede zaten bir Yerleşke Stok Yetkilisi atanmış: {existingManager.FirstName} {existingManager.LastName}.");
             }
         }
-
         user.GiveLocationAccess(request.LocationId);
 
         await _userRepository.SaveAllChangesAsync(cancellationToken);
