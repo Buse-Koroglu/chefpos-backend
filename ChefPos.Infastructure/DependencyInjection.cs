@@ -29,6 +29,7 @@ public static class DependencyInjection
       services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
       services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
       services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+      services.AddSingleton<IInitialPasswordGenerator, InitialPasswordGenerator>();
       return services;
    } 
 }

@@ -9,10 +9,12 @@ public class UserResponseDto
     public string PersonalId { get; set; } = default!;
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
-    public List<Role> Roles { get; set; }
+    public List<Role> Roles { get; set; } = new();
     public bool IsFirstLogin { get; set; }
     public bool IsActive { get; set; }
     public List<Guid> LocationIds { get; set; } = new();
+    
+    public string? GeneratedPassword { get; set; }
  
     public static UserResponseDto FromEntity(User user)
     {
