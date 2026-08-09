@@ -46,7 +46,7 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
     
-
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/locations")]
     public async Task<ActionResult> AssignLocationAccess([FromRoute] Guid id, AssignLocationAccessRequest body, CancellationToken cancellationToken)
     {
