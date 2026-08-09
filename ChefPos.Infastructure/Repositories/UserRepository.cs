@@ -16,12 +16,12 @@ public class UserRepository : IUserRepository
     
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Users.Include(u => u.Locations).FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        return await _context.Users.Include(u => u.Locations).Include(u=>u.UserRoles).FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
     public async Task<User?> GetByPersonalIdAsync(string personalId, CancellationToken cancellationToken)
     {
-        return await _context.Users.Include(u => u.Locations).FirstOrDefaultAsync(u => u.PersonalId == personalId, cancellationToken);
+        return await _context.Users.Include(u => u.Locations).Include(u=>u.UserRoles).FirstOrDefaultAsync(u => u.PersonalId == personalId, cancellationToken);
     }
 
     public async Task AddAsync(User user, CancellationToken cancellationToken)
@@ -33,7 +33,10 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users
             .Include(u => u.Locations)
-            .FirstOrDefaultAsync(u => u.Role == Role.STOCK_MANAGER && u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u =>
+                u.UserRoles.Any(r => r.Role == Role.STOCK_MANAGER) &&
+                u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
     }
 
     public async Task SaveAllChangesAsync(CancellationToken cancellationToken)

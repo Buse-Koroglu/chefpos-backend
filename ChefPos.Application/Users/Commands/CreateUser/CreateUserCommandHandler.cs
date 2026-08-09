@@ -27,7 +27,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserR
 
         var hashedPassword = _passwordHasher.Hash(request.Password);
 
-        var user = new User(request.PersonalId, request.FirstName, request.LastName, hashedPassword, request.Role);
+        var user = new User(request.PersonalId, request.FirstName, request.LastName, hashedPassword, request.Roles);
 
         await _userRepository.AddAsync(user, cancellationToken);
         await _userRepository.SaveAllChangesAsync(cancellationToken);

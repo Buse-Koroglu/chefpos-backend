@@ -9,12 +9,11 @@ public class UserTest
     private const string Name = "Mock Name";
     private const string Surname = "Mock Surname";
     private const string Password = "Mock Password";
-    private const string Icon = "Mock Icon";
 
     [Fact]
     public void CreateConstructorSuccessfullyWhenValidParametersArePassed()
     {
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
  
         Assert.Equal("E001", user.PersonalId);
         Assert.True(user.IsFirstLogin);
@@ -28,7 +27,7 @@ public class UserTest
     public void ThrowAnExceptionWhenPersonalIdIsEmpty(string? personalId)
     {
         Assert.Throws<ArgumentException>(() =>
-            new User(personalId!, Name, Surname, Password, Role.CASHIER));
+            new User(personalId!, Name, Surname, Password, new[] { Role.CASHIER }));
     }
     
     [Theory]
@@ -38,13 +37,13 @@ public class UserTest
     public void ThrowAnExceptionWhenNameIsEmpty(string firstName, string lastName)
     {
         Assert.Throws<ArgumentException>(() =>
-            new User(PersonalId, firstName, lastName, Password, Role.CASHIER));
+            new User(PersonalId, firstName, lastName, Password, new[] { Role.CASHIER }));
     }
     
     [Fact]
     public void IsFirstLoginIsTrueWhenChangedPassword()
     {
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
  
         user.ChangePassword("newpass");
  
@@ -54,7 +53,7 @@ public class UserTest
     [Fact]
     public void ThrowAnExceptionWhenNewPasswordIsEmptyAndStaySameFirstLogin()
     {
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
  
         Assert.Throws<ArgumentException>(() => user.ChangePassword("   "));
         Assert.True(user.IsFirstLogin);
@@ -63,7 +62,7 @@ public class UserTest
     [Fact]
     public void LocationListWillUpdateCorrectlyWhenGiveLocationAccessRun()
     {
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
         var newLocationId = Guid.NewGuid();
  
         user.GiveLocationAccess(newLocationId);
@@ -76,7 +75,7 @@ public class UserTest
     public void ThrowAnErrorWhenDuplicatesSameLocationForAccess()
     {
         var locationId = Guid.NewGuid();
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
         user.GiveLocationAccess(locationId);
         Assert.Throws<InvalidOperationException>(() => user.GiveLocationAccess(locationId));
     }
@@ -87,7 +86,7 @@ public class UserTest
     {
         var locationId1 = Guid.NewGuid();
         var locationId2 = Guid.NewGuid();
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
         user.GiveLocationAccess(locationId2);
  
         user.RevokeLocationAccess(locationId1);
@@ -101,32 +100,26 @@ public class UserTest
     public void DoesNothingWhenUserNotAuthorizedForALocationAndRunRevokeAccess()
     {
         var locationId2 = Guid.NewGuid();
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
         user.GiveLocationAccess(locationId2);
- 
         user.RevokeLocationAccess(Guid.NewGuid());
- 
         Assert.Single(new[] { user.Locations.Count });
     }
  
     [Fact]
     public void DeactivateUserWillWorkCorrectlyWhenUserIsActive()
     {
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
- 
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
         user.DeactivateUser();
- 
         Assert.False(user.IsActive);
     }
  
     [Fact]
     public void ActivateUserWillWorkCorrectlyWhenUserIsNotActive()
     {
-        var user = new User(PersonalId, Name, Surname, Password, Role.CASHIER);
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
         user.DeactivateUser();
- 
         user.ActivateUser();
- 
         Assert.True(user.IsActive);
     }
     

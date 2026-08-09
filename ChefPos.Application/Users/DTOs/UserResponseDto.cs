@@ -9,7 +9,7 @@ public class UserResponseDto
     public string PersonalId { get; set; } = default!;
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
-    public Role Role { get; set; }
+    public List<Role> Roles { get; set; }
     public bool IsFirstLogin { get; set; }
     public bool IsActive { get; set; }
     public List<Guid> LocationIds { get; set; } = new();
@@ -22,7 +22,7 @@ public class UserResponseDto
             PersonalId = user.PersonalId,
             FirstName = user.FirstName,
             LastName = user.LastName,
-            Role = user.Role,
+            Roles = user.Roles.ToList(),
             IsFirstLogin = user.IsFirstLogin,
             IsActive = user.IsActive,
             LocationIds = user.Locations.Select(l => l.LocationId).ToList()
