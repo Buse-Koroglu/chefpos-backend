@@ -59,7 +59,7 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "CASHIER")]
+    [Authorize(Roles = "CASHIER,WAITER")]
     [HttpPost("{id}/complete")]
     public async Task<ActionResult> CompleteOrder(Guid id, CancellationToken cancellationToken)
     {

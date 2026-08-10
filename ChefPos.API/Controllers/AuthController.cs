@@ -91,8 +91,8 @@ public class AuthController : ControllerBase
         return new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
+            Secure = false, // for dev
+            SameSite = SameSiteMode.Lax, // for dev
             Expires = expiresAt,
             Path = "/api/auth"
         };
