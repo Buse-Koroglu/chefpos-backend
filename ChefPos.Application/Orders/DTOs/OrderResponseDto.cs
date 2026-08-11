@@ -13,6 +13,7 @@ public class OrderResponseDto
     public string Type { get; set; } = default!;
     public string PaymentStatus { get; set; } = default!;
     public List<OrderItemResponseDto> Items { get; set; } = new();
+    public DateTime? CompletedAt { get; set; }
     
 
     public static OrderResponseDto FromEntity(Order order)
@@ -26,7 +27,8 @@ public class OrderResponseDto
             Status = order.OrderStatus.ToString(),
             PaymentStatus = order.PaymentStatus.ToString(),
             Type = order.OrderType.ToString(),
-            Items = order.Items.Select(OrderItemResponseDto.FromEntity).ToList()
+            Items = order.Items.Select(OrderItemResponseDto.FromEntity).ToList(),
+            CompletedAt = order.CompletedAt
         };
     }
 }

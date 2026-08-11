@@ -15,6 +15,8 @@ public class Order : BaseEntity
     public Location Location { get; private set; } = null!;
     public Guid? CreatedByUserId { get; private set; }
     public User? CreatedByUser { get; private set; }
+    
+    public DateTime? CompletedAt { get; private set; }
 
     private readonly List<OrderItem> _items = new();
     public IReadOnlyCollection<OrderItem> Items => _items;
@@ -103,6 +105,7 @@ public class Order : BaseEntity
             throw new InvalidOperationException($"Sipariş tamamlandığı ve iptal edildiği durumundayken tamamlanamaz.");
 
         OrderStatus = OrderStatus.COMPLETED;
+        CompletedAt = DateTime.UtcNow;
         Touch();
     }
 
