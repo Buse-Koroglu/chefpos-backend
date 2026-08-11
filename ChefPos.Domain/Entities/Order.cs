@@ -105,7 +105,6 @@ public class Order : BaseEntity
             throw new InvalidOperationException($"Sipariş tamamlandığı ve iptal edildiği durumundayken tamamlanamaz.");
 
         OrderStatus = OrderStatus.COMPLETED;
-        CompletedAt = DateTime.UtcNow;
         Touch();
     }
 
@@ -124,6 +123,7 @@ public class Order : BaseEntity
             throw new InvalidOperationException("Sipariş zaten ödenmiş.");
 
         PaymentStatus = PaymentStatus.PAID;
+        CompletedAt = DateTime.UtcNow;
         Touch();
     }
     
