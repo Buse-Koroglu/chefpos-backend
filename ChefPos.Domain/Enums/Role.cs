@@ -6,5 +6,6 @@ public enum Role
     CASHIER,
     WAITER,
     STOCK_MANAGER,
-    INVENTORY_STAFF
+    INVENTORY_STAFF,
+    KITCHEN
 }

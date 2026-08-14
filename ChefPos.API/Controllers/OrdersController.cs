@@ -7,6 +7,7 @@ using ChefPos.Application.Orders.Commands.DecreaseOrderItem;
 using ChefPos.Application.Orders.Commands.MakePaidOrder;
 using ChefPos.Application.Orders.Commands.RemoveOrderItem;
 using ChefPos.Application.Orders.DTOs;
+using ChefPos.Application.Orders.Queries.GetKitchenOrders;
 using ChefPos.Application.Orders.Queries.GetOrderById;
 using ChefPos.Application.Orders.Queries.GetOrders;
 using ChefPos.Domain.Enums;
@@ -51,15 +52,30 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "KITCHEN,ADMIN")]
+    [HttpGet("kitchen")]
+    public async Task<ActionResult> GetKitchenOrders([FromQuery] Guid locationId, [FromQuery] OrderStatus? status, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetKitchenOrdersQuery(locationId, status), cancellationToken);
+        return Ok(result);
+    }
+    
     [Authorize(Roles = "CASHIER,WAITER,ADMIN")]
     [HttpGet]
-    public async Task<ActionResult> GetOrders([FromQuery] Guid locationId, [FromQuery] OrderStatus? status, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetOrders(
+        [FromQuery] Guid locationId,
+        [FromQuery] OrderStatus? status,
+        [FromQuery] OrderType? type,
+        [FromQuery] PaymentStatus? paymentStatus,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetOrdersQuery(locationId, status), cancellationToken);
+        var result = await _mediator.Send(new GetOrdersQuery(locationId, status, type, paymentStatus, pageNumber, pageSize), cancellationToken);
         return Ok(result);
     }
 
-    [Authorize(Roles = "CASHIER,WAITER")]
+    [Authorize(Roles = "CASHIER,KITCHEN")]
     [HttpPost("{id}/complete")]
     public async Task<ActionResult> CompleteOrder(Guid id, CancellationToken cancellationToken)
     {

@@ -6,14 +6,13 @@ namespace ChefPos.Application.Common.Interfaces;
 public interface IOrderRepository
 {
     Task<Order?>  GetByIdAsync(Guid id,CancellationToken cancellationToken);
-    Task<List<Order>> GetAllByLocationAsync(Guid locationId, OrderStatus? status, CancellationToken cancellationToken);
+    Task<List<Order>> GetAllByLocationAsync(Guid locationId, OrderStatus? status, OrderType? orderType, CancellationToken cancellationToken);    
     Task AddAsync(Order order, CancellationToken cancellationToken);
-    Task<(List<Order> Items, int TotalCount)> GetPagedAsync(
-        Guid? locationId,
+    Task<(List<Order> Items, int TotalCount)> GetAllByLocationPagedAsync(
+        Guid locationId,
         OrderStatus? status,
+        OrderType? orderType,
         PaymentStatus? paymentStatus,
-        DateTime? fromDate,
-        DateTime? toDate,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);

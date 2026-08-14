@@ -10,15 +10,23 @@ public class CreateKioskOrderCommandHandler : IRequestHandler<CreateKioskOrderCo
 {
     private readonly IOrderRepository  _orderRepository;
     private readonly IProductRepository _productRepository;
+    private readonly ILocationRepository _locationRepository;
  
-    public CreateKioskOrderCommandHandler(IOrderRepository orderRepository, IProductRepository productRepository)
+    public CreateKioskOrderCommandHandler(IOrderRepository orderRepository, IProductRepository productRepository, ILocationRepository locationRepository)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
+        _locationRepository = locationRepository;
     }
  
     public async Task<OrderResponseDto> Handle(CreateKioskOrderCommand request, CancellationToken cancellationToken)
     {
+        var location = await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken);
+        if (location is null)
+        {
+            throw new NotFoundException("Yerleşke bulunamadı.");
+        }
+
         var order = Order.CreateByKiosk(request.LocationId, request.CustomerName!);
         foreach (var itemRequest in request.Items)
         {

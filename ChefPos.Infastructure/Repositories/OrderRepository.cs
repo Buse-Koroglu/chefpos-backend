@@ -19,18 +19,53 @@ public class OrderRepository : IOrderRepository
         return await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id,cancellationToken);
     }
     
-    public async Task<List<Order>> GetAllByLocationAsync(Guid locationId, OrderStatus? status, CancellationToken cancellationToken)
+    public async Task<List<Order>> GetAllByLocationAsync(Guid locationId, OrderStatus? status, OrderType? orderType, CancellationToken cancellationToken)
     {
         var query = _context.Orders
             .Include(o => o.Items)
             .Where(o => o.LocationId == locationId);
- 
+
         if (status.HasValue)
             query = query.Where(o => o.OrderStatus == status.Value);
- 
-        return await query
-            .OrderByDescending(o => o.CreatedAt)
+
+        if (orderType.HasValue)
+            query = query.Where(o => o.OrderType == orderType.Value);
+
+        return await query.ToListAsync(cancellationToken);
+    }
+    
+    public async Task<(List<Order> Items, int TotalCount)> GetAllByLocationPagedAsync(
+        Guid locationId,
+        OrderStatus? status,
+        OrderType? orderType,
+        PaymentStatus? paymentStatus,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Orders
+            .Include(o => o.Items)
+            .Where(o => o.LocationId == locationId);
+
+        if (status.HasValue)
+            query = query.Where(o => o.OrderStatus == status.Value);
+
+        if (orderType.HasValue)
+            query = query.Where(o => o.OrderType == orderType.Value);
+
+        if (paymentStatus.HasValue)
+            query = query.Where(o => o.PaymentStatus == paymentStatus.Value);
+
+        query = query.OrderByDescending(o => o.CreatedAt);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     public async Task AddAsync(Order order, CancellationToken cancellationToken)
