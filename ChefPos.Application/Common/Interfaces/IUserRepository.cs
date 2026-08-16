@@ -1,4 +1,5 @@
 using ChefPos.Domain.Entities;
+using ChefPos.Domain.Enums;
 
 namespace ChefPos.Application.Common.Interfaces;
 
@@ -9,5 +10,12 @@ public interface IUserRepository
         Task AddAsync(User user, CancellationToken cancellationToken);
         Task<List<User>> GetAllAsync(CancellationToken cancellationToken);
         Task<User?> GetStockManagerByLocationAsync(Guid locationId, CancellationToken cancellationToken);
+        Task<(List<User> Items, int TotalCount)> GetAllPagedAsync(
+                Role? role,
+                bool? isActive,
+                Guid? locationId,
+                int pageNumber,
+                int pageSize,
+                CancellationToken cancellationToken);
         Task SaveAllChangesAsync(CancellationToken cancellationToken);
 }

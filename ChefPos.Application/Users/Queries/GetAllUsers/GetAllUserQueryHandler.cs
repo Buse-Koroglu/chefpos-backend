@@ -1,9 +1,10 @@
 using ChefPos.Application.Common.Interfaces;
+using ChefPos.Application.Common.Pagination;
 using ChefPos.Application.Users.DTOs;
 using ChefPos.Application.Users.Queries.GetAllUsers;
 using MediatR;
 
-public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<UserResponseDto>>
+public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, PagedResult<UserResponseDto>>
 {
     private readonly IUserRepository _userRepository;
 
@@ -12,18 +13,17 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<Us
         _userRepository = userRepository;
     }
 
-    public async Task<List<UserResponseDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<UserResponseDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = await _userRepository.GetAllAsync(cancellationToken);
+        var (users, totalCount) = await _userRepository.GetAllPagedAsync(
+            request.Role, request.IsActive, request.LocationId, request.PageNumber, request.PageSize, cancellationToken);
 
-        var filtered = users.AsEnumerable();
-
-        if (!request.IncludeInactive)
-            filtered = filtered.Where(u => u.IsActive);
-
-        if (request.Role.HasValue)
-            filtered = filtered.Where(u => u.HasRole(request.Role.Value));
-
-        return filtered.Select(UserResponseDto.FromEntity).ToList();
+        return new PagedResult<UserResponseDto>
+        {
+            Items = users.Select(UserResponseDto.FromEntity).ToList(),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
     }
 }

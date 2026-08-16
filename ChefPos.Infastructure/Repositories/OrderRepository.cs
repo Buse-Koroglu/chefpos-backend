@@ -169,6 +169,22 @@ public class OrderRepository : IOrderRepository
  
         return result.Select(r => (r.Date, r.Revenue)).ToList();
     }
+    
+    public async Task<List<(Guid LocationId, int OrderCount)>> GetTodayPaidOrderCountByLocationAsync(CancellationToken cancellationToken)
+    {
+        var todayStart = DateTime.UtcNow.Date;
+        var todayEnd = todayStart.AddDays(1);
+
+        var result = await _context.Orders
+            .Where(o => o.PaymentStatus == PaymentStatus.PAID
+                        && o.CreatedAt >= todayStart
+                        && o.CreatedAt < todayEnd)
+            .GroupBy(o => o.LocationId)
+            .Select(g => new { LocationId = g.Key, OrderCount = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        return result.Select(x => (x.LocationId, x.OrderCount)).ToList();
+    }
 
     public async Task SaveAllChangesAsync(CancellationToken cancellationToken)
     {

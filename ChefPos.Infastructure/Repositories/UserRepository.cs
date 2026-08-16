@@ -48,6 +48,40 @@ public class UserRepository : IUserRepository
                 u.UserRoles.Any(r => r.Role == Role.STOCK_MANAGER) &&
                 u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
     }
+    
+    public async Task<(List<User> Items, int TotalCount)> GetAllPagedAsync(
+        Role? role,
+        bool? isActive,
+        Guid? locationId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Users
+            .Include(u => u.UserRoles)
+            .Include(u => u.Locations)
+            .AsQueryable();
+
+        if (role.HasValue)
+            query = query.Where(u => u.UserRoles.Any(ur => ur.Role == role.Value));
+
+        if (isActive.HasValue)
+            query = query.Where(u => u.IsActive == isActive.Value);
+
+        if (locationId.HasValue)
+            query = query.Where(u => u.Locations.Any(l => l.LocationId == locationId.Value));
+
+        query = query.OrderByDescending(u => u.CreatedAt);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 
     public async Task SaveAllChangesAsync(CancellationToken cancellationToken)
     {

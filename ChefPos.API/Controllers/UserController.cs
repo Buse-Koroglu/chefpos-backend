@@ -1,7 +1,10 @@
+using ChefPos.Application.Users.Commands.ActivateUser;
 using ChefPos.Application.Users.Commands.AddRole;
 using ChefPos.Application.Users.Commands.AssignLocationAccess;
 using ChefPos.Application.Users.Commands.CreateUser;
+using ChefPos.Application.Users.Commands.DeactivateUser;
 using ChefPos.Application.Users.Commands.RemoveRole;
+using ChefPos.Application.Users.Commands.RevokeLocationAccess;
 using ChefPos.Application.Users.DTOs;
 using ChefPos.Application.Users.Queries.GetAllUsers;
 using ChefPos.Application.Users.Queries.GetUserById;
@@ -30,10 +33,15 @@ public class UsersController : ControllerBase
     
     [Authorize(Roles = "ADMIN")]
     [HttpGet]
-    public async Task<ActionResult> GetUsers([FromQuery] Role? role, [FromQuery] bool includeInactive, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetUsers(
+        [FromQuery] Role? role,
+        [FromQuery] bool? isActive,
+        [FromQuery] Guid? locationId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetAllUsersQuery(role, includeInactive);
-        var result = await _mediator.Send(query, cancellationToken);
+        var result = await _mediator.Send(new GetAllUsersQuery(role, isActive, locationId, pageNumber, pageSize), cancellationToken);
         return Ok(result);
     }
  
@@ -56,6 +64,15 @@ public class UsersController : ControllerBase
     }
     
     [Authorize(Roles = "ADMIN")]
+    [HttpDelete("{id}/locations/{locationId}")]
+    public async Task<ActionResult> RevokeLocationAccess([FromRoute] Guid id, [FromRoute] Guid locationId, CancellationToken cancellationToken)
+    {
+        var command = new RevokeLocationAccessCommand(id, locationId);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/roles")]
     public async Task<ActionResult> AddRole([FromRoute] Guid id, AddRoleRequest body, CancellationToken cancellationToken)
     {
@@ -69,6 +86,24 @@ public class UsersController : ControllerBase
     public async Task<ActionResult> RemoveRole([FromRoute] Guid id, [FromRoute] Role role, CancellationToken cancellationToken)
     {
         var command = new RemoveRoleCommand(id, role);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
+    [Authorize(Roles = "ADMIN")]
+    [HttpPost("{id}/activate")]
+    public async Task<ActionResult> ActivateUser([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var command = new ActivateUserCommand(id);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN")]
+    [HttpPost("{id}/deactivate")]
+    public async Task<ActionResult> DeactivateUser([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var command = new DeactivateUserCommand(id);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }

@@ -22,6 +22,7 @@ public interface IOrderRepository
     Task<(Guid ProductId, int TotalQuantitySold)?> GetBestSellingProductAsync(Guid locationId, CancellationToken cancellationToken);
     Task<List<(DateTime Date, decimal Revenue)>> GetDailyRevenueAsync(Guid locationId, DateTime fromDate, DateTime toDateExclusive, CancellationToken cancellationToken);
 
+    Task<List<(Guid LocationId, int OrderCount)>> GetTodayPaidOrderCountByLocationAsync(CancellationToken cancellationToken);
     Task SaveAllChangesAsync(CancellationToken cancellationToken);
     
 }
