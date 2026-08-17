@@ -35,7 +35,40 @@ public class CategoryRepository : ICategoryRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+    
+    public async Task<(List<Category> Items, int TotalCount)> GetAllPagedAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Categories
+            .Include(c => c.Location)
+            .Include(c => c.Products)
+            .AsQueryable();
 
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(c => c.Name.Contains(searchTerm));
+
+        if (locationId.HasValue)
+            query = query.Where(c => c.LocationId == locationId.Value);
+
+        if (isActive.HasValue)
+            query = query.Where(c => c.IsActive == isActive.Value);
+
+        query = query.OrderBy(c => c.Name);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
     public async Task RemoveAsync(Guid id, CancellationToken cancellationToken)
     {
         var category = await GetByIdAsync(id, cancellationToken);

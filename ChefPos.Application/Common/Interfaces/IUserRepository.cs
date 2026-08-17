@@ -17,5 +17,7 @@ public interface IUserRepository
                 int pageNumber,
                 int pageSize,
                 CancellationToken cancellationToken);
+        
+        Task<List<(Guid LocationId, int EmployeeCount)>> GetEmployeeCountsByLocationAsync(CancellationToken cancellationToken);
         Task SaveAllChangesAsync(CancellationToken cancellationToken);
 }

@@ -4,6 +4,7 @@ using ChefPos.Application.Categories.Commands.RemoveCategory;
 using ChefPos.Application.Categories.Commands.UpdateCategory;
 using ChefPos.Application.Categories.DTOs;
 using ChefPos.Application.Categories.Queries.GetCategories;
+using ChefPos.Application.Categories.Queries.GetCategoriesAdmin;
 using ChefPos.Application.Categories.Queries.GetCategoryById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -60,6 +61,21 @@ public class CategoryController : ControllerBase
         [FromQuery] bool includeInactive, CancellationToken cancellationToken)
     {
         var query = new GetCategoriesQuery(locationId, includeInactive);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+    
+    [Authorize(Roles = "ADMIN")]
+    [HttpGet("categories")]
+    public async Task<ActionResult> GetCategoriesAdmin(
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid? locationId,
+        [FromQuery] bool? isActive,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetCategoriesAdminQuery(searchTerm, locationId, isActive, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }

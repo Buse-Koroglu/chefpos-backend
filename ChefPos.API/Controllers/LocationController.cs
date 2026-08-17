@@ -4,6 +4,7 @@ using ChefPos.Application.Locations.Commands.DeactivateLocation;
 using ChefPos.Application.Locations.Commands.UpdateLocation;
 using ChefPos.Application.Locations.DTOs;
 using ChefPos.Application.Locations.Queries.GetLocations;
+using ChefPos.Application.Locations.Queries.GetLocationsPaged;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,9 +37,14 @@ public class LocationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetLocations([FromQuery] bool includeInactive = false, CancellationToken cancellationToken = default)
+    public async Task<ActionResult> GetLocationsPaged(
+        [FromQuery] string? searchTerm,
+        [FromQuery] bool? isActive,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetLocationsQuery(includeInactive);
+        var query = new GetLocationsPagedQuery(searchTerm, isActive, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }

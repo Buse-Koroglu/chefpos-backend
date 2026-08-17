@@ -82,6 +82,15 @@ public class UserRepository : IUserRepository
 
         return (items, totalCount);
     }
+    public async Task<List<(Guid LocationId, int EmployeeCount)>> GetEmployeeCountsByLocationAsync(CancellationToken cancellationToken)
+    {
+        var result = await _context.UserLocations
+            .GroupBy(ul => ul.LocationId)
+            .Select(g => new { LocationId = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        return result.Select(x => (x.LocationId, x.Count)).ToList();
+    }
 
     public async Task SaveAllChangesAsync(CancellationToken cancellationToken)
     {

@@ -9,5 +9,12 @@ public interface ICategoryRepository
     Task AddAsync(Category category, CancellationToken cancellationToken);
     Task SaveAllChangesAsync(CancellationToken cancellationToken);
     
+    Task<(List<Category> Items, int TotalCount)> GetAllPagedAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
     Task RemoveAsync(Guid id, CancellationToken cancellationToken);
 }
