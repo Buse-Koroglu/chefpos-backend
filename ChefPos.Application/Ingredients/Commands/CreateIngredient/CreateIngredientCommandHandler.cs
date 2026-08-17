@@ -4,8 +4,7 @@ using ChefPos.Application.Ingredients.Commands;
 using ChefPos.Application.Ingredients.DTOs;
 using ChefPos.Domain.Entities;
 using MediatR;
-
-public class CreateIngredientCommandHandler : IRequestHandler<CreateIngredientCommand, IngredientResponseDto>
+public class CreateIngredientCommandHandler : IRequestHandler<CreateIngredientCommand, List<IngredientResponseDto>>
 {
     private readonly IIngredientRepository _ingredientRepository;
     private readonly ILocationRepository _locationRepository;
@@ -16,25 +15,41 @@ public class CreateIngredientCommandHandler : IRequestHandler<CreateIngredientCo
         _locationRepository = locationRepository;
     }
 
-    public async Task<IngredientResponseDto> Handle(CreateIngredientCommand request, CancellationToken cancellationToken)
+    public async Task<List<IngredientResponseDto>> Handle(CreateIngredientCommand request, CancellationToken cancellationToken)
     {
-        var location = await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken);
-        if (location is null)
+        if (request.LocationIds is null || request.LocationIds.Count == 0)
         {
-            throw new NotFoundException("Yerleşke bulunamadı.");
-        }
-        
-        var existing = await _ingredientRepository.GetAllByLocationAsync(request.LocationId, includeInactive: true, cancellationToken);
-        if (existing.Any(i => i.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase)))
-        {
-            throw new ValidationException("Bu isimde bir ham madde bu yerleşkede zaten mevcut.");
+            throw new ValidationException("En az bir yerleşke seçilmelidir.");
         }
 
-        var ingredient = new Ingredient(request.Name, request.Unit, request.UnitPrice, request.LocationId, request.InitialStock, request.MinStockThreshold);
+        var distinctLocationIds = request.LocationIds.Distinct().ToList();
+        var createdIngredients = new List<Ingredient>();
 
-        await _ingredientRepository.AddAsync(ingredient, cancellationToken);
+        foreach (var locationId in distinctLocationIds)
+        {
+            var location = await _locationRepository.GetByIdAsync(locationId, cancellationToken);
+            if (location is null)
+            {
+                throw new NotFoundException($"Yerleşke bulunamadı: {locationId}");
+            }
+
+            var existing = await _ingredientRepository.GetAllByLocationAsync(locationId, includeInactive: true, cancellationToken);
+            if (existing.Any(i => i.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new ValidationException($"'{location.Name}' yerleşkesinde bu isimde bir ham madde zaten mevcut.");
+            }
+
+            var ingredient = new Ingredient(request.Name, request.Unit, request.UnitPrice, locationId, request.InitialStock, request.MinStockThreshold);
+            createdIngredients.Add(ingredient);
+        }
+
+        foreach (var ingredient in createdIngredients)
+        {
+            await _ingredientRepository.AddAsync(ingredient, cancellationToken);
+        }
+
         await _ingredientRepository.SaveAllChangesAsync(cancellationToken);
 
-        return IngredientResponseDto.FromEntity(ingredient);
+        return createdIngredients.Select(IngredientResponseDto.FromEntity).ToList();
     }
 }
