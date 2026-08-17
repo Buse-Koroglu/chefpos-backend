@@ -24,6 +24,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<StockRequest>  StockRequests => Set<StockRequest>();
     
     public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
+    
+    public DbSet<CategoryLocation> CategoryLocations => Set<CategoryLocation>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

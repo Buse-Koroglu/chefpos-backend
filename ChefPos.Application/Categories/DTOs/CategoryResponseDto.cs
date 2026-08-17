@@ -8,7 +8,7 @@ public class CategoryResponseDto
     public string Name { get; set; } = default!;
     public string? Icon { get; set; }
     public bool IsActive { get; set; }
-    public Guid LocationId { get; set; }
+    public List<Guid> LocationIds { get; set; } = new();
 
     public static CategoryResponseDto FromEntity(Category category)
     {
@@ -18,7 +18,7 @@ public class CategoryResponseDto
             Name = category.Name,
             Icon = category.Icon,
             IsActive = category.IsActive,
-            LocationId = category.LocationId
+            LocationIds = category.LocationIds.ToList()
         };
     }
 }

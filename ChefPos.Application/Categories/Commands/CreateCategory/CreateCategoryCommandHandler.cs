@@ -6,11 +6,10 @@ using MediatR;
 
 namespace ChefPos.Application.Categories.Commands.CreateCategory;
 
-public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand,CategoryResponseDto>
+public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, CategoryResponseDto>
 {
-    private readonly ICategoryRepository  _categoryRepository;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly ILocationRepository _locationRepository;
-    
 
     public CreateCategoryCommandHandler(ICategoryRepository categoryRepository, ILocationRepository locationRepository)
     {
@@ -20,14 +19,17 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
 
     public async Task<CategoryResponseDto> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        await _locationRepository.GetByIdAsync(request.LocationId,cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı : {request.LocationId}");
+        foreach (var locationId in request.LocationIds.Distinct())
+        {
+            await _locationRepository.GetByIdAsync(locationId, cancellationToken)
+                .OrThrowNotFoundAsync($"Yerleşke bulunamadı: {locationId}");
+        }
 
-        var category = new Category(request.Name,request.LocationId,request.Icon);
+        var category = new Category(request.Name, request.LocationIds, request.Icon);
 
         await _categoryRepository.AddAsync(category, cancellationToken);
         await _categoryRepository.SaveAllChangesAsync(cancellationToken);
 
         return CategoryResponseDto.FromEntity(category);
     }
-    
 }

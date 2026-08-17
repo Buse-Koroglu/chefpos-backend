@@ -11,12 +11,14 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Categories.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return await _context.Categories
+            .Include(c => c.CategoryLocations)
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public async Task<List<Category>> GetAllByLocationAsync(Guid locationId, bool includeInactive, CancellationToken cancellationToken)
     {
-        var query = _context.Categories.Where(c => c.LocationId == locationId);
+        var query = _context.Categories.Where(c => c.CategoryLocations.Any(cl => cl.LocationId == locationId));
 
         if (!includeInactive)
         {
@@ -35,7 +37,7 @@ public class CategoryRepository : ICategoryRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
-    
+
     public async Task<(List<Category> Items, int TotalCount)> GetAllPagedAsync(
         string? searchTerm,
         Guid? locationId,
@@ -45,7 +47,8 @@ public class CategoryRepository : ICategoryRepository
         CancellationToken cancellationToken)
     {
         var query = _context.Categories
-            .Include(c => c.Location)
+            .Include(c => c.CategoryLocations)
+                .ThenInclude(cl => cl.Location)
             .Include(c => c.Products)
             .AsQueryable();
 
@@ -53,7 +56,7 @@ public class CategoryRepository : ICategoryRepository
             query = query.Where(c => c.Name.Contains(searchTerm));
 
         if (locationId.HasValue)
-            query = query.Where(c => c.LocationId == locationId.Value);
+            query = query.Where(c => c.CategoryLocations.Any(cl => cl.LocationId == locationId.Value));
 
         if (isActive.HasValue)
             query = query.Where(c => c.IsActive == isActive.Value);
@@ -69,6 +72,7 @@ public class CategoryRepository : ICategoryRepository
 
         return (items, totalCount);
     }
+
     public async Task RemoveAsync(Guid id, CancellationToken cancellationToken)
     {
         var category = await GetByIdAsync(id, cancellationToken);
@@ -76,7 +80,6 @@ public class CategoryRepository : ICategoryRepository
         {
             throw new KeyNotFoundException("Kategori bulunamadı.");
         }
-         _context.Categories.Remove(category);
+        _context.Categories.Remove(category);
     }
-    
 }

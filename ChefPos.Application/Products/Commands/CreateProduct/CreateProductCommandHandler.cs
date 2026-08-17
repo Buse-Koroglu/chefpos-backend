@@ -31,10 +31,8 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             throw new ValidationException("Pasif bir kategoriye ürün eklenemez.");
         }
 
-        if (category.LocationId != request.LocationId)
-        {
-            throw new ValidationException("Kategori bu yerleşkeye ait değil.");
-        }
+        if (!category.BelongsToLocation(request.LocationId))
+            throw new ValidationException("Seçilen kategori, bu yerleşkede tanımlı değil.");
 
         var product = new Product(request.Name, request.Price, request.CategoryId, request.LocationId,
             request.Description, request.ImageUrl);

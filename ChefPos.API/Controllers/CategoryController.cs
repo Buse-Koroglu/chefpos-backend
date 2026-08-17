@@ -1,6 +1,8 @@
 using ChefPos.Application.Categories.Commands.ActivateCategory;
+using ChefPos.Application.Categories.Commands.AddCategoryLocation;
 using ChefPos.Application.Categories.Commands.CreateCategory;
 using ChefPos.Application.Categories.Commands.RemoveCategory;
+using ChefPos.Application.Categories.Commands.RemoveCategoryLocation;
 using ChefPos.Application.Categories.Commands.UpdateCategory;
 using ChefPos.Application.Categories.DTOs;
 using ChefPos.Application.Categories.Queries.GetCategories;
@@ -88,5 +90,23 @@ public class CategoryController : ControllerBase
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
+
+    [Authorize(Roles = "ADMIN")]
+    [HttpPost("{id}/locations")]
+    public async Task<ActionResult> AddCategoryLocation([FromRoute] Guid id, AddCategoryLocationRequestDto body, CancellationToken cancellationToken)
+    {
+        var command = new AddCategoryLocationCommand(id, body.LocationId);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN")]
+    [HttpDelete("{id}/locations/{locationId}")]
+    public async Task<ActionResult> RemoveCategoryLocation([FromRoute] Guid id, [FromRoute] Guid locationId, CancellationToken cancellationToken)
+    {
+        var command = new RemoveCategoryLocationCommand(id, locationId);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
     }
     

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace ChefPos.Application.Categories.Commands.ActivateCategory;
 
-public class ActivateCategoryCommandHandler : IRequestHandler<ActivateCategoryCommand,CategoryResponseDto>
+public class ActivateCategoryCommandHandler : IRequestHandler<ActivateCategoryCommand, CategoryResponseDto>
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly ILocationRepository _locationRepository;
@@ -19,16 +19,17 @@ public class ActivateCategoryCommandHandler : IRequestHandler<ActivateCategoryCo
 
     public async Task<CategoryResponseDto> Handle(ActivateCategoryCommand request, CancellationToken cancellationToken)
     {
-        await _locationRepository.GetByIdAsync(request.LocationId,cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
-        var category = await _categoryRepository.GetByIdAsync(request.Id,cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı: {request.Id}");
-        if (category.LocationId != request.LocationId)
+        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
+        var category = await _categoryRepository.GetByIdAsync(request.Id, cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı: {request.Id}");
+
+        if (!category.BelongsToLocation(request.LocationId))
         {
             throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
         }
+
         category.ActivateCategory();
         await _categoryRepository.SaveAllChangesAsync(cancellationToken);
 
         return CategoryResponseDto.FromEntity(category);
     }
-    
 }

@@ -6,7 +6,7 @@ public class CategoryAdminResponseDto
     public string Name { get; set; } = default!;
     public string? Icon { get; set; }
     public bool IsActive { get; set; }
-    public Guid LocationId { get; set; }
-    public string LocationName { get; set; } = default!;
+    public List<Guid> LocationIds { get; set; } = new();
+    public List<string> LocationNames { get; set; } = new();
     public int ProductCount { get; set; }
 }

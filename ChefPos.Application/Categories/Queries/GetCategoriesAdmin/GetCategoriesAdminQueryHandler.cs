@@ -26,8 +26,8 @@ public class GetCategoriesAdminQueryHandler : IRequestHandler<GetCategoriesAdmin
             Name = c.Name,
             Icon = c.Icon,
             IsActive = c.IsActive,
-            LocationId = c.LocationId,
-            LocationName = c.Location.Name,
+            LocationIds = c.CategoryLocations.Select(cl => cl.LocationId).ToList(),
+            LocationNames = c.CategoryLocations.Select(cl => cl.Location.Name).ToList(),
             ProductCount = c.Products.Count
         }).ToList();
 
