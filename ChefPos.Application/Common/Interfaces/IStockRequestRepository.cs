@@ -9,5 +9,12 @@ public interface IStockRequestRepository
     Task<List<StockRequest>> GetAllByLocationAsync(Guid locationId, StockRequestStatus? status, CancellationToken cancellationToken);
     Task<bool> HasPendingAsync(Guid ingredientId, Guid locationId, CancellationToken cancellationToken);
     Task AddAsync(StockRequest stockRequest, CancellationToken cancellationToken);
+    Task<(List<StockRequest> Items, int TotalCount)> GetAllPagedAsync(
+        string? searchTerm,
+        Guid? locationId,
+        StockRequestStatus? status,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
     Task SaveAllChangesAsync(CancellationToken cancellationToken);
 }

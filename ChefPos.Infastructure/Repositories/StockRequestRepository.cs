@@ -46,6 +46,47 @@ public class StockRequestRepository : IStockRequestRepository
         await _context.StockRequests.AddAsync(stockRequest, cancellationToken);
     }
 
+    public async Task<(List<StockRequest> Items, int TotalCount)> GetAllPagedAsync(
+        string? searchTerm,
+        Guid? locationId,
+        StockRequestStatus? status,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.StockRequests
+            .AsNoTracking()
+            .Include(sr => sr.Ingredient)
+            .Include(sr => sr.Location)
+            .Include(sr => sr.RequestedByUser)
+            .Include(sr => sr.DecidedByUser) 
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(sr => EF.Functions.ILike(sr.Ingredient.Name, $"%{searchTerm}%"));
+        }
+
+        if (locationId.HasValue && locationId.Value != Guid.Empty)
+        {
+            query = query.Where(sr => sr.LocationId == locationId.Value);
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(sr => sr.Status == status.Value);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(sr => sr.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
     public async Task SaveAllChangesAsync(CancellationToken cancellationToken)
     {
         await _context.SaveChangesAsync(cancellationToken);
