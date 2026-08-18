@@ -9,4 +9,11 @@ public interface IIngredientRepository
     Task AddAsync(Ingredient ingredient, CancellationToken cancellationToken);
     Task SaveAllChangesAsync(CancellationToken cancellationToken);
     Task<List<Ingredient>> GetLowStockAsync(Guid locationId, CancellationToken cancellationToken);
+    Task<(List<Ingredient> Items, int TotalCount)> GetAllPagedAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

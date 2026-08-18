@@ -24,18 +24,23 @@ public class AddProductIngredientCommandHandler : IRequestHandler<AddProductIngr
             throw new NotFoundException("Ürün bulunamadı.");
         }
 
+        if (!product.BelongsToLocation(request.LocationId))
+        {
+            throw new ValidationException("Ürün bu yerleşkede tanımlı değil.");
+        }
+
         var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken);
         if (ingredient is null)
         {
             throw new NotFoundException("Ham madde bulunamadı.");
         }
 
-        if (ingredient.LocationId != product.LocationId)
+        if (ingredient.LocationId != request.LocationId)
         {
-            throw new ValidationException("Ham madde bu ürünün yerleşkesine ait değil.");
+            throw new ValidationException("Ham madde bu yerleşkeye ait değil.");
         }
 
-        product.AddIngredient(request.IngredientId, request.QuantityPerServing);
+        product.AddIngredient(request.LocationId, request.IngredientId, request.QuantityPerServing);
 
         await _productRepository.SaveAllChangesAsync(cancellationToken);
 

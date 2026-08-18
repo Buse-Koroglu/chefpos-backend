@@ -16,15 +16,18 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _context.Products
-            .Include(p => p.ProductItems).ThenInclude(pi => pi.Ingredient)
-            .FirstOrDefaultAsync(p=>p.Id == id, cancellationToken);    }
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.ProductItems).ThenInclude(pi => pi.Ingredient)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
 
     public async Task<List<Product>> GetAllByLocationAsync(Guid locationId, Guid? categoryId, bool includeInactive, CancellationToken cancellationToken)
     {
         var query = _context.Products
-            .Include(p => p.ProductItems).ThenInclude(pi => pi.Ingredient)
-            .Where(p => p.LocationId == locationId);
-        
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.ProductItems).ThenInclude(pi => pi.Ingredient)
+            .Where(p => p.ProductLocations.Any(pl => pl.LocationId == locationId));
+
         if (categoryId.HasValue)
         {
             query = query.Where(p => p.CategoryId == categoryId.Value);
@@ -36,6 +39,44 @@ public class ProductRepository : IProductRepository
         }
 
         return await query.OrderBy(p => p.Name).ToListAsync(cancellationToken);
+    }
+
+    public async Task<(List<Product> Items, int TotalCount)> GetAllPagedAsync(
+        string? searchTerm,
+        Guid? locationId,
+        Guid? categoryId,
+        bool? isActive,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{searchTerm}%"));
+
+        if (locationId.HasValue)
+            query = query.Where(p => p.ProductLocations.Any(pl => pl.LocationId == locationId.Value));
+
+        if (categoryId.HasValue)
+            query = query.Where(p => p.CategoryId == categoryId.Value);
+
+        if (isActive.HasValue)
+            query = query.Where(p => p.IsActive == isActive.Value);
+
+        query = query.OrderBy(p => p.Name);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     public async Task AddAsync(Product product, CancellationToken cancellationToken)

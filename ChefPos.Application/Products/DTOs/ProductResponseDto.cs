@@ -11,9 +11,9 @@ public class ProductResponseDto
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; }
-    public Guid LocationId { get; set; }
     public Guid CategoryId { get; set; }
-    public List<ProductItemResponseDto> Ingredients { get; set; } = new();
+    public List<Guid> LocationIds { get; set; } = new();
+    public List<ProductLocationRecipeDto> Locations { get; set; } = new();
 
     public static ProductResponseDto FromEntity(Product product)
     {
@@ -25,9 +25,24 @@ public class ProductResponseDto
             Description = product.Description,
             ImageUrl = product.ImageUrl,
             IsActive = product.IsActive,
-            LocationId = product.LocationId,
             CategoryId = product.CategoryId,
-            Ingredients = product.ProductItems.Select(ProductItemResponseDto.FromEntity).ToList()
+            LocationIds = product.LocationIds.ToList(),
+            Locations = product.ProductLocations.Select(ProductLocationRecipeDto.FromEntity).ToList()
+        };
+    }
+}
+
+public class ProductLocationRecipeDto
+{
+    public Guid LocationId { get; set; }
+    public List<ProductItemResponseDto> Ingredients { get; set; } = new();
+
+    public static ProductLocationRecipeDto FromEntity(ProductLocation productLocation)
+    {
+        return new ProductLocationRecipeDto
+        {
+            LocationId = productLocation.LocationId,
+            Ingredients = productLocation.ProductItems.Select(ProductItemResponseDto.FromEntity).ToList()
         };
     }
 }

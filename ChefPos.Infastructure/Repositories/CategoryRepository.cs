@@ -53,7 +53,7 @@ public class CategoryRepository : ICategoryRepository
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
-            query = query.Where(c => c.Name.Contains(searchTerm));
+            query = query.Where(c => EF.Functions.ILike(c.Name, $"%{searchTerm}%"));
 
         if (locationId.HasValue)
             query = query.Where(c => c.CategoryLocations.Any(cl => cl.LocationId == locationId.Value));

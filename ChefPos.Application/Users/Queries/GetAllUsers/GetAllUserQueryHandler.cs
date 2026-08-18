@@ -16,7 +16,7 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, PagedRe
     public async Task<PagedResult<UserResponseDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
         var (users, totalCount) = await _userRepository.GetAllPagedAsync(
-            request.Role, request.IsActive, request.LocationId, request.PageNumber, request.PageSize, cancellationToken);
+            request.SearchTerm, request.Role, request.IsActive, request.LocationId, request.PageNumber, request.PageSize, cancellationToken);
 
         return new PagedResult<UserResponseDto>
         {

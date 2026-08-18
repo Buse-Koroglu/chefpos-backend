@@ -7,14 +7,16 @@ namespace ChefPos.Application.Users.Queries.GetAllUsers;
 
 public class GetAllUsersQuery : IRequest<PagedResult<UserResponseDto>>
 {
+    public string? SearchTerm { get; }
     public Role? Role { get; }
     public bool? IsActive { get; }
     public Guid? LocationId { get; }
     public int PageNumber { get; }
     public int PageSize { get; }
-    
-    public GetAllUsersQuery(Role? role, bool? isActive, Guid? locationId, int pageNumber = 1, int pageSize = 20)
+
+    public GetAllUsersQuery(string? searchTerm, Role? role, bool? isActive, Guid? locationId, int pageNumber = 1, int pageSize = 20)
     {
+        SearchTerm = searchTerm;
         Role = role;
         IsActive = isActive;
         LocationId = locationId;

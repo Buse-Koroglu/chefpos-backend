@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
     
     public DbSet<CategoryLocation> CategoryLocations => Set<CategoryLocation>();
+    public DbSet<ProductLocation> ProductLocations => Set<ProductLocation>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

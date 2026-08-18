@@ -38,7 +38,7 @@ public class LocationRepository : ILocationRepository
         var query = _context.Locations.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
-            query = query.Where(l => l.Name.Contains(searchTerm));
+            query = query.Where(l => EF.Functions.ILike(l.Name, $"%{searchTerm}%"));
 
         if (isActive.HasValue)
             query = query.Where(l => l.IsActive == isActive.Value);

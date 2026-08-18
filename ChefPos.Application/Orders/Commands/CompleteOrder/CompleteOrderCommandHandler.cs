@@ -67,7 +67,13 @@ public class CompleteOrderCommandHandler : IRequestHandler<CompleteOrderCommand,
                 }
                 productCache[item.ProductId.Value] = product;
             }
-            foreach (var recipeLine in product.ProductItems)
+            var productLocation = product.ProductLocations.FirstOrDefault(pl => pl.LocationId == order.LocationId);
+            if (productLocation is null)
+            {
+                throw new ValidationException($"'{product.Name}' ürünü bu siparişin yerleşkesinde tanımlı değil.");
+            }
+
+            foreach (var recipeLine in productLocation.ProductItems)
             {
                 var amountToDeduct = item.Quantity * recipeLine.QuantityPerServing;
                 recipeLine.Ingredient.DecreaseStock(amountToDeduct);

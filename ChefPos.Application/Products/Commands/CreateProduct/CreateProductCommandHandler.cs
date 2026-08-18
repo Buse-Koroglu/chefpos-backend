@@ -22,19 +22,27 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
     public async Task<ProductResponseDto> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
-        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
+        if (request.LocationIds is null || request.LocationIds.Count == 0)
+        {
+            throw new ValidationException("En az bir yerleşke seçilmelidir.");
+        }
 
         var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı: {request.CategoryId}");
-                
+
         if (!category.IsActive)
         {
             throw new ValidationException("Pasif bir kategoriye ürün eklenemez.");
         }
 
-        if (!category.BelongsToLocation(request.LocationId))
-            throw new ValidationException("Seçilen kategori, bu yerleşkede tanımlı değil.");
+        foreach (var locationId in request.LocationIds.Distinct())
+        {
+            await _locationRepository.GetByIdAsync(locationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {locationId}");
 
-        var product = new Product(request.Name, request.Price, request.CategoryId, request.LocationId,
+            if (!category.BelongsToLocation(locationId))
+                throw new ValidationException("Seçilen kategori, seçilen yerleşkelerin tümünde tanımlı değil.");
+        }
+
+        var product = new Product(request.Name, request.Price, request.CategoryId, request.LocationIds,
             request.Description, request.ImageUrl);
 
         await _productRepository.AddAsync(product, cancellationToken);
@@ -42,5 +50,5 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         return ProductResponseDto.FromEntity(product);
 
     }
-    
+
 }

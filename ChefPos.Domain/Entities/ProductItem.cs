@@ -5,29 +5,29 @@ namespace ChefPos.Domain.Entities;
 public class ProductItem : BaseEntity
 {
     
-    public Guid ProductId { get; private set; }
-    public Product Product { get; private set; } = null!;
-    
+    public Guid ProductLocationId { get; private set; }
+    public ProductLocation ProductLocation { get; private set; } = null!;
+
     public Guid IngredientId { get; private set; }
     public Ingredient Ingredient { get; private set; } = null!;
     public decimal QuantityPerServing { get; private set; }
-    
-    
+
+
     private  ProductItem()
     {}
 
-    internal ProductItem(Guid productId, Guid ingredientId, decimal quantityPerServing)
+    internal ProductItem(Guid productLocationId, Guid ingredientId, decimal quantityPerServing)
     {
-        
+
         if (quantityPerServing < 0)
         {
             throw new ArgumentOutOfRangeException( nameof(quantityPerServing),"Kullanılan miktar pozitif olmalı");
-        } 
-        
-        ProductId = productId;
+        }
+
+        ProductLocationId = productLocationId;
         IngredientId = ingredientId;
         QuantityPerServing = quantityPerServing;
-    
+
     }
     
 

@@ -50,6 +50,7 @@ public class UserRepository : IUserRepository
     }
     
     public async Task<(List<User> Items, int TotalCount)> GetAllPagedAsync(
+        string? searchTerm,
         Role? role,
         bool? isActive,
         Guid? locationId,
@@ -61,6 +62,13 @@ public class UserRepository : IUserRepository
             .Include(u => u.UserRoles)
             .Include(u => u.Locations)
             .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(u =>
+                EF.Functions.ILike(u.FirstName, $"%{searchTerm}%") ||
+                EF.Functions.ILike(u.LastName, $"%{searchTerm}%") ||
+                EF.Functions.ILike(u.FirstName + " " + u.LastName, $"%{searchTerm}%") ||
+                EF.Functions.ILike(u.PersonalId, $"%{searchTerm}%"));
 
         if (role.HasValue)
             query = query.Where(u => u.UserRoles.Any(ur => ur.Role == role.Value));

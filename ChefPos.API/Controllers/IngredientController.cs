@@ -6,7 +6,9 @@ using ChefPos.Application.Ingredients.Commands.UpdateIngredientMinStockThreshold
 using ChefPos.Application.Ingredients.DTOs;
 using ChefPos.Application.Ingredients.Queries.GetIngredientById;
 using ChefPos.Application.Ingredients.Queries.GetIngredients;
+using ChefPos.Application.Ingredients.Queries.GetIngredientsPaged;
 using ChefPos.Application.Ingredients.Queries.GetLowStockIngredients;
+using ChefPos.Application.Common.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +49,22 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-    
+
+    [Authorize(Roles = "ADMIN")]
+    [HttpGet("paged")]
+    public async Task<ActionResult<PagedResult<IngredientAdminResponseDto>>> GetIngredientsPaged(
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid? locationId,
+        [FromQuery] bool? isActive,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetIngredientsPagedQuery(searchTerm, locationId, isActive, pageNumber, pageSize);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("low-stock")]
     public async Task<ActionResult> GetLowStockIngredients([FromQuery] Guid locationId, CancellationToken cancellationToken)

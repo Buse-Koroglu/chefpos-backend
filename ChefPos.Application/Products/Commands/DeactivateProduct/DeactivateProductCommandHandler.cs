@@ -1,4 +1,5 @@
 using ChefPos.Application.Common.Behaviors;
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
 using MediatR;
@@ -21,6 +22,12 @@ public class DeactivateProductCommandHandler : IRequestHandler<DeactivateProduct
         await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunmadı: {request.LocationId}");
 
         var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {request.Id}");
+
+        if (!product.BelongsToLocation(request.LocationId))
+        {
+            throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
+        }
+
         product.DeactivateProduct();
         await _productRepository.SaveAllChangesAsync(cancellationToken);
         return ProductResponseDto.FromEntity(product);

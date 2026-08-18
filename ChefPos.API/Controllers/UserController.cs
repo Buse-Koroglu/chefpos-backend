@@ -34,6 +34,7 @@ public class UsersController : ControllerBase
     [Authorize(Roles = "ADMIN")]
     [HttpGet]
     public async Task<ActionResult> GetUsers(
+        [FromQuery] string? searchTerm,
         [FromQuery] Role? role,
         [FromQuery] bool? isActive,
         [FromQuery] Guid? locationId,
@@ -41,7 +42,7 @@ public class UsersController : ControllerBase
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetAllUsersQuery(role, isActive, locationId, pageNumber, pageSize), cancellationToken);
+        var result = await _mediator.Send(new GetAllUsersQuery(searchTerm, role, isActive, locationId, pageNumber, pageSize), cancellationToken);
         return Ok(result);
     }
  

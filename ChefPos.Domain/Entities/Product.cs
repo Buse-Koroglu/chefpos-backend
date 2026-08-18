@@ -9,15 +9,16 @@ public class Product : BaseEntity
     public string? Description { get; private set; }
     public string? ImageUrl { get; private set; }
     public bool IsActive { get; private set; } = true;
-    public Guid LocationId { get; private set; }
-    public Location Location { get; private set; } = null!;
     public Guid CategoryId { get; private set; }
     public Category Category { get; private set; } = null!;
-    private readonly List<ProductItem> _productItems = new();
-    public IReadOnlyCollection<ProductItem> ProductItems => _productItems;
+
+    private readonly List<ProductLocation> _locations = new();
+    public IReadOnlyCollection<ProductLocation> ProductLocations => _locations;
+    public IEnumerable<Guid> LocationIds => _locations.Select(l => l.LocationId);
+
     private Product() { }
 
-    public Product(string name, decimal price, Guid categoryId , Guid locationId,string? description = null, string? imageUrl = null )
+    public Product(string name, decimal price, Guid categoryId, IEnumerable<Guid> locationIds, string? description = null, string? imageUrl = null)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -27,15 +28,23 @@ public class Product : BaseEntity
         if (price < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(price), "Fiyat negatif olamaz.");
-        } 
-       Name = name;
-       Price = price;
-       Description = description;
-       ImageUrl = imageUrl;
-       LocationId = locationId;
-       CategoryId = categoryId;
+        }
+
+        var distinctLocationIds = locationIds?.Distinct().ToList() ?? new List<Guid>();
+        if (distinctLocationIds.Count == 0)
+        {
+            throw new ArgumentException("Ürüne en az bir yerleşke atanmalıdır.", nameof(locationIds));
+        }
+
+        Name = name;
+        Price = price;
+        Description = description;
+        ImageUrl = imageUrl;
+        CategoryId = categoryId;
+        foreach (var locationId in distinctLocationIds)
+            _locations.Add(new ProductLocation(Id, locationId));
     }
-    
+
     public void UpdatePrice(decimal newPrice)
     {
         if (newPrice < 0)
@@ -43,41 +52,57 @@ public class Product : BaseEntity
         Price = newPrice;
         Touch();
     }
-    
-    public void AddIngredient(Guid ingredientId, decimal quantityPerServing)
-    {
-        if (_productItems.Any(i => i.IngredientId == ingredientId))
-        {
-            throw new InvalidOperationException("Bu ham madde zaten reçetede mevcut.");
-        }
 
-        _productItems.Add(new ProductItem(Id, ingredientId, quantityPerServing));
-        Touch();
-    }
-    
-    public void UpdateIngredientQuantity(Guid productItemId, decimal newQuantityPerServing)
+    public bool BelongsToLocation(Guid locationId) => _locations.Any(l => l.LocationId == locationId);
+
+    public void AddLocation(Guid locationId)
     {
-        var item = _productItems.FirstOrDefault(i => i.Id == productItemId);
-        if (item is null)
-        {
-            throw new KeyNotFoundException("Ham madde bu ürünün reçetesinde bulunamadı.");
-        }
- 
-        item.UpdateQuantity(newQuantityPerServing);
+        if (_locations.Any(l => l.LocationId == locationId))
+            throw new InvalidOperationException("Ürün zaten bu yerleşkede tanımlı.");
+        _locations.Add(new ProductLocation(Id, locationId));
         Touch();
     }
 
-    public void RemoveIngredient(Guid productItemId)
+    public void RemoveLocation(Guid locationId)
     {
-        var item = _productItems.FirstOrDefault(i => i.Id == productItemId);
-        if (item is null)
-        {
-            throw new KeyNotFoundException("Ham madde bu ürünün reçetesinde bulunamadı.");
-        }
-        _productItems.Remove(item);
+        if (_locations.Count <= 1)
+            throw new InvalidOperationException("Ürünün en az bir yerleşkesi olmalıdır.");
+
+        var link = _locations.FirstOrDefault(l => l.LocationId == locationId);
+        if (link is null) return;
+
+        _locations.Remove(link);
         Touch();
     }
-    
+
+    private ProductLocation GetLocationOrThrow(Guid locationId)
+    {
+        var location = _locations.FirstOrDefault(l => l.LocationId == locationId);
+        if (location is null)
+        {
+            throw new InvalidOperationException("Ürün bu yerleşkede tanımlı değil.");
+        }
+        return location;
+    }
+
+    public void AddIngredient(Guid locationId, Guid ingredientId, decimal quantityPerServing)
+    {
+        GetLocationOrThrow(locationId).AddIngredient(ingredientId, quantityPerServing);
+        Touch();
+    }
+
+    public void UpdateIngredientQuantity(Guid locationId, Guid productItemId, decimal newQuantityPerServing)
+    {
+        GetLocationOrThrow(locationId).UpdateIngredientQuantity(productItemId, newQuantityPerServing);
+        Touch();
+    }
+
+    public void RemoveIngredient(Guid locationId, Guid productItemId)
+    {
+        GetLocationOrThrow(locationId).RemoveIngredient(productItemId);
+        Touch();
+    }
+
     public void UpdateDetails(string name, string? description, string? imageUrl)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -89,7 +114,7 @@ public class Product : BaseEntity
         ImageUrl = imageUrl;
         Touch();
     }
-    
+
     public void DeactivateProduct() { IsActive = false; Touch(); }
     public void ActivateProduct() { IsActive = true; Touch(); }
 }

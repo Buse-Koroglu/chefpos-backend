@@ -1,4 +1,5 @@
 using ChefPos.Application.Common.Behaviors;
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Products.DTOs;
 using MediatR;
@@ -9,7 +10,7 @@ public class ActivateProductCommandHandler : IRequestHandler<ActivateProductComm
 {
     private readonly IProductRepository _productRepository;
     private readonly ILocationRepository _locationRepository;
-    
+
     public ActivateProductCommandHandler(IProductRepository productRepository, ILocationRepository locationRepository)
     {
         _productRepository = productRepository;
@@ -21,10 +22,15 @@ public class ActivateProductCommandHandler : IRequestHandler<ActivateProductComm
         await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı : {request.LocationId}");
 
         var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı : {request.Id}");
-        
+
+        if (!product.BelongsToLocation(request.LocationId))
+        {
+            throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
+        }
+
         product.ActivateProduct();
         await _productRepository.SaveAllChangesAsync(cancellationToken);
         return ProductResponseDto.FromEntity(product);
     }
-    
+
 }

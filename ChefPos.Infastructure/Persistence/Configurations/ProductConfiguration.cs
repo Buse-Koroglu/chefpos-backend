@@ -14,9 +14,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.ImageUrl).HasMaxLength(500);
         builder.Property(p => p.Price).HasPrecision(10, 2);
         builder.HasOne(p => p.Category).WithMany(c => c.Products).HasForeignKey(p => p.CategoryId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(p=>p.Location).WithMany(l=>l.Products).HasForeignKey(p => p.LocationId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasMany(p=>p.ProductItems).WithOne(pi=>pi.Product).HasForeignKey(pi=>pi.ProductId).OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation(p => p.ProductItems).HasField("_productItems").UsePropertyAccessMode(PropertyAccessMode.Field);
-        
+        builder.Navigation(p => p.ProductLocations).HasField("_locations").UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

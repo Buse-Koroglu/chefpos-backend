@@ -7,7 +7,6 @@ public class Location : BaseEntity
     public string Name { get; private set; } = default!;
     public bool IsActive { get; private set; } = true;
     public ICollection<Order> Orders { get; private set; } = new List<Order>();
-    public ICollection<Product> Products { get; private set; } = new List<Product>();
     public ICollection<UserLocation> AuthorizedUsers { get; private set; } = new List<UserLocation>();
     
     public ICollection<Ingredient> Ingredients { get; private set; } = new List<Ingredient>();

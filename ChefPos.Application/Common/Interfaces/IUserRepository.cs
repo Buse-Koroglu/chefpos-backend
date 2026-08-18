@@ -11,6 +11,7 @@ public interface IUserRepository
         Task<List<User>> GetAllAsync(CancellationToken cancellationToken);
         Task<User?> GetStockManagerByLocationAsync(Guid locationId, CancellationToken cancellationToken);
         Task<(List<User> Items, int TotalCount)> GetAllPagedAsync(
+                string? searchTerm,
                 Role? role,
                 bool? isActive,
                 Guid? locationId,

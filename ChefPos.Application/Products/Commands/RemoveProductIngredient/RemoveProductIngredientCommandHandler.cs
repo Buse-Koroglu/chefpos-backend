@@ -17,7 +17,7 @@ public class RemoveProductIngredientCommandHandler : IRequestHandler<RemoveProdu
     public async Task<ProductResponseDto> Handle(RemoveProductIngredientCommand request, CancellationToken cancellationToken)
     {
         var product =await _productRepository.GetByIdAsync(request.ProductId,cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı:  {request.ProductId}");
-        product.RemoveIngredient(request.ProductItemId);
+        product.RemoveIngredient(request.LocationId, request.ProductItemId);
         await _productRepository.SaveAllChangesAsync(cancellationToken);
         return ProductResponseDto.FromEntity(product);
     }

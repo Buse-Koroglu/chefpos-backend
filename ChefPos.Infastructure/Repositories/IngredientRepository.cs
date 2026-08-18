@@ -47,4 +47,37 @@ public class IngredientRepository : IIngredientRepository
             .OrderBy(i => i.Name)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<(List<Ingredient> Items, int TotalCount)> GetAllPagedAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Ingredients
+            .Include(i => i.Location)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(i => EF.Functions.ILike(i.Name, $"%{searchTerm}%"));
+
+        if (locationId.HasValue)
+            query = query.Where(i => i.LocationId == locationId.Value);
+
+        if (isActive.HasValue)
+            query = query.Where(i => i.IsActive == isActive.Value);
+
+        query = query.OrderBy(i => i.Name);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 }
