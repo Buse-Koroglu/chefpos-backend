@@ -16,13 +16,14 @@ public class OrderRepository : IOrderRepository
     }
     public async Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id,cancellationToken);
+        return await _context.Orders.Include(o => o.Items).Include(o => o.Table).FirstOrDefaultAsync(o => o.Id == id,cancellationToken);
     }
-    
+
     public async Task<List<Order>> GetAllByLocationAsync(Guid locationId, OrderStatus? status, OrderType? orderType, CancellationToken cancellationToken)
     {
         var query = _context.Orders
             .Include(o => o.Items)
+            .Include(o => o.Table)
             .Where(o => o.LocationId == locationId);
 
         if (status.HasValue)
@@ -45,6 +46,7 @@ public class OrderRepository : IOrderRepository
     {
         var query = _context.Orders
             .Include(o => o.Items)
+            .Include(o => o.Table)
             .Where(o => o.LocationId == locationId);
 
         if (status.HasValue)
@@ -82,7 +84,7 @@ public class OrderRepository : IOrderRepository
         int pageSize,
         CancellationToken cancellationToken)
     {
-        var query = _context.Orders.Include(o => o.Items).AsQueryable();
+        var query = _context.Orders.Include(o => o.Items).Include(o => o.Table).AsQueryable();
  
         if (locationId.HasValue)
         {

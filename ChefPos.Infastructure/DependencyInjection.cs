@@ -23,6 +23,7 @@ public static class DependencyInjection
       services.AddScoped<ILocationRepository, LocationRepository>();
       services.AddScoped<IIngredientRepository, IngredientRepository>();
       services.AddScoped<IStockRequestRepository,StockRequestRepository>();
+      services.AddScoped<ITableRepository, TableRepository>();
       services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
       services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
       services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();

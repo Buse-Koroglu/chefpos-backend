@@ -15,6 +15,8 @@ public class Order : BaseEntity
     public Location Location { get; private set; } = null!;
     public Guid? CreatedByUserId { get; private set; }
     public User? CreatedByUser { get; private set; }
+    public Guid? TableId { get; private set; }
+    public Table? Table { get; private set; }
     
     public DateTime? CompletedAt { get; private set; }
 
@@ -28,12 +30,25 @@ public class Order : BaseEntity
     private void CalculateTotalPrice() => TotalPrice = _items.Sum(i => i.Price * i.Quantity);
     
     public static Order CreateByCashier(Guid locationId, Guid cashierId, string customerName)
-        => CreateByStaff(locationId, cashierId, customerName, OrderType.CASHIER);
- 
-    public static Order CreateByWaiter(Guid locationId, Guid waiterId, string customerName)
-        => CreateByStaff(locationId, waiterId, customerName, OrderType.WAITER);
- 
-    private static Order CreateByStaff(Guid locationId, Guid createdByUserId, string customerName, OrderType orderType)
+        => CreateByStaff(locationId, cashierId, customerName, OrderType.CASHIER, null);
+
+    public static Order CreateByWaiter(Guid locationId, Guid waiterId, string customerName, Table table)
+    {
+        if (table.LocationId != locationId)
+        {
+            throw new ArgumentException("Seçilen masa bu yerleşkeye ait değil.", nameof(table));
+        }
+        if (!table.IsActive)
+        {
+            throw new ArgumentException("Seçilen masa aktif değil.", nameof(table));
+        }
+
+        var order = CreateByStaff(locationId, waiterId, customerName, OrderType.WAITER, table.Id);
+        order.Table = table;
+        return order;
+    }
+
+    private static Order CreateByStaff(Guid locationId, Guid createdByUserId, string customerName, OrderType orderType, Guid? tableId)
     {
         return new Order
         {
@@ -41,6 +56,7 @@ public class Order : BaseEntity
             LocationId = locationId,
             CustomerName = string.IsNullOrWhiteSpace(customerName) ? "Müşteri" : customerName,
             OrderType = orderType,
+            TableId = tableId,
         };
     }
 

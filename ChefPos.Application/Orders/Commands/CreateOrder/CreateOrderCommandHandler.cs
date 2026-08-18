@@ -14,17 +14,20 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
     private readonly IUserRepository  _userRepository;
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
+    private readonly ITableRepository _tableRepository;
 
     public CreateOrderCommandHandler(
         ICurrentUserService currentUserService,
         IUserRepository userRepository,
         IOrderRepository orderRepository,
-        IProductRepository productRepository)
+        IProductRepository productRepository,
+        ITableRepository tableRepository)
     {
         _currentUserService = currentUserService;
         _userRepository = userRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
+        _tableRepository = tableRepository;
     }
 
     public async Task<OrderResponseDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -39,15 +42,25 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         if (!requestingUser.HasAccessToLocation(request.LocationId))
             throw new ForbiddenException("Bu kullanıcının belirtilen yerleşkede işlem yapma yetkisi yok.");
  
-        var order = request.RequestedAs switch
+        Order order;
+        switch (request.RequestedAs)
         {
-            Role.CASHIER when requestingUser.HasRole(Role.CASHIER)
-                => Order.CreateByCashier(request.LocationId, currentUserId, request.CustomerName!),
-            Role.WAITER when requestingUser.HasRole(Role.WAITER)
-                => Order.CreateByWaiter(request.LocationId, currentUserId, request.CustomerName!),
-            _ => throw new ValidationException(
-                $"Kullanıcının '{request.RequestedAs}' rolü olarak sipariş oluşturma yetkisi yok.")
-        };
+            case Role.CASHIER when requestingUser.HasRole(Role.CASHIER):
+                order = Order.CreateByCashier(request.LocationId, currentUserId, request.CustomerName!);
+                break;
+            case Role.WAITER when requestingUser.HasRole(Role.WAITER):
+                if (request.TableId is null)
+                {
+                    throw new ValidationException("Garson siparişlerinde masa seçimi zorunludur.");
+                }
+                var table = await _tableRepository.GetByIdAsync(request.TableId.Value, cancellationToken)
+                    .OrThrowNotFoundAsync($"Masa bulunamadı: {request.TableId}");
+                order = Order.CreateByWaiter(request.LocationId, currentUserId, request.CustomerName!, table);
+                break;
+            default:
+                throw new ValidationException(
+                    $"Kullanıcının '{request.RequestedAs}' rolü olarak sipariş oluşturma yetkisi yok.");
+        }
  
         foreach (var itemRequest in request.Items)
         {

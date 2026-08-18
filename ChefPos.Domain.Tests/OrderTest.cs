@@ -23,11 +23,36 @@ public class OrderTest
     [Fact]
     public void ShouldSetOrderTypeForWaiter()
     {
-        var order = Order.CreateByWaiter(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+        var locationId = Guid.NewGuid();
+        var table = new Table(locationId, 1);
+
+        var order = Order.CreateByWaiter(locationId, Guid.NewGuid(), CustomerName, table);
 
         Assert.Equal(OrderType.WAITER, order.OrderType);
+        Assert.Equal(table.Id, order.TableId);
     }
-    
+
+    [Fact]
+    public void ShouldThrowExceptionWhenWaiterTableBelongsToDifferentLocation()
+    {
+        var table = new Table(Guid.NewGuid(), 1);
+
+        Assert.Throws<ArgumentException>(() =>
+            Order.CreateByWaiter(Guid.NewGuid(), Guid.NewGuid(), CustomerName, table));
+    }
+
+    [Fact]
+    public void ShouldThrowExceptionWhenWaiterTableIsInactive()
+    {
+        var locationId = Guid.NewGuid();
+        var table = new Table(locationId, 1);
+        table.Deactivate();
+
+        Assert.Throws<ArgumentException>(() =>
+            Order.CreateByWaiter(locationId, Guid.NewGuid(), CustomerName, table));
+    }
+
+
     [Fact]
     public void ShouldIncreaseQuantityWhenIteIsInTheOrder()
     {

@@ -22,6 +22,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
     
     public DbSet<StockRequest>  StockRequests => Set<StockRequest>();
+
+    public DbSet<Table> Tables => Set<Table>();
     
     public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
     
