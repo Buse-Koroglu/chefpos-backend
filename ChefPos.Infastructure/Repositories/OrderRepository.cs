@@ -40,6 +40,7 @@ public class OrderRepository : IOrderRepository
         OrderStatus? status,
         OrderType? orderType,
         PaymentStatus? paymentStatus,
+        string? searchTerm,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken)
@@ -50,13 +51,44 @@ public class OrderRepository : IOrderRepository
             .Where(o => o.LocationId == locationId);
 
         if (status.HasValue)
+        {
             query = query.Where(o => o.OrderStatus == status.Value);
+        }
 
         if (orderType.HasValue)
+        {
             query = query.Where(o => o.OrderType == orderType.Value);
+        }
 
         if (paymentStatus.HasValue)
+        {
             query = query.Where(o => o.PaymentStatus == paymentStatus.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var normalizedSearchTerm = searchTerm.Trim();
+
+            query = query.Where(o =>
+                EF.Functions.ILike(
+                    o.CustomerName ?? string.Empty,
+                    $"%{normalizedSearchTerm}%"
+                )
+            );
+
+            if (int.TryParse(normalizedSearchTerm, out var orderNumber))
+            {
+                query = query.Union(
+                    _context.Orders
+                        .Include(o => o.Items)
+                        .Include(o => o.Table)
+                        .Where(o =>
+                            o.LocationId == locationId &&
+                            o.OrderNumber == orderNumber
+                        )
+                );
+            }
+        }
 
         query = query.OrderByDescending(o => o.CreatedAt);
 
@@ -69,7 +101,6 @@ public class OrderRepository : IOrderRepository
 
         return (items, totalCount);
     }
-
     public async Task AddAsync(Order order, CancellationToken cancellationToken)
     {
         await _context.Orders.AddAsync(order, cancellationToken);

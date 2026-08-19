@@ -60,18 +60,19 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "CASHIER,WAITER,ADMIN")]
+    [Authorize(Roles = "CASHIER,WAITER,ADMIN,KITCHEN")]
     [HttpGet]
     public async Task<ActionResult> GetOrders(
         [FromQuery] Guid locationId,
         [FromQuery] OrderStatus? status,
         [FromQuery] OrderType? type,
         [FromQuery] PaymentStatus? paymentStatus,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetOrdersQuery(locationId, status, type, paymentStatus, pageNumber, pageSize), cancellationToken);
+        var result = await _mediator.Send(new GetOrdersQuery( locationId, status, type,paymentStatus, searchTerm, pageNumber, pageSize), cancellationToken);
         return Ok(result);
     }
 

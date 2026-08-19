@@ -13,6 +13,7 @@ public interface IOrderRepository
         OrderStatus? status,
         OrderType? orderType,
         PaymentStatus? paymentStatus,
+        string? searchTerm,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
