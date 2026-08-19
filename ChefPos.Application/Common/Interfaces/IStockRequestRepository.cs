@@ -16,5 +16,14 @@ public interface IStockRequestRepository
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
+    
+    Task<(
+        int PendingRequestsCount,
+        int PastRequestsCount,
+        int TotalStockRequestsCount
+        )> GetInventoryDashboardStatsAsync(
+        Guid userId,
+        Guid? locationId,
+        CancellationToken cancellationToken);
     Task SaveAllChangesAsync(CancellationToken cancellationToken);
 }

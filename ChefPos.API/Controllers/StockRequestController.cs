@@ -3,6 +3,7 @@ using ChefPos.Application.StockRequests.Commands.ApproveStockRequest;
 using ChefPos.Application.StockRequests.Commands.CreateStockRequest;
 using ChefPos.Application.StockRequests.Commands.RejectStockRequest;
 using ChefPos.Application.StockRequests.DTOs;
+using ChefPos.Application.StockRequests.Queries.GetInventoryDashboardStats;
 using ChefPos.Application.StockRequests.Queries.GetStockRequestById;
 using ChefPos.Application.StockRequests.Queries.GetStockRequestPaged;
 using ChefPos.Application.StockRequests.Queries.GetStockRequests;
@@ -63,6 +64,23 @@ public class StockRequestsController : ControllerBase
     {
         var query = new GetPagedStockRequestsQuery(searchTerm, locationId, status, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+    
+    [Authorize(Roles = "INVENTORY_STAFF,ADMIN")]
+    [HttpGet("dashboard-stats")]
+    public async Task<ActionResult<InventoryDashboardStatsDto>>
+        GetInventoryDashboardStats(
+            [FromQuery] Guid? locationId,
+            CancellationToken cancellationToken)
+    {
+        var query = new GetInventoryDashboardStatsQuery(
+            locationId);
+
+        var result = await _mediator.Send(
+            query,
+            cancellationToken);
+
         return Ok(result);
     }
 

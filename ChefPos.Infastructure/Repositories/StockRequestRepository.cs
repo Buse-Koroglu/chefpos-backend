@@ -91,4 +91,47 @@ public class StockRequestRepository : IStockRequestRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+    
+    public async Task<(
+        int PendingRequestsCount,
+        int PastRequestsCount,
+        int TotalStockRequestsCount
+        )> GetInventoryDashboardStatsAsync(
+        Guid userId,
+        Guid? locationId,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.StockRequests
+            .AsNoTracking()
+            .Where(request =>
+                request.RequestedByUserId == userId);
+
+        if (locationId.HasValue)
+        {
+            query = query.Where(request =>
+                request.LocationId == locationId.Value);
+        }
+
+        var pendingCount = await query
+            .CountAsync(
+                request =>
+                    request.Status == StockRequestStatus.PENDING,
+                cancellationToken);
+
+        var pastCount = await query
+            .CountAsync(
+                request =>
+                    request.Status == StockRequestStatus.APPROVED ||
+                    request.Status == StockRequestStatus.REJECTED,
+                cancellationToken);
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+
+        return (
+            pendingCount,
+            pastCount,
+            totalCount
+        );
+    }
 }
