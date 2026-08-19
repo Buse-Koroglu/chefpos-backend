@@ -126,7 +126,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,WAITER,CASHIER")]
     [HttpGet("paged")]
     public async Task<ActionResult> GetProductsPaged(
         [FromQuery] string? searchTerm,
