@@ -54,15 +54,9 @@ public class StockRequestsController : ControllerBase
     
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("paged")]
-    public async Task<ActionResult<PagedResult<AdminStockRequestResponseDto>>> GetAllPaged(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Guid? locationId,
-        [FromQuery] StockRequestStatus? status,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
-        CancellationToken cancellationToken = default)
+    public async Task<ActionResult<PagedResult<AdminStockRequestResponseDto>>> GetAllPaged([FromQuery] string? searchTerm,[FromQuery] Guid? locationId, [FromQuery] StockRequestStatus? status, [FromQuery] bool onlyMyRequests = false, [FromQuery] bool onlyHistory = false, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
     {
-        var query = new GetPagedStockRequestsQuery(searchTerm, locationId, status, pageNumber, pageSize);
+        var query = new GetPagedStockRequestsQuery(searchTerm, locationId, status, onlyMyRequests, onlyHistory, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }

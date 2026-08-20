@@ -50,6 +50,8 @@ public class StockRequestRepository : IStockRequestRepository
         string? searchTerm,
         Guid? locationId,
         StockRequestStatus? status,
+        Guid? requestedByUserId,
+        bool onlyHistory,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken)
@@ -61,30 +63,41 @@ public class StockRequestRepository : IStockRequestRepository
             .Include(sr => sr.RequestedByUser)
             .Include(sr => sr.DecidedByUser) 
             .AsQueryable();
-
+ 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(sr => EF.Functions.ILike(sr.Ingredient.Name, $"%{searchTerm}%"));
         }
-
+ 
         if (locationId.HasValue && locationId.Value != Guid.Empty)
         {
             query = query.Where(sr => sr.LocationId == locationId.Value);
         }
-
+ 
         if (status.HasValue)
         {
             query = query.Where(sr => sr.Status == status.Value);
         }
-
+ 
+        if (onlyHistory)
+        {
+            // "Geçmiş Stok Taleplerim" tab'ı: bekleyen dışındaki tüm durumlar (APPROVED / REJECTED)
+            query = query.Where(sr => sr.Status != StockRequestStatus.PENDING);
+        }
+ 
+        if (requestedByUserId.HasValue && requestedByUserId.Value != Guid.Empty)
+        {
+            query = query.Where(sr => sr.RequestedByUserId == requestedByUserId.Value);
+        }
+ 
         var totalCount = await query.CountAsync(cancellationToken);
-
+ 
         var items = await query
             .OrderByDescending(sr => sr.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
-
+ 
         return (items, totalCount);
     }
     public async Task SaveAllChangesAsync(CancellationToken cancellationToken)

@@ -13,6 +13,8 @@ public interface IStockRequestRepository
         string? searchTerm,
         Guid? locationId,
         StockRequestStatus? status,
+        Guid? requestedByUserId,
+        bool onlyHistory,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
