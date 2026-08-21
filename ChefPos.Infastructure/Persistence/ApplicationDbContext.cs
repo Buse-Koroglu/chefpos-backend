@@ -29,6 +29,10 @@ public class ApplicationDbContext : DbContext
     
     public DbSet<CategoryLocation> CategoryLocations => Set<CategoryLocation>();
     public DbSet<ProductLocation> ProductLocations => Set<ProductLocation>();
+    
+    public DbSet<IngredientLot> IngredientLots => Set<IngredientLot>();
+    public DbSet<StockMovement> StockMovements => Set<StockMovement>();
+    public DbSet<StockMovementLotConsumption> StockMovementLotConsumptions => Set<StockMovementLotConsumption>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

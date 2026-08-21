@@ -14,17 +14,20 @@ public class CompleteOrderCommandHandler : IRequestHandler<CompleteOrderCommand,
     private readonly IProductRepository _productRepository;
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IStockMovementRepository _stockMovementRepository;
 
     public CompleteOrderCommandHandler(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
         IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IStockMovementRepository stockMovementRepository)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _userRepository = userRepository;
         _currentUserService = currentUserService;
+        _stockMovementRepository = stockMovementRepository;
     }
     
     public async Task<OrderResponseDto> Handle(CompleteOrderCommand request, CancellationToken cancellationToken)
@@ -76,7 +79,10 @@ public class CompleteOrderCommandHandler : IRequestHandler<CompleteOrderCommand,
             foreach (var recipeLine in productLocation.ProductItems)
             {
                 var amountToDeduct = item.Quantity * recipeLine.QuantityPerServing;
-                recipeLine.Ingredient.DecreaseStock(amountToDeduct);
+                var ingredient = recipeLine.Ingredient;
+                var consumptions = ingredient.DeductStockFifo(amountToDeduct);
+                var movement = StockMovement.CreateOrderSaleDeduction(ingredient.Id, ingredient.LocationId, requestingUser.Id, order.Id, consumptions);
+                await _stockMovementRepository.AddAsync(movement, cancellationToken);
             }
         }
         await _orderRepository.SaveAllChangesAsync(cancellationToken);

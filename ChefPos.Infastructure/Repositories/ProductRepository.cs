@@ -17,7 +17,7 @@ public class ProductRepository : IProductRepository
     {
         return await _context.Products
             .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
-            .Include(p => p.ProductLocations).ThenInclude(pl => pl.ProductItems).ThenInclude(pi => pi.Ingredient)
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.ProductItems).ThenInclude(pi => pi.Ingredient).ThenInclude(i => i.Lots)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 

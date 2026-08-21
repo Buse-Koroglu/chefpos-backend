@@ -7,6 +7,7 @@ using ChefPos.Application.Users.Commands.RemoveRole;
 using ChefPos.Application.Users.Commands.RevokeLocationAccess;
 using ChefPos.Application.Users.DTOs;
 using ChefPos.Application.Users.Queries.GetAllUsers;
+using ChefPos.Application.Users.Queries.GetStockManagerByLocation;
 using ChefPos.Application.Users.Queries.GetUserById;
 using ChefPos.Domain.Enums;
 using MediatR;
@@ -54,7 +55,16 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-    
+
+    [Authorize(Roles = "ADMIN")]
+    [HttpGet("stock-manager")]
+    public async Task<ActionResult> GetStockManagerByLocation([FromQuery] Guid locationId, CancellationToken cancellationToken)
+    {
+        var query = new GetStockManagerByLocationQuery(locationId);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
     [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/locations")]
     public async Task<ActionResult> AssignLocationAccess([FromRoute] Guid id, AssignLocationAccessRequest body, CancellationToken cancellationToken)

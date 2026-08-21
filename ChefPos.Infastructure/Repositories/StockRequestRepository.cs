@@ -1,3 +1,4 @@
+
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Domain.Enums;
@@ -58,7 +59,7 @@ public class StockRequestRepository : IStockRequestRepository
     {
         var query = _context.StockRequests
             .AsNoTracking()
-            .Include(sr => sr.Ingredient)
+            .Include(sr => sr.Ingredient).ThenInclude(i => i.Lots)
             .Include(sr => sr.Location)
             .Include(sr => sr.RequestedByUser)
             .Include(sr => sr.DecidedByUser) 
@@ -124,6 +125,41 @@ public class StockRequestRepository : IStockRequestRepository
             query = query.Where(request =>
                 request.LocationId == locationId.Value);
         }
+
+        var pendingCount = await query
+            .CountAsync(
+                request =>
+                    request.Status == StockRequestStatus.PENDING,
+                cancellationToken);
+
+        var pastCount = await query
+            .CountAsync(
+                request =>
+                    request.Status == StockRequestStatus.APPROVED ||
+                    request.Status == StockRequestStatus.REJECTED,
+                cancellationToken);
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+
+        return (
+            pendingCount,
+            pastCount,
+            totalCount
+        );
+    }
+
+    public async Task<(
+        int PendingRequestsCount,
+        int PastRequestsCount,
+        int TotalStockRequestsCount
+        )> GetStockManagerDashboardStatsAsync(
+        Guid locationId,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.StockRequests
+            .AsNoTracking()
+            .Where(request => request.LocationId == locationId);
 
         var pendingCount = await query
             .CountAsync(

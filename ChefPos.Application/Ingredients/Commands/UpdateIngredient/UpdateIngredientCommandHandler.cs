@@ -29,7 +29,7 @@ public class UpdateIngredientCommandHandler : IRequestHandler<UpdateIngredientCo
             }
         }
 
-        ingredient.UpdateDetails(request.Name, request.UnitPrice);
+        ingredient.UpdateDetails(request.Name);
 
         await _ingredientRepository.SaveAllChangesAsync(cancellationToken);
 

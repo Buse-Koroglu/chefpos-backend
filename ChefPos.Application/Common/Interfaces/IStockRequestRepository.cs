@@ -27,5 +27,13 @@ public interface IStockRequestRepository
         Guid userId,
         Guid? locationId,
         CancellationToken cancellationToken);
+
+    Task<(
+        int PendingRequestsCount,
+        int PastRequestsCount,
+        int TotalStockRequestsCount
+        )> GetStockManagerDashboardStatsAsync(
+        Guid locationId,
+        CancellationToken cancellationToken);
     Task SaveAllChangesAsync(CancellationToken cancellationToken);
 }

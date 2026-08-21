@@ -9,6 +9,7 @@ public class StockRequestConfiguration : IEntityTypeConfiguration<StockRequest>
         builder.HasKey(sr => sr.Id);
         builder.Property(sr => sr.RequestedQuantity).HasPrecision(10, 3);
         builder.Property(sr => sr.RejectionReason).HasMaxLength(500);
+        builder.Property(sr => sr.ApprovedUnitPrice).HasPrecision(10, 2);
 
         builder.HasOne(sr => sr.Ingredient)
             .WithMany()

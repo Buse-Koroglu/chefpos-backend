@@ -9,11 +9,15 @@ using ChefPos.Application.Ingredients.Queries.GetIngredients;
 using ChefPos.Application.Ingredients.Queries.GetIngredientsPaged;
 using ChefPos.Application.Ingredients.Queries.GetLowStockIngredients;
 using ChefPos.Application.Common.Pagination;
+using ChefPos.Application.Ingredients.Commands.RecordIngredientPurchase;
+using ChefPos.Application.Ingredients.Commands.RecordManuelIngredientDeduction;
+using ChefPos.Application.Ingredients.Commands.RecordProductProduction;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChefPos.API.Controllers;
+
 
 [ApiController]
 [Route("api/ingredients")]
@@ -25,7 +29,7 @@ public class IngredientsController : ControllerBase
     {
         _mediator = mediator;
     }
-
+ 
     [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateIngredient(CreateIngredientCommand command, CancellationToken cancellationToken)
@@ -33,7 +37,7 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-
+ 
     [HttpGet("{id}")]
     public async Task<ActionResult<IngredientResponseDto>> GetIngredientById([FromRoute]Guid id, CancellationToken cancellationToken)
     {
@@ -41,7 +45,7 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-
+ 
     [HttpGet]
     public async Task<ActionResult<List<IngredientResponseDto>>> GetAllIngredients([FromQuery]Guid locationId, [FromQuery] bool includeInactive = false, CancellationToken cancellationToken= default)
     {
@@ -49,7 +53,7 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-
+ 
     [Authorize(Roles = "ADMIN")]
     [HttpGet("paged")]
     public async Task<ActionResult<PagedResult<IngredientAdminResponseDto>>> GetIngredientsPaged(
@@ -64,7 +68,7 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-
+ 
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("low-stock")]
     public async Task<ActionResult> GetLowStockIngredients([FromQuery] Guid locationId, CancellationToken cancellationToken)
@@ -78,12 +82,12 @@ public class IngredientsController : ControllerBase
     [HttpPatch("{id}")]
     public async Task<ActionResult> UpdateIngredient([FromRoute] Guid id, UpdateIngredientRequest body, CancellationToken cancellationToken)
     {
-        var command = new UpdateIngredientCommand(id, body.Name, body.UnitPrice);
+        var command = new UpdateIngredientCommand(id, body.Name);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
     
-
+ 
     [Authorize(Roles = "ADMIN,STOCK_MANAGER")]
     [HttpPatch("{id}/min-stock-threshold")]
     public async Task<ActionResult> UpdateMinStockThreshold([FromRoute] Guid id, UpdateMinStockThresholdRequest body, CancellationToken cancellationToken)
@@ -92,7 +96,7 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-
+ 
     [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/activate")]
     public async Task<ActionResult> ActivateIngredient([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -101,12 +105,42 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-
+ 
     [Authorize(Roles = "ADMIN")]
     [HttpPost("{id}/deactivate")]
     public async Task<ActionResult> DeactivateIngredient([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var command = new DeactivateIngredientCommand(id);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+ 
+    /// <summary>Yeni bir alış partisi (lot) kaydeder: miktar + o anki fiyat.</summary>
+    [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
+    [HttpPost("{id}/purchases")]
+    public async Task<ActionResult> RecordPurchase([FromRoute] Guid id, RecordIngredientPurchaseRequest body, CancellationToken cancellationToken)
+    {
+        var command = new RecordIngredientPurchaseCommand(id, body.Quantity, body.UnitPrice, body.Note);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+ 
+    /// <summary>Siparişten bağımsız, elle stok düşümü (fire, zayiat, sipariş dışı elle tüketim).</summary>
+    [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
+    [HttpPost("{id}/manual-deduction")]
+    public async Task<ActionResult> RecordManualDeduction([FromRoute] Guid id, RecordManualDeductionRequest body, CancellationToken cancellationToken)
+    {
+        var command = new RecordManualIngredientDeductionCommand(id, body.Quantity, body.Note);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+ 
+    /// <summary>Sipariş dışında üretilen bir ürünün reçetesine göre ham madde stoklarını düşer.</summary>
+    [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
+    [HttpPost("production")]
+    public async Task<ActionResult> RecordProductProduction(RecordProductProductionRequest body, CancellationToken cancellationToken)
+    {
+        var command = new RecordProductProductionCommand(body.ProductId, body.LocationId, body.Quantity, body.Note);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }

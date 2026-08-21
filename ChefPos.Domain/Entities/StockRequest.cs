@@ -21,6 +21,7 @@ public class StockRequest : BaseEntity
     public User? DecidedByUser { get; private set; }
     public string? RejectionReason { get; private set; }
     public DateTime? DecidedAt { get; private set; }
+    public decimal? ApprovedUnitPrice { get; private set; }
 
     private StockRequest() { }
 
@@ -38,13 +39,19 @@ public class StockRequest : BaseEntity
         Status = StockRequestStatus.PENDING;
     }
 
-    public void Approve(Guid decidedByUserId)
+    public void Approve(Guid decidedByUserId, decimal approvedUnitPrice)
     {
         EnsurePending();
+
+        if (approvedUnitPrice < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(approvedUnitPrice), "Fiyat negatif olamaz.");
+        }
 
         Status = StockRequestStatus.APPROVED;
         DecidedByUserId = decidedByUserId;
         DecidedAt = DateTime.UtcNow;
+        ApprovedUnitPrice = approvedUnitPrice;
         Touch();
     }
 

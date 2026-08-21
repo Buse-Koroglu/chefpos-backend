@@ -3,8 +3,6 @@ using ChefPos.Domain.Entities;
 using ChefPos.Infastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChefPos.Infastructure.Repositories;
-
 public class IngredientRepository : IIngredientRepository
 {
     private readonly ApplicationDbContext _context;
@@ -15,12 +13,16 @@ public class IngredientRepository : IIngredientRepository
 
     public async Task<Ingredient?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Ingredients.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+        return await _context.Ingredients
+            .Include(i => i.Lots)
+            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
 
     public async Task<List<Ingredient>> GetAllByLocationAsync(Guid locationId, bool includeInactive, CancellationToken cancellationToken)
     {
-        var query = _context.Ingredients.Where(i => i.LocationId == locationId);
+        var query = _context.Ingredients
+            .Include(i => i.Lots)
+            .Where(i => i.LocationId == locationId);
 
         if (!includeInactive)
         {
@@ -43,6 +45,7 @@ public class IngredientRepository : IIngredientRepository
     public async Task<List<Ingredient>> GetLowStockAsync(Guid locationId, CancellationToken cancellationToken)
     {
         return await _context.Ingredients
+            .Include(i => i.Lots)
             .Where(i => i.LocationId == locationId && i.IsActive && i.CurrentStock < i.MinStockThreshold)
             .OrderBy(i => i.Name)
             .ToListAsync(cancellationToken);
@@ -58,6 +61,7 @@ public class IngredientRepository : IIngredientRepository
     {
         var query = _context.Ingredients
             .Include(i => i.Location)
+            .Include(i => i.Lots)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))

@@ -25,6 +25,7 @@ public static class DependencyInjection
       services.AddScoped<IStockRequestRepository,StockRequestRepository>();
       services.AddScoped<ITableRepository, TableRepository>();
       services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+      services.AddScoped<IStockMovementRepository, StockMovementRepository>();
       services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
       services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
       services.Configure<JwtSettings>(configuration.GetSection("Jwt"));

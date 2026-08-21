@@ -1,9 +1,11 @@
+
 using ChefPos.Application.Common.Pagination;
 using ChefPos.Application.StockRequests.Commands.ApproveStockRequest;
 using ChefPos.Application.StockRequests.Commands.CreateStockRequest;
 using ChefPos.Application.StockRequests.Commands.RejectStockRequest;
 using ChefPos.Application.StockRequests.DTOs;
 using ChefPos.Application.StockRequests.Queries.GetInventoryDashboardStats;
+using ChefPos.Application.StockRequests.Queries.GetStockManagerDashboardStats;
 using ChefPos.Application.StockRequests.Queries.GetStockRequestById;
 using ChefPos.Application.StockRequests.Queries.GetStockRequestPaged;
 using ChefPos.Application.StockRequests.Queries.GetStockRequests;
@@ -11,8 +13,6 @@ using ChefPos.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-namespace ChefPos.API.Controllers;
 
 [ApiController]
 [Route("api/stock-requests")]
@@ -78,11 +78,25 @@ public class StockRequestsController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "STOCK_MANAGER,ADMIN")]
+    [HttpGet("stock-manager-dashboard-stats")]
+    public async Task<ActionResult<StockManagerDashboardStatsDto>>
+        GetStockManagerDashboardStats(
+            [FromQuery] Guid locationId,
+            CancellationToken cancellationToken)
+    {
+        var query = new GetStockManagerDashboardStatsQuery(locationId);
+
+        var result = await _mediator.Send(query, cancellationToken);
+
+        return Ok(result);
+    }
+
     [Authorize(Roles = "STOCK_MANAGER")]
     [HttpPost("{id}/approve")]
-    public async Task<ActionResult> ApproveStockRequest([FromRoute] Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult> ApproveStockRequest([FromRoute] Guid id, ApproveStockRequestDto body, CancellationToken cancellationToken)
     {
-        var command = new ApproveStockRequestCommand(id);
+        var command = new ApproveStockRequestCommand(id, body.UnitPrice);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }

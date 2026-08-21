@@ -25,6 +25,10 @@ public class AdminStockRequestResponseDto
     public string? RejectionReason { get; set; }
     public DateTime? DecidedAt { get; set; }
 
+    public decimal? ApprovedUnitPrice { get; set; }
+    public decimal? IngredientLatestUnitPrice { get; set; }
+    public decimal IngredientWeightedAverageUnitPrice { get; set; }
+
     public static AdminStockRequestResponseDto FromEntity(StockRequest stockRequest)
     {
         return new AdminStockRequestResponseDto
@@ -39,16 +43,19 @@ public class AdminStockRequestResponseDto
             Status = stockRequest.Status,
             CreatedAt = stockRequest.CreatedAt,
             RequestedByUserId = stockRequest.RequestedByUserId,
-            RequestedByUserName = stockRequest.RequestedByUser != null 
-                ? $"{stockRequest.RequestedByUser.FirstName} {stockRequest.RequestedByUser.LastName}".Trim() 
+            RequestedByUserName = stockRequest.RequestedByUser != null
+                ? $"{stockRequest.RequestedByUser.FirstName} {stockRequest.RequestedByUser.LastName}".Trim()
                 : string.Empty,
-                
+
             DecidedByUserId = stockRequest.DecidedByUserId,
-            DecidedByUserName = stockRequest.DecidedByUser != null 
-                ? $"{stockRequest.DecidedByUser.FirstName} {stockRequest.DecidedByUser.LastName}".Trim() 
+            DecidedByUserName = stockRequest.DecidedByUser != null
+                ? $"{stockRequest.DecidedByUser.FirstName} {stockRequest.DecidedByUser.LastName}".Trim()
                 : null,
             RejectionReason = stockRequest.RejectionReason,
-            DecidedAt = stockRequest.DecidedAt
+            DecidedAt = stockRequest.DecidedAt,
+            ApprovedUnitPrice = stockRequest.ApprovedUnitPrice,
+            IngredientLatestUnitPrice = stockRequest.Ingredient?.LatestUnitPrice,
+            IngredientWeightedAverageUnitPrice = stockRequest.Ingredient?.WeightedAverageUnitPrice ?? 0
         };
     }
 }
