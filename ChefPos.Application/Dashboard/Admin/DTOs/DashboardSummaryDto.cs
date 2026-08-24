@@ -9,7 +9,7 @@ public class DashboardSummaryDto {
 public class DashboardDailyRevenueDto
 {
     public DateTime Date { get; set; }
-    public decimal Revenue { get; set; }
+    public decimal Profit { get; set; }
 }
 
 public class LocationOrderCountDto

@@ -18,8 +18,8 @@ public class GetWeeklyRevenueQueryHandler : IRequestHandler<GetWeeklyRevenueQuer
         var monday = today.AddDays(-diff);
         var saturdayExclusive = monday.AddDays(5);
 
-        var dailyRevenues = await _orderRepository.GetDailyRevenueAsync(request.LocationId, monday, saturdayExclusive, cancellationToken);
-        var revenueByDate = dailyRevenues.ToDictionary(x => x.Date, x => x.Revenue);
+        var dailyProfits = await _orderRepository.GetDailyProfitAsync(request.LocationId, monday, saturdayExclusive, cancellationToken);
+        var profitByDate = dailyProfits.ToDictionary(x => x.Date, x => x.Profit);
 
         var days = new List<DailyRevenueDto>();
         for (var i = 0; i < 5; i++)
@@ -29,7 +29,7 @@ public class GetWeeklyRevenueQueryHandler : IRequestHandler<GetWeeklyRevenueQuer
             {
                 Date = date,
                 DayName = DayNames[i],
-                Revenue = revenueByDate.TryGetValue(date, out var revenue) ? revenue : 0m
+                Profit = profitByDate.TryGetValue(date, out var profit) ? profit : 0m
             });
         }
 

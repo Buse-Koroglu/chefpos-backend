@@ -59,14 +59,14 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
         var fridayOfThisWeek = mondayOfThisWeek.AddDays(4);
         var toDateExclusive = fridayOfThisWeek.AddDays(1);
 
-        var dailyRevenueRaw = await _orderRepository.GetDailyRevenueAsync(locationId, mondayOfThisWeek, toDateExclusive, cancellationToken);
+        var dailyProfitRaw = await _orderRepository.GetDailyProfitAsync(locationId, mondayOfThisWeek, toDateExclusive, cancellationToken);
 
         var weeklyRevenue = Enumerable.Range(0, 5)
             .Select(offset =>
             {
                 var date = mondayOfThisWeek.AddDays(offset);
-                var revenue = dailyRevenueRaw.FirstOrDefault(x => x.Date.Date == date).Revenue;
-                return new DashboardDailyRevenueDto { Date = date, Revenue = revenue };
+                var profit = dailyProfitRaw.FirstOrDefault(x => x.Date.Date == date).Profit;
+                return new DashboardDailyRevenueDto { Date = date, Profit = profit };
             })
             .ToList();
 

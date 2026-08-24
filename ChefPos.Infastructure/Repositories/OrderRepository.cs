@@ -105,6 +105,18 @@ public class OrderRepository : IOrderRepository
     {
         await _context.Orders.AddAsync(order, cancellationToken);
     }
+
+    public async Task<Order?> GetOpenOrderByTableIdAsync(Guid tableId, CancellationToken cancellationToken)
+    {
+        return await _context.Orders
+            .Include(o => o.Items)
+            .Include(o => o.Table)
+            .FirstOrDefaultAsync(o =>
+                o.TableId == tableId &&
+                o.OrderStatus != OrderStatus.CANCELLED &&
+                o.PaymentStatus == PaymentStatus.UNPAID,
+                cancellationToken);
+    }
      public async Task<(List<Order> Items, int TotalCount)> GetPagedAsync(
         Guid? locationId,
         OrderStatus? status,
@@ -187,20 +199,50 @@ public class OrderRepository : IOrderRepository
         return result is null ? null : (result.ProductId, result.TotalQuantity);
     }
     
-    public async Task<List<(DateTime Date, decimal Revenue)>> GetDailyRevenueAsync(
+    public async Task<List<(DateTime Date, decimal Profit)>> GetDailyProfitAsync(
         Guid locationId, DateTime fromDate, DateTime toDateExclusive, CancellationToken cancellationToken)
     {
-        var result = await _context.Orders
+        var orders = await _context.Orders
+            .Include(o => o.Items)
             .Where(o => o.LocationId == locationId
                         && o.OrderStatus == OrderStatus.COMPLETED
                         && o.CompletedAt != null
                         && o.CompletedAt >= fromDate
                         && o.CompletedAt < toDateExclusive)
-            .GroupBy(o => o.CompletedAt!.Value.Date)
-            .Select(g => new { Date = g.Key, Revenue = g.Sum(o => o.TotalPrice) })
             .ToListAsync(cancellationToken);
- 
-        return result.Select(r => (r.Date, r.Revenue)).ToList();
+
+        var productIds = orders
+            .SelectMany(o => o.Items)
+            .Where(i => i.ProductId.HasValue)
+            .Select(i => i.ProductId!.Value)
+            .Distinct()
+            .ToList();
+
+        var products = await _context.Products
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.ProductItems).ThenInclude(pi => pi.Ingredient).ThenInclude(i => i.Lots)
+            .Where(p => productIds.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+
+        var ingredientCostByProductId = products.ToDictionary(
+            p => p.Id,
+            p => p.ProductLocations
+                .Where(pl => pl.LocationId == locationId)
+                .SelectMany(pl => pl.ProductItems)
+                .Sum(pi => pi.QuantityPerServing * pi.Ingredient.WeightedAverageUnitPrice));
+
+        return orders
+            .GroupBy(o => o.CompletedAt!.Value.Date)
+            .Select(g => (
+                Date: g.Key,
+                Profit: g.SelectMany(o => o.Items).Sum(i =>
+                {
+                    var ingredientCost = i.ProductId.HasValue && ingredientCostByProductId.TryGetValue(i.ProductId.Value, out var cost)
+                        ? cost
+                        : 0m;
+                    return (i.Price - ingredientCost) * i.Quantity;
+                })
+            ))
+            .ToList();
     }
     
     public async Task<List<(Guid LocationId, int OrderCount)>> GetTodayPaidOrderCountByLocationAsync(CancellationToken cancellationToken)

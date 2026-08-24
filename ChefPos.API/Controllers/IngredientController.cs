@@ -3,6 +3,7 @@ using ChefPos.Application.Ingredients.Commands.ActivateIngredient;
 using ChefPos.Application.Ingredients.Commands.DeactivateIngredient;
 using ChefPos.Application.Ingredients.Commands.UpdateIngredient;
 using ChefPos.Application.Ingredients.Commands.UpdateIngredientMinStockThreshold;
+using ChefPos.Application.Ingredients.Commands.UpdateIngredientPrice;
 using ChefPos.Application.Ingredients.DTOs;
 using ChefPos.Application.Ingredients.Queries.GetIngredientById;
 using ChefPos.Application.Ingredients.Queries.GetIngredients;
@@ -88,6 +89,15 @@ public class IngredientsController : ControllerBase
     }
     
  
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpPatch("{id}/price")]
+    public async Task<ActionResult> UpdatePrice([FromRoute] Guid id, UpdateIngredientPriceRequest body, CancellationToken cancellationToken)
+    {
+        var command = new UpdateIngredientPriceCommand(id, body.UnitPrice);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
     [Authorize(Roles = "ADMIN,SUPER_ADMIN,STOCK_MANAGER")]
     [HttpPatch("{id}/min-stock-threshold")]
     public async Task<ActionResult> UpdateMinStockThreshold([FromRoute] Guid id, UpdateMinStockThresholdRequest body, CancellationToken cancellationToken)

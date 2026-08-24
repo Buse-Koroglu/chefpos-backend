@@ -43,4 +43,13 @@ public class IngredientLot : BaseEntity
         Touch();
         return consumed;
     }
+
+    internal void UpdateUnitPrice(decimal newUnitPrice)
+    {
+        if (newUnitPrice < 0)
+            throw new ArgumentOutOfRangeException(nameof(newUnitPrice), "Fiyat negatif olamaz.");
+
+        UnitPrice = newUnitPrice;
+        Touch();
+    }
 }

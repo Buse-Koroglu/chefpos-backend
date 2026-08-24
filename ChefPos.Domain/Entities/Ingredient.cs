@@ -105,6 +105,18 @@ public class Ingredient : BaseEntity
         return lot;
     }
     
+    public void UpdateLatestPurchasePrice(decimal newUnitPrice)
+    {
+        var latestLot = _lots.OrderByDescending(l => l.PurchasedAt).FirstOrDefault();
+        if (latestLot is null)
+        {
+            throw new InvalidOperationException($"'{Name}' için düzenlenecek bir alış kaydı bulunmuyor.");
+        }
+
+        latestLot.UpdateUnitPrice(newUnitPrice);
+        Touch();
+    }
+
     public IReadOnlyList<(IngredientLot Lot, decimal Quantity)> DeductStockFifo(decimal amount)
     {
         if (amount <= 0)
