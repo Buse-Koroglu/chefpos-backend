@@ -42,12 +42,12 @@ public class RecordProductProductionCommandHandler : IRequestHandler<RecordProdu
             throw new NotFoundException($"Kullanıcı bulunamadı: {currentUserId}");
         }
 
-        if (!currentUser.HasRole(Role.INVENTORY_STAFF) && !currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.ADMIN))
+        if (!currentUser.HasRole(Role.INVENTORY_STAFF) && !currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.SUPER_ADMIN))
         {
             throw new ValidationException("Sadece depo görevlisi, stok yöneticisi veya admin üretim kaydı girebilir.");
         }
 
-        if (!currentUser.HasRole(Role.ADMIN) && !currentUser.HasAccessToLocation(request.LocationId))
+        if (!currentUser.HasRole(Role.SUPER_ADMIN) && !currentUser.HasAccessToLocation(request.LocationId))
         {
             throw new ValidationException("Bu kullanıcının belirtilen yerleşkeye erişimi yok.");
         }

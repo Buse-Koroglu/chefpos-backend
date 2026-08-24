@@ -7,5 +7,6 @@ public enum Role
     WAITER,
     STOCK_MANAGER,
     INVENTORY_STAFF,
-    KITCHEN
+    KITCHEN,
+    SUPER_ADMIN
 }

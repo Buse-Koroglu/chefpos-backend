@@ -29,7 +29,7 @@ public class ProductController : ControllerBase
         _mediator = mediator;
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateProduct(CreateProductCommand command, CancellationToken cancellationToken)
     {
@@ -38,7 +38,7 @@ public class ProductController : ControllerBase
     }
     
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPatch("{id}")]
     public async Task<ActionResult> UpdateProduct(Guid id,UpdateProductRequestDto body, CancellationToken cancellationToken)
     {
@@ -47,7 +47,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPatch("{id}/price")]
     public async Task<ActionResult> UpdateProductPrice(Guid id,UpdateProductPriceRequestDto body, CancellationToken cancellationToken)
     {
@@ -57,7 +57,7 @@ public class ProductController : ControllerBase
     }
 
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("deactivate")]
     public async Task<ActionResult> DeactivateProduct(DeactivateProductCommand command, CancellationToken cancellationToken)
     {
@@ -65,7 +65,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("activate")]
     public async Task<ActionResult> ActivateProduct(ActivateProductCommand command, CancellationToken cancellationToken)
     {
@@ -73,7 +73,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/ingredients")]
     public async Task<ActionResult> AddIngredient(Guid id, AddIngredientRequest body, CancellationToken cancellationToken)
     {
@@ -82,7 +82,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpDelete("{id}/ingredients/{productItemId}")]
     public async Task<ActionResult> RemoveIngredient(Guid id, Guid productItemId, [FromQuery] Guid locationId, CancellationToken cancellationToken)
     {
@@ -91,7 +91,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPost("{id}/locations")]
     public async Task<ActionResult> AddLocation(Guid id, AddProductLocationRequestDto body, CancellationToken cancellationToken)
     {
@@ -100,7 +100,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpDelete("{id}/locations/{locationId}")]
     public async Task<ActionResult> RemoveLocation(Guid id, Guid locationId, CancellationToken cancellationToken)
     {
@@ -126,7 +126,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN,WAITER,CASHIER")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN,WAITER,CASHIER")]
     [HttpGet("paged")]
     public async Task<ActionResult> GetProductsPaged(
         [FromQuery] string? searchTerm,

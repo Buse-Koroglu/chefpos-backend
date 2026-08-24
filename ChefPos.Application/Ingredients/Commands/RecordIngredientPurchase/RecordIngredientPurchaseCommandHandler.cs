@@ -32,7 +32,7 @@ public class RecordIngredientPurchaseCommandHandler : IRequestHandler<RecordIngr
         var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
             .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
-        if (!currentUser.HasRole(Role.INVENTORY_STAFF) && !currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.ADMIN))
+        if (!currentUser.HasRole(Role.INVENTORY_STAFF) && !currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.SUPER_ADMIN))
         {
             throw new ValidationException("Sadece depo görevlisi, stok yöneticisi veya admin alış kaydı girebilir.");
         }
@@ -40,7 +40,7 @@ public class RecordIngredientPurchaseCommandHandler : IRequestHandler<RecordIngr
         var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
             .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
-        if (!currentUser.HasRole(Role.ADMIN) && !currentUser.HasAccessToLocation(ingredient.LocationId))
+        if (!currentUser.HasRole(Role.SUPER_ADMIN) && !currentUser.HasAccessToLocation(ingredient.LocationId))
         {
             throw new ValidationException("Bu kullanıcının, hammaddenin bulunduğu yerleşkeye erişimi yok.");
         }

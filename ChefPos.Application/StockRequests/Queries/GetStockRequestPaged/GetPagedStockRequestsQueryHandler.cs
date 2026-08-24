@@ -37,15 +37,21 @@ public class GetPagedStockRequestsQueryHandler
             throw new NotFoundException($"Kullanıcı bulunamadı: {currentUserId}");
         }
         
-        var isPrivilegedUser = currentUser.HasRole(Role.ADMIN) || currentUser.HasRole(Role.STOCK_MANAGER);
+        var isPrivilegedUser = currentUser.HasRole(Role.ADMIN) || currentUser.HasRole(Role.SUPER_ADMIN) || currentUser.HasRole(Role.STOCK_MANAGER);
 
         var mustFilterByOwner = request.OnlyMyRequests || !isPrivilegedUser;
 
         Guid? requestedByUserId = mustFilterByOwner ? currentUserId : null;
 
+        var locationId = request.LocationId;
+        if (currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.SUPER_ADMIN))
+        {
+            locationId = currentUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+        }
+
         var (items, totalCount) = await _stockRequestRepository.GetAllPagedAsync(
             request.SearchTerm,
-            request.LocationId,
+            locationId,
             request.Status,
             requestedByUserId,
             request.OnlyHistory,

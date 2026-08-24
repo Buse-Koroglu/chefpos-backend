@@ -37,12 +37,12 @@ public class GetStockMovementsPagedQueryHandler
             throw new NotFoundException($"Kullanıcı bulunamadı: {currentUserId}");
         }
 
-        if (!currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.INVENTORY_STAFF))
+        if (!currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.SUPER_ADMIN) && !currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.INVENTORY_STAFF))
         {
             throw new ValidationException("Stok hareketlerini görüntüleme yetkiniz yok.");
         }
 
-        if (!currentUser.HasRole(Role.ADMIN) && request.LocationId.HasValue && !currentUser.HasAccessToLocation(request.LocationId.Value))
+        if (!currentUser.HasRole(Role.SUPER_ADMIN) && request.LocationId.HasValue && !currentUser.HasAccessToLocation(request.LocationId.Value))
         {
             throw new ValidationException("Bu yerleşkeye erişim yetkiniz yok.");
         }

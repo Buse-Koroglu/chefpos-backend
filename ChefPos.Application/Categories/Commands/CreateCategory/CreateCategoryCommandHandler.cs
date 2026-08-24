@@ -11,7 +11,9 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
     private readonly ICategoryRepository _categoryRepository;
     private readonly ILocationRepository _locationRepository;
 
-    public CreateCategoryCommandHandler(ICategoryRepository categoryRepository, ILocationRepository locationRepository)
+    public CreateCategoryCommandHandler(
+        ICategoryRepository categoryRepository,
+        ILocationRepository locationRepository)
     {
         _categoryRepository = categoryRepository;
         _locationRepository = locationRepository;

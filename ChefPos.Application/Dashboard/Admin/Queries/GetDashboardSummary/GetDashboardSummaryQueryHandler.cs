@@ -1,4 +1,7 @@
+using ChefPos.Application.Common.Behaviors;
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
+using ChefPos.Domain.Enums;
 using MediatR;
 
 namespace ChefPos.Application.Dashboard.Admin.Queries.GetDashboardSummary;
@@ -9,27 +12,40 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
     private readonly ILocationRepository _locationRepository;
+    private readonly ICurrentUserService _currentUserService;
 
     public GetDashboardSummaryQueryHandler(
         IUserRepository userRepository,
         IOrderRepository orderRepository,
         IProductRepository productRepository,
-        ILocationRepository locationRepository)
+        ILocationRepository locationRepository,
+        ICurrentUserService currentUserService)
     {
         _userRepository = userRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _locationRepository = locationRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task<DashboardSummaryDto> Handle(GetDashboardSummaryQuery request, CancellationToken cancellationToken)
     {
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
+            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+
+        var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
+        var locationId = isSuperAdmin
+            ? request.LocationId
+            : actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+
         // 1. Toplam personel sayısı
         var allUsers = await _userRepository.GetAllAsync(cancellationToken);
-        var totalStaffCount = allUsers.Count;
+        var totalStaffCount = isSuperAdmin
+            ? allUsers.Count
+            : allUsers.Count(u => u.Locations.Any(l => l.LocationId == locationId));
 
         // 2. En çok satan ürün (seçili lokasyon için)
-        var bestSeller = await _orderRepository.GetBestSellingProductAsync(request.LocationId, cancellationToken);
+        var bestSeller = await _orderRepository.GetBestSellingProductAsync(locationId, cancellationToken);
         string? topSellingProductName = null;
         if (bestSeller.HasValue)
         {
@@ -43,7 +59,7 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
         var fridayOfThisWeek = mondayOfThisWeek.AddDays(4);
         var toDateExclusive = fridayOfThisWeek.AddDays(1);
 
-        var dailyRevenueRaw = await _orderRepository.GetDailyRevenueAsync(request.LocationId, mondayOfThisWeek, toDateExclusive, cancellationToken);
+        var dailyRevenueRaw = await _orderRepository.GetDailyRevenueAsync(locationId, mondayOfThisWeek, toDateExclusive, cancellationToken);
 
         var weeklyRevenue = Enumerable.Range(0, 5)
             .Select(offset =>
@@ -56,8 +72,9 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
 
         var todayOrdersRaw = await _orderRepository.GetTodayPaidOrderCountByLocationAsync(cancellationToken);
         var allLocations = await _locationRepository.GetAllAsync(false,cancellationToken);
+        var visibleLocations = isSuperAdmin ? allLocations : allLocations.Where(loc => loc.Id == locationId);
 
-        var todayOrdersByLocation = allLocations
+        var todayOrdersByLocation = visibleLocations
             .Select(loc => new LocationOrderCountDto
             {
                 LocationId = loc.Id,

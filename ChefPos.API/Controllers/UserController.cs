@@ -6,6 +6,7 @@ using ChefPos.Application.Users.Commands.DeactivateUser;
 using ChefPos.Application.Users.Commands.RemoveRole;
 using ChefPos.Application.Users.Commands.RevokeLocationAccess;
 using ChefPos.Application.Users.DTOs;
+using ChefPos.Application.Users.Queries.GetAdminByLocation;
 using ChefPos.Application.Users.Queries.GetAllUsers;
 using ChefPos.Application.Users.Queries.GetStockManagerByLocation;
 using ChefPos.Application.Users.Queries.GetUserById;
@@ -24,7 +25,7 @@ public class UsersController : ControllerBase
         _mediator = mediator;
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateUser(CreateUserCommand command, CancellationToken cancellationToken)
     {
@@ -32,7 +33,7 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet]
     public async Task<ActionResult> GetUsers(
         [FromQuery] string? searchTerm,
@@ -65,7 +66,16 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
+    [HttpGet("admin")]
+    public async Task<ActionResult> GetAdminByLocation([FromQuery] Guid locationId, CancellationToken cancellationToken)
+    {
+        var query = new GetAdminByLocationQuery(locationId);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/locations")]
     public async Task<ActionResult> AssignLocationAccess([FromRoute] Guid id, AssignLocationAccessRequest body, CancellationToken cancellationToken)
     {
@@ -83,7 +93,7 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/roles")]
     public async Task<ActionResult> AddRole([FromRoute] Guid id, AddRoleRequest body, CancellationToken cancellationToken)
     {
@@ -92,7 +102,7 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
  
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpDelete("{id}/roles/{role}")]
     public async Task<ActionResult> RemoveRole([FromRoute] Guid id, [FromRoute] Role role, CancellationToken cancellationToken)
     {
@@ -101,7 +111,7 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/activate")]
     public async Task<ActionResult> ActivateUser([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -110,7 +120,7 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/deactivate")]
     public async Task<ActionResult> DeactivateUser([FromRoute] Guid id, CancellationToken cancellationToken)
     {

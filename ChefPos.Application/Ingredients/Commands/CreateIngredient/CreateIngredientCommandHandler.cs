@@ -9,7 +9,9 @@ public class CreateIngredientCommandHandler : IRequestHandler<CreateIngredientCo
     private readonly IIngredientRepository _ingredientRepository;
     private readonly ILocationRepository _locationRepository;
 
-    public CreateIngredientCommandHandler(IIngredientRepository ingredientRepository, ILocationRepository locationRepository)
+    public CreateIngredientCommandHandler(
+        IIngredientRepository ingredientRepository,
+        ILocationRepository locationRepository)
     {
         _ingredientRepository = ingredientRepository;
         _locationRepository = locationRepository;

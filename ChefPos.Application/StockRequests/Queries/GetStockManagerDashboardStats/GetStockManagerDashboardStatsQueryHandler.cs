@@ -35,12 +35,12 @@ public sealed class GetStockManagerDashboardStatsQueryHandler
             throw new NotFoundException($"Kullanıcı bulunamadı: {userId}");
         }
 
-        if (!user.HasRole(Role.STOCK_MANAGER) && !user.HasRole(Role.ADMIN))
+        if (!user.HasRole(Role.STOCK_MANAGER) && !user.HasRole(Role.ADMIN) && !user.HasRole(Role.SUPER_ADMIN))
         {
             throw new ValidationException("Dashboard'a erişim yetkiniz yok.");
         }
 
-        if (!user.HasRole(Role.ADMIN) && !user.HasAccessToLocation(request.LocationId))
+        if (!user.HasRole(Role.SUPER_ADMIN) && !user.HasAccessToLocation(request.LocationId))
         {
             throw new ValidationException("Bu yerleşkeye erişim yetkiniz yok.");
         }

@@ -10,6 +10,8 @@ public interface IUserRepository
         Task AddAsync(User user, CancellationToken cancellationToken);
         Task<List<User>> GetAllAsync(CancellationToken cancellationToken);
         Task<User?> GetStockManagerByLocationAsync(Guid locationId, CancellationToken cancellationToken);
+        Task<User?> GetAdminByLocationAsync(Guid locationId, CancellationToken cancellationToken);
+        Task<User?> GetSuperAdminAsync(CancellationToken cancellationToken);
         Task<(List<User> Items, int TotalCount)> GetAllPagedAsync(
                 string? searchTerm,
                 Role? role,

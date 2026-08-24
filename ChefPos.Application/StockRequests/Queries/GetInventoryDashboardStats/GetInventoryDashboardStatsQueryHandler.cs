@@ -41,7 +41,8 @@ public sealed class GetInventoryDashboardStatsQueryHandler
         }
 
         if (!user.HasRole(Role.INVENTORY_STAFF) &&
-            !user.HasRole(Role.ADMIN))
+            !user.HasRole(Role.ADMIN) &&
+            !user.HasRole(Role.SUPER_ADMIN))
         {
             throw new ValidationException(
                 "Dashboard'a erişim yetkiniz yok.");
@@ -50,6 +51,7 @@ public sealed class GetInventoryDashboardStatsQueryHandler
         var locationId = request.LocationId;
 
         if (locationId.HasValue &&
+            !user.HasRole(Role.SUPER_ADMIN) &&
             !user.HasAccessToLocation(locationId.Value))
         {
             throw new ValidationException(

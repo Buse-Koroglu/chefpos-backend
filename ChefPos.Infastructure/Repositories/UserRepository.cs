@@ -45,10 +45,30 @@ public class UserRepository : IUserRepository
             .Include(u => u.Locations)
             .Include(u => u.UserRoles)
             .FirstOrDefaultAsync(u =>
+                u.IsActive &&
                 u.UserRoles.Any(r => r.Role == Role.STOCK_MANAGER) &&
                 u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
     }
     
+    public async Task<User?> GetAdminByLocationAsync(Guid locationId, CancellationToken cancellationToken)
+    {
+        return await _context.Users
+            .Include(u => u.Locations)
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u =>
+                u.UserRoles.Any(r => r.Role == Role.ADMIN) &&
+                u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
+    }
+
+    public async Task<User?> GetSuperAdminAsync(CancellationToken cancellationToken)
+    {
+        return await _context.Users
+            .Include(u => u.Locations)
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u =>
+                u.UserRoles.Any(r => r.Role == Role.SUPER_ADMIN), cancellationToken);
+    }
+
     public async Task<(List<User> Items, int TotalCount)> GetAllPagedAsync(
         string? searchTerm,
         Role? role,

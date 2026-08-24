@@ -30,7 +30,7 @@ public class IngredientsController : ControllerBase
         _mediator = mediator;
     }
  
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateIngredient(CreateIngredientCommand command, CancellationToken cancellationToken)
     {
@@ -54,7 +54,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
  
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet("paged")]
     public async Task<ActionResult<PagedResult<IngredientAdminResponseDto>>> GetIngredientsPaged(
         [FromQuery] string? searchTerm,
@@ -78,7 +78,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPatch("{id}")]
     public async Task<ActionResult> UpdateIngredient([FromRoute] Guid id, UpdateIngredientRequest body, CancellationToken cancellationToken)
     {
@@ -88,7 +88,7 @@ public class IngredientsController : ControllerBase
     }
     
  
-    [Authorize(Roles = "ADMIN,STOCK_MANAGER")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN,STOCK_MANAGER")]
     [HttpPatch("{id}/min-stock-threshold")]
     public async Task<ActionResult> UpdateMinStockThreshold([FromRoute] Guid id, UpdateMinStockThresholdRequest body, CancellationToken cancellationToken)
     {
@@ -97,7 +97,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
  
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/activate")]
     public async Task<ActionResult> ActivateIngredient([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -106,7 +106,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
  
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/deactivate")]
     public async Task<ActionResult> DeactivateIngredient([FromRoute] Guid id, CancellationToken cancellationToken)
     {

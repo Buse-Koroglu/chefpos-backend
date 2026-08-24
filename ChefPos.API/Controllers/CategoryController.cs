@@ -25,7 +25,7 @@ public class CategoryController : ControllerBase
         _mediator = mediator;
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateCategory(CreateCategoryCommand command,CancellationToken cancellationToken)
     {
@@ -41,7 +41,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("deactivate")]
     public async Task<ActionResult> DeactivateCategory(DeactivateCategoryCommand command,CancellationToken cancellationToken)
     {
@@ -49,7 +49,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("activate")]
     public async Task<ActionResult> ActivateCategory(ActivateCategoryCommand command,CancellationToken cancellationToken)
     {
@@ -67,7 +67,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet("categories")]
     public async Task<ActionResult> GetCategoriesAdmin(
         [FromQuery] string? searchTerm,
@@ -82,7 +82,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPatch("{id}")]
         public async Task<ActionResult> UpdateCategory(Guid id, UpdateCategoryRequestDto body, CancellationToken cancellationToken)
         {
@@ -91,7 +91,7 @@ public class CategoryController : ControllerBase
             return Ok(result);
         }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPost("{id}/locations")]
     public async Task<ActionResult> AddCategoryLocation([FromRoute] Guid id, AddCategoryLocationRequestDto body, CancellationToken cancellationToken)
     {
@@ -100,7 +100,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpDelete("{id}/locations/{locationId}")]
     public async Task<ActionResult> RemoveCategoryLocation([FromRoute] Guid id, [FromRoute] Guid locationId, CancellationToken cancellationToken)
     {

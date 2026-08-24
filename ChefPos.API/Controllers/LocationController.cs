@@ -20,7 +20,7 @@ public class LocationsController : ControllerBase
         _mediator = mediator;
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateLocation(CreateLocationCommand command, CancellationToken cancellationToken)
     {
@@ -50,7 +50,7 @@ public class LocationsController : ControllerBase
     }
     
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateLocation([FromRoute] Guid id, UpdateLocationRequestDto body, CancellationToken cancellationToken)
     {
@@ -59,7 +59,7 @@ public class LocationsController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPost("{id}/activate")]
     public async Task<ActionResult> ActivateLocation([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -68,7 +68,7 @@ public class LocationsController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPost("{id}/deactivate")]
     public async Task<ActionResult> DeactivateLocation([FromRoute] Guid id, CancellationToken cancellationToken)
     {
