@@ -5,7 +5,7 @@ namespace ChefPos.Application.Common.Interfaces;
 public interface IProductRepository
 {
         Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
-        Task<List<Product>> GetAllByLocationAsync(Guid locationId, Guid? categoryId, bool includeInactive, CancellationToken cancellationToken);
+        Task<List<Product>> GetAllByLocationAsync(Guid locationId, Guid? categoryId, bool includeInactive, bool includeUncategorized, CancellationToken cancellationToken);
 
         Task<(List<Product> Items, int TotalCount)> GetAllPagedAsync(
             string? searchTerm,
@@ -14,6 +14,7 @@ public interface IProductRepository
             bool? isActive,
             int pageNumber,
             int pageSize,
+            bool includeUncategorized,
             CancellationToken cancellationToken);
 
         Task AddAsync(Product product, CancellationToken cancellationToken);

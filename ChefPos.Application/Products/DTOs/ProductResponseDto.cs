@@ -11,7 +11,7 @@ public class ProductResponseDto
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; }
-    public Guid CategoryId { get; set; }
+    public Guid? CategoryId { get; set; }
     public List<Guid> LocationIds { get; set; } = new();
     public List<ProductLocationRecipeDto> Locations { get; set; } = new();
 

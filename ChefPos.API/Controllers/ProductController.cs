@@ -119,9 +119,9 @@ public class ProductController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult> GetProducts( [FromQuery] Guid locationId, [FromQuery] Guid? categoryId, [FromQuery] bool includeInactive = false, CancellationToken cancellationToken = default)
+    public async Task<ActionResult> GetProducts( [FromQuery] Guid locationId, [FromQuery] Guid? categoryId, [FromQuery] bool includeInactive = false, [FromQuery] bool includeUncategorized = false, CancellationToken cancellationToken = default)
     {
-        var query = new GetProductsQuery(locationId, categoryId, includeInactive);
+        var query = new GetProductsQuery(locationId, categoryId, includeInactive, includeUncategorized);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
@@ -135,9 +135,10 @@ public class ProductController : ControllerBase
         [FromQuery] bool? isActive,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
+        [FromQuery] bool includeUncategorized = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetProductsPagedQuery(searchTerm, locationId, categoryId, isActive, pageNumber, pageSize);
+        var query = new GetProductsPagedQuery(searchTerm, locationId, categoryId, isActive, pageNumber, pageSize, includeUncategorized);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }

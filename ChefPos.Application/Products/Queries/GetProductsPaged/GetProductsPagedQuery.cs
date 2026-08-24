@@ -12,8 +12,9 @@ public class GetProductsPagedQuery : IRequest<PagedResult<ProductAdminResponseDt
     public bool? IsActive { get; }
     public int PageNumber { get; }
     public int PageSize { get; }
+    public bool IncludeUncategorized { get; set; } = false;
 
-    public GetProductsPagedQuery(string? searchTerm, Guid? locationId, Guid? categoryId, bool? isActive, int pageNumber = 1, int pageSize = 20)
+    public GetProductsPagedQuery(string? searchTerm, Guid? locationId, Guid? categoryId, bool? isActive, int pageNumber = 1, int pageSize = 20, bool includeUncategorized = false)
     {
         SearchTerm = searchTerm;
         LocationId = locationId;
@@ -21,5 +22,6 @@ public class GetProductsPagedQuery : IRequest<PagedResult<ProductAdminResponseDt
         IsActive = isActive;
         PageNumber = pageNumber < 1 ? 1 : pageNumber;
         PageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
+        IncludeUncategorized = includeUncategorized;
     }
 }

@@ -31,6 +31,7 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
             request.LocationId,
             request.CategoryId,
             request.IncludeInactive,
+            request.IncludeUncategorized,
             cancellationToken);
         
  

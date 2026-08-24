@@ -45,12 +45,15 @@ public class AddProductLocationCommandHandler : IRequestHandler<AddProductLocati
             throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
         }
 
-        var category = await _categoryRepository.GetByIdAsync(product.CategoryId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kategori bulunamadı: {product.CategoryId}");
-
-        if (!category.BelongsToLocation(request.LocationId))
+        if (product.CategoryId.HasValue)
         {
-            throw new ValidationException("Ürünün kategorisi, bu yerleşkede tanımlı değil.");
+            var category = await _categoryRepository.GetByIdAsync(product.CategoryId.Value, cancellationToken)
+                .OrThrowNotFoundAsync($"Kategori bulunamadı: {product.CategoryId}");
+
+            if (!category.BelongsToLocation(request.LocationId))
+            {
+                throw new ValidationException("Ürünün kategorisi, bu yerleşkede tanımlı değil.");
+            }
         }
 
         product.AddLocation(request.LocationId);

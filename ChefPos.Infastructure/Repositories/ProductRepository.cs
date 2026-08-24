@@ -21,7 +21,7 @@ public class ProductRepository : IProductRepository
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<List<Product>> GetAllByLocationAsync(Guid locationId, Guid? categoryId, bool includeInactive, CancellationToken cancellationToken)
+    public async Task<List<Product>> GetAllByLocationAsync(Guid locationId, Guid? categoryId, bool includeInactive, bool includeUncategorized, CancellationToken cancellationToken)
     {
         var query = _context.Products
             .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
@@ -38,6 +38,8 @@ public class ProductRepository : IProductRepository
             query = query.Where(p => p.IsActive);
         }
 
+        query = query.Where(p => includeUncategorized || p.CategoryId != null);
+
         return await query.OrderBy(p => p.Name).ToListAsync(cancellationToken);
     }
 
@@ -48,6 +50,7 @@ public class ProductRepository : IProductRepository
         bool? isActive,
         int pageNumber,
         int pageSize,
+        bool includeUncategorized,
         CancellationToken cancellationToken)
     {
         var query = _context.Products
@@ -66,6 +69,8 @@ public class ProductRepository : IProductRepository
 
         if (isActive.HasValue)
             query = query.Where(p => p.IsActive == isActive.Value);
+
+        query = query.Where(p => includeUncategorized || p.CategoryId != null);
 
         query = query.OrderBy(p => p.Name);
 

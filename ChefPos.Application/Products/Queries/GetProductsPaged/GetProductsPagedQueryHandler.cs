@@ -1,4 +1,5 @@
 using ChefPos.Application.Common.Behaviors;
+using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Common.Pagination;
 using ChefPos.Application.Products.DTOs;
@@ -28,11 +29,19 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
         {
-            locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+            if (locationId.HasValue)
+            {
+                if (!actingUser.HasAccessToLocation(locationId.Value))
+                    throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
+            }
+            else
+            {
+                locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+            }
         }
 
         var (products, totalCount) = await _productRepository.GetAllPagedAsync(
-            request.SearchTerm, locationId, request.CategoryId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
+            request.SearchTerm, locationId, request.CategoryId, request.IsActive, request.PageNumber, request.PageSize, request.IncludeUncategorized, cancellationToken);
 
         var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
 
@@ -50,7 +59,7 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
                 ImageUrl = p.ImageUrl,
                 IsActive = p.IsActive,
                 CategoryId = p.CategoryId,
-                CategoryName = p.Category.Name,
+                CategoryName = p.Category?.Name,
                 LocationIds = visibleLocations.Select(pl => pl.LocationId).ToList(),
                 LocationNames = visibleLocations.Select(pl => pl.Location.Name).ToList()
             };

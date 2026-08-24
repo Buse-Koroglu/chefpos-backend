@@ -9,8 +9,8 @@ public class Product : BaseEntity
     public string? Description { get; private set; }
     public string? ImageUrl { get; private set; }
     public bool IsActive { get; private set; } = true;
-    public Guid CategoryId { get; private set; }
-    public Category Category { get; private set; } = null!;
+    public Guid? CategoryId { get; private set; }
+    public Category? Category { get; private set; }
 
     private readonly List<ProductLocation> _locations = new();
     public IReadOnlyCollection<ProductLocation> ProductLocations => _locations;
@@ -18,7 +18,7 @@ public class Product : BaseEntity
 
     private Product() { }
 
-    public Product(string name, decimal price, Guid categoryId, IEnumerable<Guid> locationIds, string? description = null, string? imageUrl = null)
+    public Product(string name, decimal price, Guid? categoryId, IEnumerable<Guid> locationIds, string? description = null, string? imageUrl = null)
     {
         if (string.IsNullOrWhiteSpace(name))
         {

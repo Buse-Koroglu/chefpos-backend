@@ -34,6 +34,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
     public DbSet<StockMovementLotConsumption> StockMovementLotConsumptions => Set<StockMovementLotConsumption>();
 
+    public DbSet<Menu> Menus => Set<Menu>();
+    public DbSet<MenuProduct> MenuProducts => Set<MenuProduct>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

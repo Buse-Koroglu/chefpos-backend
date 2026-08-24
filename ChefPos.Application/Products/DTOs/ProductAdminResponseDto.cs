@@ -7,8 +7,8 @@ public class ProductAdminResponseDto
     public decimal Price { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; }
-    public Guid CategoryId { get; set; }
-    public string CategoryName { get; set; } = default!;
+    public Guid? CategoryId { get; set; }
+    public string? CategoryName { get; set; }
     public List<Guid> LocationIds { get; set; } = new();
     public List<string> LocationNames { get; set; } = new();
 }
