@@ -81,7 +81,11 @@ public class Order : BaseEntity
         {
             throw new InvalidOperationException("Sadece bekleyen siparişler değişitirilebilir.");
         }
-        
+        if (PaymentStatus == PaymentStatus.PAID)
+        {
+            throw new InvalidOperationException("Ödemesi alınmış sipariş değiştirilemez.");
+        }
+
         if (quantity <= 0)
             throw new ArgumentOutOfRangeException(nameof(quantity), "Adet 0'dan büyük olmalı.");
         if (unitPrice < 0)
@@ -105,6 +109,10 @@ public class Order : BaseEntity
         if (OrderStatus != OrderStatus.PENDING)
         {
             throw new InvalidOperationException("Sadece bekleyen siparişler değişitirilebilir.");
+        }
+        if (PaymentStatus == PaymentStatus.PAID)
+        {
+            throw new InvalidOperationException("Ödemesi alınmış sipariş değiştirilemez.");
         }
         var item = _items.FirstOrDefault(i => i.Id == orderItemId);
         if (item is null) return;
@@ -148,6 +156,10 @@ public class Order : BaseEntity
         if (OrderStatus != OrderStatus.PENDING)
         {
             throw new InvalidOperationException("Sadece bekleyen siparişler değiştirilebilir.");
+        }
+        if (PaymentStatus == PaymentStatus.PAID)
+        {
+            throw new InvalidOperationException("Ödemesi alınmış sipariş değiştirilemez.");
         }
         var item = _items.FirstOrDefault(i => i.Id == orderItemId);
         if (item is null) return;

@@ -144,4 +144,36 @@ public class OrderTest
 
         Assert.Throws<InvalidOperationException>(() => order.MarkAsPaid());
     }
+
+    [Fact]
+    public void ShouldThrowAnExceptionAddItemToPaidOrder()
+    {
+        var order = Order.CreateByCashier(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+        order.AddItem(Guid.NewGuid(), 1, 10, ProductName);
+        order.MarkAsPaid();
+
+        Assert.Throws<InvalidOperationException>(() => order.AddItem(Guid.NewGuid(), 1, 10, ProductName));
+    }
+
+    [Fact]
+    public void ShouldThrowAnExceptionRemoveItemFromPaidOrder()
+    {
+        var order = Order.CreateByCashier(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+        order.AddItem(Guid.NewGuid(), 1, 10, ProductName);
+        var itemId = order.Items.First().Id;
+        order.MarkAsPaid();
+
+        Assert.Throws<InvalidOperationException>(() => order.RemoveItem(itemId));
+    }
+
+    [Fact]
+    public void ShouldThrowAnExceptionDecreaseQuantityOnPaidOrder()
+    {
+        var order = Order.CreateByCashier(Guid.NewGuid(), Guid.NewGuid(), CustomerName);
+        order.AddItem(Guid.NewGuid(), 2, 10, ProductName);
+        var itemId = order.Items.First().Id;
+        order.MarkAsPaid();
+
+        Assert.Throws<InvalidOperationException>(() => order.DecreaseQuantity(itemId, 1));
+    }
 }

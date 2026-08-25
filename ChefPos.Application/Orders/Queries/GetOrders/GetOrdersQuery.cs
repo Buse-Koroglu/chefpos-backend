@@ -13,13 +13,29 @@ public class GetOrdersQuery : IRequest<PagedResult<OrderResponseDto>>
     public OrderType? Type { get; set; }
     
     public PaymentStatus? PaymentStatus { get; set; }
-    
+
     public string? SearchTerm { get; }
-    
+
+    public Guid? CreatedByUserId { get; }
+
+    public DateTime? FromDate { get; }
+
+    public DateTime? ToDate { get; }
+
     public int PageNumber { get; }
     public int PageSize { get; }
- 
-    public GetOrdersQuery(Guid locationId, OrderStatus? status, OrderType? type, PaymentStatus? paymentStatus,string? searchTerm, int pageNumber =1, int pageSize = 20)
+
+    public GetOrdersQuery(
+        Guid locationId,
+        OrderStatus? status,
+        OrderType? type,
+        PaymentStatus? paymentStatus,
+        string? searchTerm,
+        Guid? createdByUserId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        int pageNumber = 1,
+        int pageSize = 20)
     {
         LocationId = locationId;
         Status = status;
@@ -28,6 +44,9 @@ public class GetOrdersQuery : IRequest<PagedResult<OrderResponseDto>>
         SearchTerm = string.IsNullOrWhiteSpace(searchTerm)
             ? null
             : searchTerm.Trim();
+        CreatedByUserId = createdByUserId;
+        FromDate = fromDate;
+        ToDate = toDate;
         PageNumber = pageNumber < 1 ? 1 : pageNumber;
         PageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
     }

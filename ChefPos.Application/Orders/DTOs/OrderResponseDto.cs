@@ -13,9 +13,11 @@ public class OrderResponseDto
     public string Type { get; set; } = default!;
     public string PaymentStatus { get; set; } = default!;
     public List<OrderItemResponseDto> Items { get; set; } = new();
+    public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public Guid? TableId { get; set; }
     public int? TableNumber { get; set; }
+    public Guid? CreatedByUserId { get; set; }
 
 
     public static OrderResponseDto FromEntity(Order order)
@@ -30,9 +32,11 @@ public class OrderResponseDto
             PaymentStatus = order.PaymentStatus.ToString(),
             Type = order.OrderType.ToString(),
             Items = order.Items.Select(OrderItemResponseDto.FromEntity).ToList(),
+            CreatedAt = order.CreatedAt,
             CompletedAt = order.CompletedAt,
             TableId = order.TableId,
-            TableNumber = order.Table?.TableNumber
+            TableNumber = order.Table?.TableNumber,
+            CreatedByUserId = order.CreatedByUserId
         };
     }
 }
@@ -43,6 +47,7 @@ public class OrderItemResponseDto
     public int Quantity { get; set; }
     public string Name { get; set; } = default!;
     public decimal Price { get; set; }
+    public Guid? ProductId { get; set; }
     public static OrderItemResponseDto FromEntity(OrderItem item)
     {
         return new OrderItemResponseDto
@@ -50,7 +55,8 @@ public class OrderItemResponseDto
             Id = item.Id,
             Name = item.Name,
             Price = item.Price,
-            Quantity = item.Quantity
+            Quantity = item.Quantity,
+            ProductId = item.ProductId
         };
     }
 }

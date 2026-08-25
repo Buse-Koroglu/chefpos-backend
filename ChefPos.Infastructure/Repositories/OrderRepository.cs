@@ -41,29 +41,54 @@ public class OrderRepository : IOrderRepository
         OrderType? orderType,
         PaymentStatus? paymentStatus,
         string? searchTerm,
+        Guid? createdByUserId,
+        DateTime? fromDate,
+        DateTime? toDate,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken)
     {
-        var query = _context.Orders
-            .Include(o => o.Items)
-            .Include(o => o.Table)
-            .Where(o => o.LocationId == locationId);
-
-        if (status.HasValue)
+        IQueryable<Order> ApplyCommonFilters(IQueryable<Order> source)
         {
-            query = query.Where(o => o.OrderStatus == status.Value);
+            source = source.Where(o => o.LocationId == locationId);
+
+            if (status.HasValue)
+            {
+                source = source.Where(o => o.OrderStatus == status.Value);
+            }
+
+            if (orderType.HasValue)
+            {
+                source = source.Where(o => o.OrderType == orderType.Value);
+            }
+
+            if (paymentStatus.HasValue)
+            {
+                source = source.Where(o => o.PaymentStatus == paymentStatus.Value);
+            }
+
+            if (createdByUserId.HasValue)
+            {
+                source = source.Where(o => o.CreatedByUserId == createdByUserId.Value);
+            }
+
+            if (fromDate.HasValue)
+            {
+                source = source.Where(o => o.CreatedAt >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                source = source.Where(o => o.CreatedAt <= toDate.Value);
+            }
+
+            return source;
         }
 
-        if (orderType.HasValue)
-        {
-            query = query.Where(o => o.OrderType == orderType.Value);
-        }
-
-        if (paymentStatus.HasValue)
-        {
-            query = query.Where(o => o.PaymentStatus == paymentStatus.Value);
-        }
+        var query = ApplyCommonFilters(
+            _context.Orders
+                .Include(o => o.Items)
+                .Include(o => o.Table));
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -79,13 +104,11 @@ public class OrderRepository : IOrderRepository
             if (int.TryParse(normalizedSearchTerm, out var orderNumber))
             {
                 query = query.Union(
-                    _context.Orders
-                        .Include(o => o.Items)
-                        .Include(o => o.Table)
-                        .Where(o =>
-                            o.LocationId == locationId &&
-                            o.OrderNumber == orderNumber
-                        )
+                    ApplyCommonFilters(
+                        _context.Orders
+                            .Include(o => o.Items)
+                            .Include(o => o.Table))
+                        .Where(o => o.OrderNumber == orderNumber)
                 );
             }
         }

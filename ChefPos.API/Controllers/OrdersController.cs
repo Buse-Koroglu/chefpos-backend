@@ -68,11 +68,16 @@ public class OrdersController : ControllerBase
         [FromQuery] OrderType? type,
         [FromQuery] PaymentStatus? paymentStatus,
         [FromQuery] string? searchTerm,
+        [FromQuery] Guid? waiterId,
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetOrdersQuery( locationId, status, type,paymentStatus, searchTerm, pageNumber, pageSize), cancellationToken);
+        var result = await _mediator.Send(
+            new GetOrdersQuery(locationId, status, type, paymentStatus, searchTerm, waiterId, fromDate, toDate, pageNumber, pageSize),
+            cancellationToken);
         return Ok(result);
     }
 

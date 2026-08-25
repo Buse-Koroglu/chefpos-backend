@@ -15,6 +15,9 @@ public interface IOrderRepository
         OrderType? orderType,
         PaymentStatus? paymentStatus,
         string? searchTerm,
+        Guid? createdByUserId,
+        DateTime? fromDate,
+        DateTime? toDate,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
