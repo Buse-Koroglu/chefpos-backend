@@ -1,4 +1,6 @@
 using ChefPos.Application.Common.Interfaces;
+using ChefPos.Application.Common.Settings;
+using ChefPos.Infastructure.Files;
 using ChefPos.Infastructure.Persistence;
 using ChefPos.Infastructure.Repositories;
 using ChefPos.Infastructure.Security;
@@ -33,6 +35,10 @@ public static class DependencyInjection
       services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
       services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
       services.AddSingleton<IInitialPasswordGenerator, InitialPasswordGenerator>();
+
+      services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
+      services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
       return services;
    } 
 }

@@ -1,10 +1,13 @@
+using ChefPos.Application.Common.Models;
 using ChefPos.Application.Products.Commands.ActivateProduct;
 using ChefPos.Application.Products.Commands.AddProductIngredient;
 using ChefPos.Application.Products.Commands.AddProductLocation;
 using ChefPos.Application.Products.Commands.CreateProduct;
 using ChefPos.Application.Products.Commands.DeactivateProduct;
+using ChefPos.Application.Products.Commands.DeleteProductImage;
 using ChefPos.Application.Products.Commands.RemoveProductIngredient;
 using ChefPos.Application.Products.Commands.RemoveProductLocation;
+using ChefPos.Application.Products.Commands.SetProductImage;
 using ChefPos.Application.Products.Commands.UpdatePrice;
 using ChefPos.Application.Products.Commands.UpdateProduct;
 using ChefPos.Application.Products.DTOs;
@@ -42,11 +45,44 @@ public class ProductController : ControllerBase
     [HttpPatch("{id}")]
     public async Task<ActionResult> UpdateProduct(Guid id,UpdateProductRequestDto body, CancellationToken cancellationToken)
     {
-        var command = new UpdateProductCommand(id,body.Name ,body.Description, body.ImageUrl);
+        var command = new UpdateProductCommand(id,body.Name ,body.Description);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-    
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpPost("{id}/image")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<ActionResult> SetProductImage(Guid id, IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+        {
+            return BadRequest("Yüklenecek bir dosya seçin.");
+        }
+
+        await using var stream = file.OpenReadStream();
+        var uploadRequest = new FileUploadRequest
+        {
+            Content = stream,
+            FileName = file.FileName,
+            ContentType = file.ContentType,
+            Length = file.Length
+        };
+
+        var command = new SetProductImageCommand(id, uploadRequest);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpDelete("{id}/image")]
+    public async Task<ActionResult> DeleteProductImage(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new DeleteProductImageCommand(id), cancellationToken);
+        return Ok(result);
+    }
+
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPatch("{id}/price")]
     public async Task<ActionResult> UpdateProductPrice(Guid id,UpdateProductPriceRequestDto body, CancellationToken cancellationToken)

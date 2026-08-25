@@ -91,7 +91,7 @@ public class MenuController : ControllerBase
     [HttpPost("{id}/products/new")]
     public async Task<ActionResult> CreateProductForMenu(Guid id, CreateProductForMenuRequestDto body, CancellationToken cancellationToken)
     {
-        var command = new CreateProductForMenuCommand(id, body.Name, body.Price, body.Description, body.ImageUrl);
+        var command = new CreateProductForMenuCommand(id, body.Name, body.Price, body.Description);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }

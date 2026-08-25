@@ -36,6 +36,9 @@ artifacts/
 ## Docker (varsa lokal override dosyaları)
 docker-compose.override.yml
 
+## Uploaded product images (local file storage)
+ChefPos.API/uploads/
+
 ## OS / Editor
 .DS_Store
 Thumbs.db

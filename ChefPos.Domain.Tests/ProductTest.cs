@@ -109,4 +109,28 @@ public class ProductTest
         Assert.True(product.IsActive);
     }
 
+    [Fact]
+    public void ShouldUpdateImageUrlAfterSetImage()
+    {
+        var product = new Product(Name, Price, Guid.NewGuid(), new[] { Guid.NewGuid() });
+        product.SetImage("/uploads/products/new-image.webp");
+        Assert.Equal("/uploads/products/new-image.webp", product.ImageUrl);
+    }
+
+    [Fact]
+    public void ShouldClearImageUrlWhenSetImageCalledWithNull()
+    {
+        var product = new Product(Name, Price, Guid.NewGuid(), new[] { Guid.NewGuid() }, Description, ImageUrl);
+        product.SetImage(null);
+        Assert.Null(product.ImageUrl);
+    }
+
+    [Fact]
+    public void ShouldNotChangeImageUrlWhenUpdateDetailsIsCalled()
+    {
+        var product = new Product(Name, Price, Guid.NewGuid(), new[] { Guid.NewGuid() }, Description, ImageUrl);
+        product.UpdateDetails("Updated Name", "Updated Desc");
+        Assert.Equal(ImageUrl, product.ImageUrl);
+    }
+
 }

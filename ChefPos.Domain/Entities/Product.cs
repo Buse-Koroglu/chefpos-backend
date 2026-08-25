@@ -103,7 +103,7 @@ public class Product : BaseEntity
         Touch();
     }
 
-    public void UpdateDetails(string name, string? description, string? imageUrl)
+    public void UpdateDetails(string name, string? description)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -111,7 +111,12 @@ public class Product : BaseEntity
         }
         Name = name;
         Description = description;
-        ImageUrl = imageUrl;
+        Touch();
+    }
+
+    public void SetImage(string? imagePath)
+    {
+        ImageUrl = imagePath;
         Touch();
     }
 

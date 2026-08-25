@@ -46,7 +46,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         }
 
         var product = new Product(request.Name, request.Price, request.CategoryId, request.LocationIds,
-            request.Description, request.ImageUrl);
+            request.Description);
 
         await _productRepository.AddAsync(product, cancellationToken);
         await _productRepository.SaveAllChangesAsync(cancellationToken);

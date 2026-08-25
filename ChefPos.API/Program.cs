@@ -1,9 +1,11 @@
 using ChefPos.API.Middleware;
 using ChefPos.API.Services;
 using ChefPos.Application.Common.Interfaces;
+using ChefPos.Application.Common.Settings;
 using ChefPos.Infastructure;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -43,6 +45,16 @@ builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.AddInfastructure(builder.Configuration);
 builder.Services.AddScoped<ICurrentUserService, HttpContextCurrentUserService>();
+
+// FileStorageSettings.RootPath is resolved to an absolute path (relative to the content root)
+// once here, so every consumer (storage service, static file middleware) agrees on the same folder.
+builder.Services.PostConfigure<FileStorageSettings>(settings =>
+{
+    if (!Path.IsPathRooted(settings.RootPath))
+    {
+        settings.RootPath = Path.Combine(builder.Environment.ContentRootPath, settings.RootPath);
+    }
+});
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ChefPos.Application.AssemblyReference).Assembly));
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -91,6 +103,14 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseCors("Frontend");
+
+var fileStorageSettings = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<FileStorageSettings>>().Value;
+Directory.CreateDirectory(fileStorageSettings.RootPath);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(fileStorageSettings.RootPath),
+    RequestPath = fileStorageSettings.PublicBasePath
+});
 
 app.UseAuthentication();
 

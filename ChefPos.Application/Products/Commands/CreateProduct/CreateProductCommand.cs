@@ -10,5 +10,4 @@ public class CreateProductCommand : IRequest<ProductResponseDto>
     public Guid CategoryId { get; set; }
     public List<Guid> LocationIds { get; set; } = new();
     public string? Description { get; set; }
-    public string? ImageUrl { get; set; }
 }

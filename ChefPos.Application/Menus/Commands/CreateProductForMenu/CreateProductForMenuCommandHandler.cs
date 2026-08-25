@@ -40,7 +40,7 @@ public class CreateProductForMenuCommandHandler : IRequestHandler<CreateProductF
             throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
         }
 
-        var product = new Product(request.Name, request.Price, categoryId: null, new List<Guid> { menu.LocationId }, request.Description, request.ImageUrl);
+        var product = new Product(request.Name, request.Price, categoryId: null, new List<Guid> { menu.LocationId }, request.Description);
 
         await _productRepository.AddAsync(product, cancellationToken);
         menu.AddProduct(product.Id);
