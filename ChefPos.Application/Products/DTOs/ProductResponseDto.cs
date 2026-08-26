@@ -11,11 +11,12 @@ public class ProductResponseDto
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; }
+    public bool IsAvailable { get; set; }
     public Guid? CategoryId { get; set; }
     public List<Guid> LocationIds { get; set; } = new();
     public List<ProductLocationRecipeDto> Locations { get; set; } = new();
 
-    public static ProductResponseDto FromEntity(Product product)
+    public static ProductResponseDto FromEntity(Product product, Guid? locationId = null)
     {
         return new ProductResponseDto
         {
@@ -25,10 +26,28 @@ public class ProductResponseDto
             Description = product.Description,
             ImageUrl = product.ImageUrl,
             IsActive = product.IsActive,
+            IsAvailable = ComputeIsAvailable(product, locationId),
             CategoryId = product.CategoryId,
             LocationIds = product.LocationIds.ToList(),
             Locations = product.ProductLocations.Select(ProductLocationRecipeDto.FromEntity).ToList()
         };
+    }
+
+    private static bool ComputeIsAvailable(Product product, Guid? locationId)
+    {
+        if (locationId is null)
+        {
+            return true;
+        }
+
+        var productLocation = product.ProductLocations.FirstOrDefault(pl => pl.LocationId == locationId.Value);
+        if (productLocation is null || productLocation.ProductItems.Count == 0)
+        {
+            return true;
+        }
+
+        return productLocation.ProductItems.All(pi =>
+            pi.Ingredient.IsActive && pi.Ingredient.CurrentStock >= pi.QuantityPerServing);
     }
 }
 

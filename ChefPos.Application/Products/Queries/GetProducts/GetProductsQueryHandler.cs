@@ -35,6 +35,6 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
             cancellationToken);
         
  
-        return products.Select(ProductResponseDto.FromEntity).ToList();
+        return products.Select(p => ProductResponseDto.FromEntity(p, request.LocationId)).ToList();
     }
 }

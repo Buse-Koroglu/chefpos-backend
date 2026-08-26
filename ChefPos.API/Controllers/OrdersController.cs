@@ -4,6 +4,7 @@ using ChefPos.Application.Orders.Commands.CancelOrder;
 using ChefPos.Application.Orders.Commands.CompleteOrder;
 using ChefPos.Application.Orders.Commands.CreateKioskOrder;
 using ChefPos.Application.Orders.Commands.DecreaseOrderItem;
+using ChefPos.Application.Orders.Commands.MakeKioskOrderPaid;
 using ChefPos.Application.Orders.Commands.MakePaidOrder;
 using ChefPos.Application.Orders.Commands.RemoveOrderItem;
 using ChefPos.Application.Orders.DTOs;
@@ -43,7 +44,15 @@ public class OrdersController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
-    
+
+    [AllowAnonymous]
+    [HttpPost("kiosk/{id}/paid")]
+    public async Task<ActionResult> MakeKioskOrderPaid(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new MakeKioskOrderPaidCommand(id), cancellationToken);
+        return Ok(result);
+    }
+
     [Authorize(Roles = "CASHIER,WAITER,ADMIN")]
     [HttpGet("{id}")]
     public async Task<ActionResult> GetOrderById(Guid id, CancellationToken cancellationToken)

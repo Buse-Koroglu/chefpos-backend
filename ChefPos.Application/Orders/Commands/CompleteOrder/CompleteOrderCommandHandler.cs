@@ -44,8 +44,8 @@ public class CompleteOrderCommandHandler : IRequestHandler<CompleteOrderCommand,
 
         var canComplete = order.OrderType switch
         {
-            OrderType.CASHIER or OrderType.SELF_SERVICE => requestingUser.HasRole(Role.CASHIER),
-            OrderType.WAITER => requestingUser.HasRole(Role.KITCHEN),
+            OrderType.CASHIER => requestingUser.HasRole(Role.CASHIER),
+            OrderType.WAITER or OrderType.SELF_SERVICE => requestingUser.HasRole(Role.KITCHEN),
             _ => false
         };
 
