@@ -5,6 +5,7 @@ using ChefPos.Application.Categories.Commands.RemoveCategory;
 using ChefPos.Application.Categories.Commands.RemoveCategoryLocation;
 using ChefPos.Application.Categories.Commands.UpdateCategory;
 using ChefPos.Application.Categories.DTOs;
+using ChefPos.Application.Categories.Queries.ExportCategories;
 using ChefPos.Application.Categories.Queries.GetCategories;
 using ChefPos.Application.Categories.Queries.GetCategoriesAdmin;
 using ChefPos.Application.Categories.Queries.GetCategoryById;
@@ -80,6 +81,18 @@ public class CategoryController : ControllerBase
         var query = new GetCategoriesAdminQuery(searchTerm, locationId, isActive, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid? locationId,
+        [FromQuery] bool? isActive,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ExportCategoriesQuery(searchTerm, locationId, isActive), cancellationToken);
+        return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
     }
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]

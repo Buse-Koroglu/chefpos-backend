@@ -1,5 +1,6 @@
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Common.Settings;
+using ChefPos.Infastructure.Export;
 using ChefPos.Infastructure.Files;
 using ChefPos.Infastructure.Persistence;
 using ChefPos.Infastructure.Repositories;
@@ -38,6 +39,7 @@ public static class DependencyInjection
 
       services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
       services.AddScoped<IFileStorageService, LocalFileStorageService>();
+      services.AddScoped<IExcelExportService, ExcelExportService>();
 
       return services;
    } 

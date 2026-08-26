@@ -16,5 +16,13 @@ public interface ICategoryRepository
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
+
+    Task<List<Category>> GetAllForExportAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int maxRows,
+        CancellationToken cancellationToken);
+
     Task RemoveAsync(Guid id, CancellationToken cancellationToken);
 }

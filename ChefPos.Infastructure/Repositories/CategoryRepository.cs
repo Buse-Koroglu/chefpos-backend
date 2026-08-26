@@ -1,3 +1,5 @@
+using ChefPos.Application.Common.Exceptions;
+using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Infastructure.Persistence;
@@ -71,6 +73,36 @@ public class CategoryRepository : ICategoryRepository
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);
+    }
+
+    public async Task<List<Category>> GetAllForExportAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int maxRows,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Categories
+            .AsNoTracking()
+            .Include(c => c.CategoryLocations)
+                .ThenInclude(cl => cl.Location)
+            .Include(c => c.Products)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(c => EF.Functions.ILike(c.Name, $"%{searchTerm}%"));
+
+        if (locationId.HasValue)
+            query = query.Where(c => c.CategoryLocations.Any(cl => cl.LocationId == locationId.Value));
+
+        if (isActive.HasValue)
+            query = query.Where(c => c.IsActive == isActive.Value);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        if (totalCount > maxRows)
+            throw new ValidationException(ExportLimits.ExceededMessage);
+
+        return await query.OrderBy(c => c.Name).ToListAsync(cancellationToken);
     }
 
     public async Task RemoveAsync(Guid id, CancellationToken cancellationToken)

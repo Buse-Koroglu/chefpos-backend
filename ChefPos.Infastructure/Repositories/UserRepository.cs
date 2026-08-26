@@ -1,3 +1,5 @@
+using ChefPos.Application.Common.Exceptions;
+using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Domain.Enums;
@@ -110,6 +112,45 @@ public class UserRepository : IUserRepository
 
         return (items, totalCount);
     }
+    public async Task<List<User>> GetAllForExportAsync(
+        string? searchTerm,
+        Role? role,
+        bool? isActive,
+        Guid? locationId,
+        int maxRows,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Users
+            .AsNoTracking()
+            .Include(u => u.UserRoles)
+            .Include(u => u.Locations).ThenInclude(l => l.Location)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(u =>
+                EF.Functions.ILike(u.FirstName, $"%{searchTerm}%") ||
+                EF.Functions.ILike(u.LastName, $"%{searchTerm}%") ||
+                EF.Functions.ILike(u.FirstName + " " + u.LastName, $"%{searchTerm}%") ||
+                EF.Functions.ILike(u.PersonalId, $"%{searchTerm}%"));
+
+        if (role.HasValue)
+            query = query.Where(u => u.UserRoles.Any(ur => ur.Role == role.Value));
+
+        if (isActive.HasValue)
+            query = query.Where(u => u.IsActive == isActive.Value);
+
+        if (locationId.HasValue)
+            query = query.Where(u => u.Locations.Any(l => l.LocationId == locationId.Value));
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        if (totalCount > maxRows)
+            throw new ValidationException(ExportLimits.ExceededMessage);
+
+        return await query
+            .OrderByDescending(u => u.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<(Guid LocationId, int EmployeeCount)>> GetEmployeeCountsByLocationAsync(CancellationToken cancellationToken)
     {
         var result = await _context.UserLocations

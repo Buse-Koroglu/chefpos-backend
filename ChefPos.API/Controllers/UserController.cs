@@ -7,6 +7,7 @@ using ChefPos.Application.Users.Commands.RemoveRole;
 using ChefPos.Application.Users.Commands.RevokeLocationAccess;
 using ChefPos.Application.Users.DTOs;
 using ChefPos.Application.Users.Queries.GetAdminByLocation;
+using ChefPos.Application.Users.Queries.ExportUsers;
 using ChefPos.Application.Users.Queries.GetAllUsers;
 using ChefPos.Application.Users.Queries.GetStockManagerByLocation;
 using ChefPos.Application.Users.Queries.GetUserById;
@@ -47,7 +48,20 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(new GetAllUsersQuery(searchTerm, role, isActive, locationId, pageNumber, pageSize), cancellationToken);
         return Ok(result);
     }
- 
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(
+        [FromQuery] string? searchTerm,
+        [FromQuery] Role? role,
+        [FromQuery] bool? isActive,
+        [FromQuery] Guid? locationId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ExportUsersQuery(searchTerm, role, isActive, locationId), cancellationToken);
+        return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
+    }
+
     [Authorize(Roles = "ADMIN")]
     [HttpGet("{id}")]
     public async Task<ActionResult> GetUserById([FromRoute] Guid id, CancellationToken cancellationToken)
