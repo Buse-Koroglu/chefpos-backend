@@ -4,6 +4,7 @@ using ChefPos.Application.StockRequests.Commands.ApproveStockRequest;
 using ChefPos.Application.StockRequests.Commands.CreateStockRequest;
 using ChefPos.Application.StockRequests.Commands.RejectStockRequest;
 using ChefPos.Application.StockRequests.DTOs;
+using ChefPos.Application.StockRequests.Queries.ExportStockRequests;
 using ChefPos.Application.StockRequests.Queries.GetInventoryDashboardStats;
 using ChefPos.Application.StockRequests.Queries.GetStockManagerDashboardStats;
 using ChefPos.Application.StockRequests.Queries.GetStockRequestById;
@@ -54,13 +55,29 @@ public class StockRequestsController : ControllerBase
     
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("paged")]
-    public async Task<ActionResult<PagedResult<AdminStockRequestResponseDto>>> GetAllPaged([FromQuery] string? searchTerm,[FromQuery] Guid? locationId, [FromQuery] StockRequestStatus? status, [FromQuery] bool onlyMyRequests = false, [FromQuery] bool onlyHistory = false, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<PagedResult<AdminStockRequestResponseDto>>> GetAllPaged([FromQuery] string? searchTerm,[FromQuery] Guid? locationId, [FromQuery] StockRequestStatus? status, [FromQuery] bool onlyMyRequests = false, [FromQuery] bool onlyHistory = false, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
     {
-        var query = new GetPagedStockRequestsQuery(searchTerm, locationId, status, onlyMyRequests, onlyHistory, pageNumber, pageSize);
+        var query = new GetPagedStockRequestsQuery(searchTerm, locationId, status, onlyMyRequests, onlyHistory, startDate, endDate, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
-    
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid? locationId,
+        [FromQuery] StockRequestStatus? status,
+        [FromQuery] bool onlyHistory = false,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new ExportStockRequestsQuery(searchTerm, locationId, status, onlyHistory, startDate, endDate);
+        var result = await _mediator.Send(query, cancellationToken);
+        return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
+    }
+
     [Authorize(Roles = "INVENTORY_STAFF,ADMIN")]
     [HttpGet("dashboard-stats")]
     public async Task<ActionResult<InventoryDashboardStatsDto>>

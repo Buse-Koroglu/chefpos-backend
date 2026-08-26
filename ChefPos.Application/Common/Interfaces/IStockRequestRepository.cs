@@ -15,10 +15,24 @@ public interface IStockRequestRepository
         StockRequestStatus? status,
         Guid? requestedByUserId,
         bool onlyHistory,
+        DateTime? startDate,
+        DateTime? endDate,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
-    
+
+    Task<List<StockRequest>> GetAllForExportAsync(
+        string? searchTerm,
+        Guid? locationId,
+        StockRequestStatus? status,
+        Guid? requestedByUserId,
+        bool onlyHistory,
+        DateTime? startDate,
+        DateTime? endDate,
+        int maxRows,
+        CancellationToken cancellationToken);
+
+
     Task<(
         int PendingRequestsCount,
         int PastRequestsCount,

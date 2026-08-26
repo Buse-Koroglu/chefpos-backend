@@ -15,6 +15,13 @@ public interface ITableRepository
         int pageSize,
         CancellationToken cancellationToken);
 
+    Task<List<Table>> GetAllForExportAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int maxRows,
+        CancellationToken cancellationToken);
+
     Task<bool> ExistsByNumberAsync(Guid locationId, int tableNumber, Guid? excludeTableId, CancellationToken cancellationToken);
     Task AddAsync(Table table, CancellationToken cancellationToken);
     Task SaveAllChangesAsync(CancellationToken cancellationToken);

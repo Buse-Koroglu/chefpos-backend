@@ -55,6 +55,8 @@ public class GetPagedStockRequestsQueryHandler
             request.Status,
             requestedByUserId,
             request.OnlyHistory,
+            request.StartDate,
+            request.EndDate,
             request.PageNumber,
             request.PageSize,
             cancellationToken);

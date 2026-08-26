@@ -3,6 +3,7 @@ using ChefPos.Application.Tables.Commands.CreateTable;
 using ChefPos.Application.Tables.Commands.DeactivateTable;
 using ChefPos.Application.Tables.Commands.UpdateTable;
 using ChefPos.Application.Tables.DTOs;
+using ChefPos.Application.Tables.Queries.ExportTables;
 using ChefPos.Application.Tables.Queries.GetTablesByLocation;
 using ChefPos.Application.Tables.Queries.GetTablesPaged;
 using MediatR;
@@ -54,6 +55,18 @@ public class TablesController : ControllerBase
     {
         var result = await _mediator.Send(new GetTablesPagedQuery(searchTerm, locationId, isActive, pageNumber, pageSize), cancellationToken);
         return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid? locationId,
+        [FromQuery] bool? isActive,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ExportTablesQuery(searchTerm, locationId, isActive), cancellationToken);
+        return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
     }
 
     [Authorize(Roles = "ADMIN")]

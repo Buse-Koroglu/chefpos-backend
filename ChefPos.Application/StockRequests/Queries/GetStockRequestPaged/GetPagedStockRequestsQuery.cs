@@ -15,17 +15,22 @@ public class GetPagedStockRequestsQuery : IRequest<PagedResult<AdminStockRequest
     
     public bool OnlyHistory { get; set; }
 
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
-    
+
 
     public GetPagedStockRequestsQuery(
-        string? searchTerm, 
-        Guid? locationId, 
-        StockRequestStatus? status, 
+        string? searchTerm,
+        Guid? locationId,
+        StockRequestStatus? status,
         bool onlyMyRequests = false,
         bool onlyHistory = false,
-        int pageNumber = 1, 
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int pageNumber = 1,
         int pageSize = 10)
     {
         SearchTerm = searchTerm;
@@ -33,6 +38,8 @@ public class GetPagedStockRequestsQuery : IRequest<PagedResult<AdminStockRequest
         Status = status;
         OnlyMyRequests = onlyMyRequests;
         OnlyHistory = onlyHistory;
+        StartDate = startDate;
+        EndDate = endDate;
         PageNumber = pageNumber;
         PageSize = pageSize;
     }

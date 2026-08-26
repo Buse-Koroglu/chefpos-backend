@@ -1,3 +1,5 @@
+using ChefPos.Application.Common.Exceptions;
+using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Infastructure.Persistence;
@@ -60,6 +62,31 @@ public class TableRepository : ITableRepository
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);
+    }
+
+    public async Task<List<Table>> GetAllForExportAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int maxRows,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Tables.AsNoTracking().Include(t => t.Location).AsQueryable();
+
+        if (locationId.HasValue)
+            query = query.Where(t => t.LocationId == locationId.Value);
+
+        if (isActive.HasValue)
+            query = query.Where(t => t.IsActive == isActive.Value);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm) && int.TryParse(searchTerm, out var searchNumber))
+            query = query.Where(t => t.TableNumber == searchNumber);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        if (totalCount > maxRows)
+            throw new ValidationException(ExportLimits.ExceededMessage);
+
+        return await query.OrderBy(t => t.TableNumber).ToListAsync(cancellationToken);
     }
 
     public async Task<bool> ExistsByNumberAsync(Guid locationId, int tableNumber, Guid? excludeTableId, CancellationToken cancellationToken)
