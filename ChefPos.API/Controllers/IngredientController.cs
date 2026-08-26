@@ -5,6 +5,7 @@ using ChefPos.Application.Ingredients.Commands.UpdateIngredient;
 using ChefPos.Application.Ingredients.Commands.UpdateIngredientMinStockThreshold;
 using ChefPos.Application.Ingredients.Commands.UpdateIngredientPrice;
 using ChefPos.Application.Ingredients.DTOs;
+using ChefPos.Application.Ingredients.Queries.ExportIngredients;
 using ChefPos.Application.Ingredients.Queries.GetIngredientById;
 using ChefPos.Application.Ingredients.Queries.GetIngredients;
 using ChefPos.Application.Ingredients.Queries.GetIngredientsPaged;
@@ -69,7 +70,19 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
- 
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid? locationId,
+        [FromQuery] bool? isActive,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ExportIngredientsQuery(searchTerm, locationId, isActive), cancellationToken);
+        return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
+    }
+
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("low-stock")]
     public async Task<ActionResult> GetLowStockIngredients([FromQuery] Guid locationId, CancellationToken cancellationToken)

@@ -16,4 +16,11 @@ public interface IIngredientRepository
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
+
+    Task<List<Ingredient>> GetAllForExportAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int maxRows,
+        CancellationToken cancellationToken);
 }

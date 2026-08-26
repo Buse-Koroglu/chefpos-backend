@@ -1,3 +1,5 @@
+using ChefPos.Application.Common.Exceptions;
+using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Infastructure.Persistence;
@@ -83,5 +85,34 @@ public class IngredientRepository : IIngredientRepository
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);
+    }
+
+    public async Task<List<Ingredient>> GetAllForExportAsync(
+        string? searchTerm,
+        Guid? locationId,
+        bool? isActive,
+        int maxRows,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Ingredients
+            .AsNoTracking()
+            .Include(i => i.Location)
+            .Include(i => i.Lots)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(i => EF.Functions.ILike(i.Name, $"%{searchTerm}%"));
+
+        if (locationId.HasValue)
+            query = query.Where(i => i.LocationId == locationId.Value);
+
+        if (isActive.HasValue)
+            query = query.Where(i => i.IsActive == isActive.Value);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        if (totalCount > maxRows)
+            throw new ValidationException(ExportLimits.ExceededMessage);
+
+        return await query.OrderBy(i => i.Name).ToListAsync(cancellationToken);
     }
 }
