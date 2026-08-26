@@ -6,6 +6,7 @@ using ChefPos.Application.Menus.Commands.DeactivateMenu;
 using ChefPos.Application.Menus.Commands.RemoveProductFromMenu;
 using ChefPos.Application.Menus.Commands.UpdateMenu;
 using ChefPos.Application.Menus.DTOs;
+using ChefPos.Application.Menus.Queries.ExportMenus;
 using ChefPos.Application.Menus.Queries.GetMenuById;
 using ChefPos.Application.Menus.Queries.GetMenusByLocation;
 using MediatR;
@@ -41,6 +42,17 @@ public class MenuController : ControllerBase
         var query = new GetMenusByLocationQuery(locationId, includeInactive);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(
+        [FromQuery] Guid locationId,
+        [FromQuery] bool includeInactive,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ExportMenusQuery(locationId, includeInactive), cancellationToken);
+        return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
     }
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]

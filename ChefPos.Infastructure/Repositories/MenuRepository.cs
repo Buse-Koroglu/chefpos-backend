@@ -1,3 +1,5 @@
+using ChefPos.Application.Common.Exceptions;
+using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Infastructure.Persistence;
@@ -27,6 +29,30 @@ public class MenuRepository : IMenuRepository
         {
             query = query.Where(m => m.IsActive);
         }
+
+        return await query.OrderBy(m => m.Name).ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Menu>> GetAllForExportAsync(
+        Guid locationId,
+        bool includeInactive,
+        int maxRows,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Menus
+            .AsNoTracking()
+            .Include(m => m.Location)
+            .Include(m => m.MenuProducts).ThenInclude(mp => mp.Product)
+            .Where(m => m.LocationId == locationId);
+
+        if (!includeInactive)
+        {
+            query = query.Where(m => m.IsActive);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        if (totalCount > maxRows)
+            throw new ValidationException(ExportLimits.ExceededMessage);
 
         return await query.OrderBy(m => m.Name).ToListAsync(cancellationToken);
     }
