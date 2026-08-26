@@ -11,6 +11,7 @@ public class CreateOrderCommand : IRequest<OrderResponseDto>
     public List<CreateOrderItemDto> Items { get; set; } = new();
     public Role RequestedAs { get; set; }
     public Guid? TableId { get; set; }
+    public bool IsPackage { get; set; }
 }
 
 public class CreateOrderItemDto

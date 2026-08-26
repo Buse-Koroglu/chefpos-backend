@@ -49,6 +49,12 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
                 order = Order.CreateByCashier(request.LocationId, currentUserId, request.CustomerName!);
                 break;
             case Role.WAITER when requestingUser.HasRole(Role.WAITER):
+                if (request.IsPackage)
+                {
+                    order = Order.CreatePackageByWaiter(request.LocationId, currentUserId, request.CustomerName!);
+                    break;
+                }
+
                 if (request.TableId is null)
                 {
                     throw new ValidationException("Garson siparişlerinde masa seçimi zorunludur.");

@@ -18,6 +18,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.TotalPrice).HasPrecision(10, 2);
         builder.HasOne(o=>o.Location).WithMany(l=>l.Orders).HasForeignKey(o=>o.LocationId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(o=>o.Table).WithMany().HasForeignKey(o=>o.TableId).OnDelete(DeleteBehavior.Restrict).IsRequired(false);
+        builder.Property(o => o.IsPackage).IsRequired().HasDefaultValue(false);
         builder.HasMany(o=>o.Items).WithOne(oi=>oi.Order).HasForeignKey(oi=>oi.OrderId).OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(o=>o.Items).HasField("_items").UsePropertyAccessMode(PropertyAccessMode.Field);
     }

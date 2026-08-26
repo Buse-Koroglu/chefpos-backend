@@ -17,7 +17,8 @@ public class Order : BaseEntity
     public User? CreatedByUser { get; private set; }
     public Guid? TableId { get; private set; }
     public Table? Table { get; private set; }
-    
+    public bool IsPackage { get; private set; }
+
     public DateTime? CompletedAt { get; private set; }
 
     private readonly List<OrderItem> _items = new();
@@ -48,7 +49,10 @@ public class Order : BaseEntity
         return order;
     }
 
-    private static Order CreateByStaff(Guid locationId, Guid createdByUserId, string customerName, OrderType orderType, Guid? tableId)
+    public static Order CreatePackageByWaiter(Guid locationId, Guid waiterId, string customerName)
+        => CreateByStaff(locationId, waiterId, customerName, OrderType.WAITER, null, isPackage: true);
+
+    private static Order CreateByStaff(Guid locationId, Guid createdByUserId, string customerName, OrderType orderType, Guid? tableId, bool isPackage = false)
     {
         return new Order
         {
@@ -57,6 +61,7 @@ public class Order : BaseEntity
             CustomerName = string.IsNullOrWhiteSpace(customerName) ? "Müşteri" : customerName,
             OrderType = orderType,
             TableId = tableId,
+            IsPackage = isPackage,
         };
     }
 

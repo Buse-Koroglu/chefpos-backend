@@ -18,6 +18,7 @@ public class OrderResponseDto
     public Guid? TableId { get; set; }
     public int? TableNumber { get; set; }
     public Guid? CreatedByUserId { get; set; }
+    public bool IsPackage { get; set; }
 
 
     public static OrderResponseDto FromEntity(Order order)
@@ -36,7 +37,8 @@ public class OrderResponseDto
             CompletedAt = order.CompletedAt,
             TableId = order.TableId,
             TableNumber = order.Table?.TableNumber,
-            CreatedByUserId = order.CreatedByUserId
+            CreatedByUserId = order.CreatedByUserId,
+            IsPackage = order.IsPackage
         };
     }
 }
