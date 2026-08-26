@@ -11,6 +11,7 @@ using ChefPos.Application.Products.Commands.SetProductImage;
 using ChefPos.Application.Products.Commands.UpdatePrice;
 using ChefPos.Application.Products.Commands.UpdateProduct;
 using ChefPos.Application.Products.DTOs;
+using ChefPos.Application.Products.Queries.ExportProducts;
 using ChefPos.Application.Products.Queries.GetProductById;
 using ChefPos.Application.Products.Queries.GetProducts;
 using ChefPos.Application.Products.Queries.GetProductsPaged;
@@ -177,5 +178,20 @@ public class ProductController : ControllerBase
         var query = new GetProductsPagedQuery(searchTerm, locationId, categoryId, isActive, pageNumber, pageSize, includeUncategorized);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(
+        [FromQuery] string? searchTerm,
+        [FromQuery] Guid? locationId,
+        [FromQuery] Guid? categoryId,
+        [FromQuery] bool? isActive,
+        [FromQuery] bool includeUncategorized = false,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(
+            new ExportProductsQuery(searchTerm, locationId, categoryId, isActive, includeUncategorized), cancellationToken);
+        return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
     }
 }

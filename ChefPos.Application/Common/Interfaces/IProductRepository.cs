@@ -17,6 +17,15 @@ public interface IProductRepository
             bool includeUncategorized,
             CancellationToken cancellationToken);
 
+        Task<List<Product>> GetAllForExportAsync(
+            string? searchTerm,
+            Guid? locationId,
+            Guid? categoryId,
+            bool? isActive,
+            bool includeUncategorized,
+            int maxRows,
+            CancellationToken cancellationToken);
+
         Task AddAsync(Product product, CancellationToken cancellationToken);
         Task SaveAllChangesAsync(CancellationToken cancellationToken);
 

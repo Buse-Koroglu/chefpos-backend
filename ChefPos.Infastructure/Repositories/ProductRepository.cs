@@ -1,3 +1,5 @@
+using ChefPos.Application.Common.Exceptions;
+using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Infastructure.Persistence;
@@ -82,6 +84,42 @@ public class ProductRepository : IProductRepository
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);
+    }
+
+    public async Task<List<Product>> GetAllForExportAsync(
+        string? searchTerm,
+        Guid? locationId,
+        Guid? categoryId,
+        bool? isActive,
+        bool includeUncategorized,
+        int maxRows,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Products
+            .AsNoTracking()
+            .Include(p => p.Category)
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{searchTerm}%"));
+
+        if (locationId.HasValue)
+            query = query.Where(p => p.ProductLocations.Any(pl => pl.LocationId == locationId.Value));
+
+        if (categoryId.HasValue)
+            query = query.Where(p => p.CategoryId == categoryId.Value);
+
+        if (isActive.HasValue)
+            query = query.Where(p => p.IsActive == isActive.Value);
+
+        query = query.Where(p => includeUncategorized || p.CategoryId != null);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        if (totalCount > maxRows)
+            throw new ValidationException(ExportLimits.ExceededMessage);
+
+        return await query.OrderBy(p => p.Name).ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Product product, CancellationToken cancellationToken)
