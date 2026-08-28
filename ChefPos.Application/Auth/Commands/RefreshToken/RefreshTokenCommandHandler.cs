@@ -14,11 +14,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, L
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
 
-    public RefreshTokenCommandHandler(
-        IRefreshTokenRepository refreshTokenRepository,
-        IUserRepository userRepository,
-        IJwtTokenGenerator jwtTokenGenerator,
-        IRefreshTokenGenerator refreshTokenGenerator)
+    public RefreshTokenCommandHandler(IRefreshTokenRepository refreshTokenRepository,IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator, IRefreshTokenGenerator refreshTokenGenerator)
     {
         _refreshTokenRepository = refreshTokenRepository;
         _userRepository = userRepository;

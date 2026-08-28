@@ -10,10 +10,7 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
     private readonly IPasswordHasher _passwordHasher;
     private readonly ICurrentUserService _currentUserService;
 
-    public ChangePasswordCommandHandler(
-        IUserRepository userRepository,
-        IPasswordHasher passwordHasher,
-        ICurrentUserService currentUserService)
+    public ChangePasswordCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, ICurrentUserService currentUserService)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
@@ -23,14 +20,9 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
     public async Task Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
         var currentUserId = _currentUserService.UserId;
-
-        var user = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
-
+        var user = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
         var hashedPassword = _passwordHasher.Hash(request.NewPassword);
-
         user.ChangePassword(hashedPassword);
-
         await _userRepository.SaveAllChangesAsync(cancellationToken);
     }
 }

@@ -24,10 +24,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
     public async Task RevokeAllForUserAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var activeTokens = await _context.RefreshToken
-            .Where(rt => rt.UserId == userId && rt.RevokedAt == null)
-            .ToListAsync(cancellationToken);
-
+        var activeTokens = await _context.RefreshToken.Where(rt => rt.UserId == userId && rt.RevokedAt == null).ToListAsync(cancellationToken);
         foreach (var token in activeTokens)
         {
             token.Revoke();

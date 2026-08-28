@@ -10,7 +10,6 @@ public class RefreshToken : BaseEntity
     public DateTime ExpiresAt { get; private set; }
     public DateTime? RevokedAt { get; private set; }
     public string? ReplacedByTokenHash { get; private set; }
-
     public bool IsRevoked => RevokedAt is not null;
     public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
     public bool IsActive => !IsRevoked && !IsExpired;
@@ -20,9 +19,7 @@ public class RefreshToken : BaseEntity
     public RefreshToken(Guid userId, string tokenHash, DateTime expiresAt)
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
-        {
             throw new ArgumentException("Token hash boş olamaz.", nameof(tokenHash));
-        }
 
         UserId = userId;
         TokenHash = tokenHash;
@@ -31,11 +28,7 @@ public class RefreshToken : BaseEntity
 
     public void Revoke(string? replacedByTokenHash = null)
     {
-        if (IsRevoked)
-        {
-            throw new InvalidOperationException("Bu token zaten iptal edilmiş.");
-        }
-
+        if (IsRevoked)  throw new InvalidOperationException("Bu token zaten iptal edilmiş.");
         RevokedAt = DateTime.UtcNow;
         ReplacedByTokenHash = replacedByTokenHash;
         Touch();

@@ -8,9 +8,8 @@ public class LoginResponseDto
     public string Token { get; set; } = default!;
     public DateTime ExpiresAt { get; set; }
     public UserResponseDto User { get; set; } = default!;
-    [JsonIgnore]
+    [JsonIgnore] // client tarafında gözükmemesi için
     public string RefreshToken { get; set; } = default!;
- 
-    [JsonIgnore]
+    [JsonIgnore]  // client tarafında gözükmemesi için
     public DateTime RefreshTokenExpiresAt { get; set; }
 }
