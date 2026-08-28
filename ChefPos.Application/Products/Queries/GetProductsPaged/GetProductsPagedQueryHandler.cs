@@ -23,8 +23,7 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
 
     public async Task<PagedResult<ProductAdminResponseDto>> Handle(GetProductsPagedQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))

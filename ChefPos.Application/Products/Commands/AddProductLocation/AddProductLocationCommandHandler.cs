@@ -15,12 +15,7 @@ public class AddProductLocationCommandHandler : IRequestHandler<AddProductLocati
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public AddProductLocationCommandHandler(
-        IProductRepository productRepository,
-        ILocationRepository locationRepository,
-        ICategoryRepository categoryRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public AddProductLocationCommandHandler(IProductRepository productRepository, ILocationRepository locationRepository, ICategoryRepository categoryRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _productRepository = productRepository;
         _locationRepository = locationRepository;
@@ -31,14 +26,11 @@ public class AddProductLocationCommandHandler : IRequestHandler<AddProductLocati
 
     public async Task<ProductResponseDto> Handle(AddProductLocationCommand request, CancellationToken cancellationToken)
     {
-        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken)
-            .OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
+        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
 
-        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ürün bulunamadı: {request.ProductId}");
+        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {request.ProductId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
         {
@@ -58,7 +50,6 @@ public class AddProductLocationCommandHandler : IRequestHandler<AddProductLocati
 
         product.AddLocation(request.LocationId);
         await _productRepository.SaveAllChangesAsync(cancellationToken);
-
         return ProductResponseDto.FromEntity(product);
     }
 }

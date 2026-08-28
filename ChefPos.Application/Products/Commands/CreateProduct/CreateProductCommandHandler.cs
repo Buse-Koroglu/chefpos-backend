@@ -13,10 +13,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
     private readonly ICategoryRepository  _categoryRepository;
     private readonly ILocationRepository _locationRepository;
 
-    public CreateProductCommandHandler(
-        IProductRepository productRepository,
-        ICategoryRepository categoryRepository,
-        ILocationRepository locationRepository)
+    public CreateProductCommandHandler(IProductRepository productRepository, ICategoryRepository categoryRepository, ILocationRepository locationRepository)
     {
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
@@ -45,13 +42,10 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
                 throw new ValidationException("Seçilen kategori, seçilen yerleşkelerin tümünde tanımlı değil.");
         }
 
-        var product = new Product(request.Name, request.Price, request.CategoryId, request.LocationIds,
-            request.Description);
+        var product = new Product(request.Name, request.Price, request.CategoryId, request.LocationIds, request.Description);
 
         await _productRepository.AddAsync(product, cancellationToken);
         await _productRepository.SaveAllChangesAsync(cancellationToken);
         return ProductResponseDto.FromEntity(product);
-
     }
-
 }

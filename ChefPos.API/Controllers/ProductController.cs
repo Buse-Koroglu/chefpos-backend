@@ -53,8 +53,8 @@ public class ProductController : ControllerBase
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/image")]
-    [Consumes("multipart/form-data")]
-    [RequestSizeLimit(10 * 1024 * 1024)]
+    [Consumes("multipart/form-data")] // file is not represented as json so used multipart/form-data
+    [RequestSizeLimit(10 * 1024 * 1024)]  // max 10 mb image
     public async Task<ActionResult> SetProductImage(Guid id, IFormFile file, CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0)
@@ -165,15 +165,7 @@ public class ProductController : ControllerBase
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN,WAITER,CASHIER")]
     [HttpGet("paged")]
-    public async Task<ActionResult> GetProductsPaged(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Guid? locationId,
-        [FromQuery] Guid? categoryId,
-        [FromQuery] bool? isActive,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        [FromQuery] bool includeUncategorized = false,
-        CancellationToken cancellationToken = default)
+    public async Task<ActionResult> GetProductsPaged([FromQuery] string? searchTerm, [FromQuery] Guid? locationId, [FromQuery] Guid? categoryId, [FromQuery] bool? isActive, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,[FromQuery] bool includeUncategorized = false,CancellationToken cancellationToken = default)
     {
         var query = new GetProductsPagedQuery(searchTerm, locationId, categoryId, isActive, pageNumber, pageSize, includeUncategorized);
         var result = await _mediator.Send(query, cancellationToken);
@@ -182,13 +174,7 @@ public class ProductController : ControllerBase
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet("export")]
-    public async Task<IActionResult> Export(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Guid? locationId,
-        [FromQuery] Guid? categoryId,
-        [FromQuery] bool? isActive,
-        [FromQuery] bool includeUncategorized = false,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Export([FromQuery] string? searchTerm, [FromQuery] Guid? locationId,[FromQuery] Guid? categoryId, [FromQuery] bool? isActive, [FromQuery] bool includeUncategorized = false, CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(
             new ExportProductsQuery(searchTerm, locationId, categoryId, isActive, includeUncategorized), cancellationToken);

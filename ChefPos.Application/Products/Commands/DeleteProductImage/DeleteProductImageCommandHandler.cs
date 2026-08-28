@@ -14,11 +14,7 @@ public class DeleteProductImageCommandHandler : IRequestHandler<DeleteProductIma
     private readonly ICurrentUserService _currentUserService;
     private readonly IFileStorageService _fileStorageService;
 
-    public DeleteProductImageCommandHandler(
-        IProductRepository productRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService,
-        IFileStorageService fileStorageService)
+    public DeleteProductImageCommandHandler(IProductRepository productRepository,IUserRepository userRepository, ICurrentUserService currentUserService, IFileStorageService fileStorageService)
     {
         _productRepository = productRepository;
         _userRepository = userRepository;
@@ -28,11 +24,9 @@ public class DeleteProductImageCommandHandler : IRequestHandler<DeleteProductIma
 
     public async Task<ProductResponseDto> Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
     {
-        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ürün bulunamadı: {request.ProductId}");
+        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {request.ProductId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !product.ProductLocations.Any(pl => actingUser.HasAccessToLocation(pl.LocationId)))
         {

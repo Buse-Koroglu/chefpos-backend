@@ -14,11 +14,7 @@ public class AddProductIngredientCommandHandler : IRequestHandler<AddProductIngr
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public AddProductIngredientCommandHandler(
-        IProductRepository productRepository,
-        IIngredientRepository ingredientRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public AddProductIngredientCommandHandler(IProductRepository productRepository, IIngredientRepository ingredientRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _productRepository = productRepository;
         _ingredientRepository = ingredientRepository;
@@ -29,18 +25,14 @@ public class AddProductIngredientCommandHandler : IRequestHandler<AddProductIngr
     public async Task<ProductResponseDto> Handle(AddProductIngredientCommand request, CancellationToken cancellationToken)
     {
         var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);
-        if (product is null)
-        {
-            throw new NotFoundException("Ürün bulunamadı.");
-        }
-
+        if (product is null) throw new NotFoundException("Ürün bulunamadı.");
+        
         if (!product.BelongsToLocation(request.LocationId))
         {
             throw new ValidationException("Ürün bu yerleşkede tanımlı değil.");
         }
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
         {
@@ -48,18 +40,12 @@ public class AddProductIngredientCommandHandler : IRequestHandler<AddProductIngr
         }
 
         var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken);
-        if (ingredient is null)
-        {
-            throw new NotFoundException("Ham madde bulunamadı.");
-        }
+        if (ingredient is null) throw new NotFoundException("Ham madde bulunamadı.");
 
-        if (ingredient.LocationId != request.LocationId)
-        {
-            throw new ValidationException("Ham madde bu yerleşkeye ait değil.");
-        }
+        if (ingredient.LocationId != request.LocationId) throw new ValidationException("Ham madde bu yerleşkeye ait değil.");
+        
 
         product.AddIngredient(request.LocationId, request.IngredientId, request.QuantityPerServing);
-
         await _productRepository.SaveAllChangesAsync(cancellationToken);
 
         return ProductResponseDto.FromEntity(product);

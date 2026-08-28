@@ -14,11 +14,7 @@ public class ActivateProductCommandHandler : IRequestHandler<ActivateProductComm
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public ActivateProductCommandHandler(
-        IProductRepository productRepository,
-        ILocationRepository locationRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public ActivateProductCommandHandler(IProductRepository productRepository, ILocationRepository locationRepository,IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _productRepository = productRepository;
         _locationRepository = locationRepository;
@@ -32,19 +28,13 @@ public class ActivateProductCommandHandler : IRequestHandler<ActivateProductComm
 
         var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı : {request.Id}");
 
-        if (!product.BelongsToLocation(request.LocationId))
-        {
-            throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
-        }
+        if (!product.BelongsToLocation(request.LocationId)) throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
-        {
             throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
-        }
-
+        
         product.ActivateProduct();
         await _productRepository.SaveAllChangesAsync(cancellationToken);
         return ProductResponseDto.FromEntity(product);

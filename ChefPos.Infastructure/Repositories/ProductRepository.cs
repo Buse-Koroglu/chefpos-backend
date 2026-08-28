@@ -17,16 +17,14 @@ public class ProductRepository : IProductRepository
     }
     public async Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Products
-            .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
+        return await _context.Products.Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
             .Include(p => p.ProductLocations).ThenInclude(pl => pl.ProductItems).ThenInclude(pi => pi.Ingredient).ThenInclude(i => i.Lots)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
     public async Task<List<Product>> GetAllByLocationAsync(Guid locationId, Guid? categoryId, bool includeInactive, bool includeUncategorized, CancellationToken cancellationToken)
     {
-        var query = _context.Products
-            .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
+        var query = _context.Products.Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
             .Include(p => p.ProductLocations).ThenInclude(pl => pl.ProductItems).ThenInclude(pi => pi.Ingredient)
             .Where(p => p.ProductLocations.Any(pl => pl.LocationId == locationId));
 
@@ -45,18 +43,9 @@ public class ProductRepository : IProductRepository
         return await query.OrderBy(p => p.Name).ToListAsync(cancellationToken);
     }
 
-    public async Task<(List<Product> Items, int TotalCount)> GetAllPagedAsync(
-        string? searchTerm,
-        Guid? locationId,
-        Guid? categoryId,
-        bool? isActive,
-        int pageNumber,
-        int pageSize,
-        bool includeUncategorized,
-        CancellationToken cancellationToken)
+    public async Task<(List<Product> Items, int TotalCount)> GetAllPagedAsync(string? searchTerm,Guid? locationId, Guid? categoryId, bool? isActive, int pageNumber, int pageSize, bool includeUncategorized, CancellationToken cancellationToken)
     {
-        var query = _context.Products
-            .Include(p => p.Category)
+        var query = _context.Products.Include(p => p.Category)
             .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
             .AsQueryable();
 
@@ -78,22 +67,11 @@ public class ProductRepository : IProductRepository
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
+        var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize) .ToListAsync(cancellationToken);
         return (items, totalCount);
     }
 
-    public async Task<List<Product>> GetAllForExportAsync(
-        string? searchTerm,
-        Guid? locationId,
-        Guid? categoryId,
-        bool? isActive,
-        bool includeUncategorized,
-        int maxRows,
-        CancellationToken cancellationToken)
+    public async Task<List<Product>> GetAllForExportAsync(string? searchTerm, Guid? locationId, Guid? categoryId, bool? isActive, bool includeUncategorized, int maxRows, CancellationToken cancellationToken)
     {
         var query = _context.Products
             .AsNoTracking()

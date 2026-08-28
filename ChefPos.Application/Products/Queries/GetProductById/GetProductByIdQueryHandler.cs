@@ -17,7 +17,6 @@ public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery,Pr
     public async Task<ProductResponseDto> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
     {
         var product = await _productRepository.GetByIdAsync(request.Id,cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {request.Id}");
-
         return ProductResponseDto.FromEntity(product);
     }
     

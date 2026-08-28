@@ -17,12 +17,7 @@ public class SetProductImageCommandHandler : IRequestHandler<SetProductImageComm
     private readonly IFileStorageService _fileStorageService;
     private readonly FileStorageSettings _settings;
 
-    public SetProductImageCommandHandler(
-        IProductRepository productRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService,
-        IFileStorageService fileStorageService,
-        IOptions<FileStorageSettings> settings)
+    public SetProductImageCommandHandler(IProductRepository productRepository, IUserRepository userRepository, ICurrentUserService currentUserService, IFileStorageService fileStorageService, IOptions<FileStorageSettings> settings)
     {
         _productRepository = productRepository;
         _userRepository = userRepository;
@@ -33,11 +28,9 @@ public class SetProductImageCommandHandler : IRequestHandler<SetProductImageComm
 
     public async Task<ProductResponseDto> Handle(SetProductImageCommand request, CancellationToken cancellationToken)
     {
-        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ürün bulunamadı: {request.ProductId}");
+        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı: {request.ProductId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !product.ProductLocations.Any(pl => actingUser.HasAccessToLocation(pl.LocationId)))
         {

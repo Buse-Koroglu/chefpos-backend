@@ -37,7 +37,6 @@ public class ProductLocation : BaseEntity
         {
             throw new KeyNotFoundException("Ham madde bu yerleşkenin reçetesinde bulunamadı.");
         }
-
         item.UpdateQuantity(newQuantityPerServing);
     }
 

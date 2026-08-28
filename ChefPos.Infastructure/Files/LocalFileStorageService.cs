@@ -10,7 +10,7 @@ namespace ChefPos.Infastructure.Files;
 
 public class LocalFileStorageService : IFileStorageService
 {
-    private const int MaxDimensionPixels = 1600;
+    private const int MaxPixelLimit = 1600;
 
     private readonly FileStorageSettings _settings;
 
@@ -23,12 +23,12 @@ public class LocalFileStorageService : IFileStorageService
     {
         using var image = await Image.LoadAsync(file.Content, cancellationToken);
 
-        if (image.Width > MaxDimensionPixels || image.Height > MaxDimensionPixels)
+        if (image.Width > MaxPixelLimit || image.Height > MaxPixelLimit)
         {
             image.Mutate(x => x.Resize(new ResizeOptions
             {
                 Mode = ResizeMode.Max,
-                Size = new Size(MaxDimensionPixels, MaxDimensionPixels)
+                Size = new Size(MaxPixelLimit, MaxPixelLimit)
             }));
         }
 
@@ -37,7 +37,7 @@ public class LocalFileStorageService : IFileStorageService
         Directory.CreateDirectory(directory);
         var physicalPath = Path.Combine(directory, fileName);
 
-        await image.SaveAsync(physicalPath, new WebpEncoder { Quality = 80 }, cancellationToken);
+        await image.SaveAsync(physicalPath, new WebpEncoder { Quality = 80 }, cancellationToken); // saved as webp all all images
 
         return $"{_settings.PublicBasePath.TrimEnd('/')}/{subfolder}/{fileName}";
     }
@@ -52,7 +52,6 @@ public class LocalFileStorageService : IFileStorageService
         var basePath = _settings.PublicBasePath.TrimEnd('/');
         if (!publicPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
         {
-            // Not a path this service manages (e.g. a legacy externally-hosted URL) — nothing to delete.
             return Task.CompletedTask;
         }
 
@@ -68,9 +67,7 @@ public class LocalFileStorageService : IFileStorageService
         }
         catch (IOException)
         {
-            // Best-effort cleanup: an orphaned file on disk is not worth failing the request over.
         }
-
         return Task.CompletedTask;
     }
 }

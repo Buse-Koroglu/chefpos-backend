@@ -14,11 +14,7 @@ public class DeactivateProductCommandHandler : IRequestHandler<DeactivateProduct
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public DeactivateProductCommandHandler(
-        IProductRepository productRepository,
-        ILocationRepository locationRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public DeactivateProductCommandHandler(IProductRepository productRepository, ILocationRepository locationRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _productRepository = productRepository;
         _locationRepository = locationRepository;
@@ -37,8 +33,7 @@ public class DeactivateProductCommandHandler : IRequestHandler<DeactivateProduct
             throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
         }
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
         {

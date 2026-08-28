@@ -15,11 +15,7 @@ public class ExportProductsQueryHandler : IRequestHandler<ExportProductsQuery, E
     private readonly ICurrentUserService _currentUserService;
     private readonly IExcelExportService _excelExportService;
 
-    public ExportProductsQueryHandler(
-        IProductRepository productRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService,
-        IExcelExportService excelExportService)
+    public ExportProductsQueryHandler(IProductRepository productRepository, IUserRepository userRepository, ICurrentUserService currentUserService, IExcelExportService excelExportService)
     {
         _productRepository = productRepository;
         _userRepository = userRepository;
@@ -29,8 +25,7 @@ public class ExportProductsQueryHandler : IRequestHandler<ExportProductsQuery, E
 
     public async Task<ExportFileResult> Handle(ExportProductsQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
         var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
@@ -47,9 +42,7 @@ public class ExportProductsQueryHandler : IRequestHandler<ExportProductsQuery, E
             }
         }
 
-        var products = await _productRepository.GetAllForExportAsync(
-            request.SearchTerm, locationId, request.CategoryId, request.IsActive, request.IncludeUncategorized,
-            ExportLimits.MaxRows, cancellationToken);
+        var products = await _productRepository.GetAllForExportAsync(request.SearchTerm, locationId, request.CategoryId, request.IsActive, request.IncludeUncategorized, ExportLimits.MaxRows, cancellationToken);
 
         var columns = new List<ExportColumn<Product>>
         {

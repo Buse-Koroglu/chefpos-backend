@@ -24,8 +24,7 @@ public class RemoveProductIngredientCommandHandler : IRequestHandler<RemoveProdu
     {
         var product =await _productRepository.GetByIdAsync(request.ProductId,cancellationToken).OrThrowNotFoundAsync($"Ürün bulunamadı:  {request.ProductId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
         {
