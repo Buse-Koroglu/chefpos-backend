@@ -28,11 +28,7 @@ public class ExportStockRequestsQueryHandler : IRequestHandler<ExportStockReques
     private readonly ICurrentUserService _currentUserService;
     private readonly IExcelExportService _excelExportService;
 
-    public ExportStockRequestsQueryHandler(
-        IStockRequestRepository stockRequestRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService,
-        IExcelExportService excelExportService)
+    public ExportStockRequestsQueryHandler(IStockRequestRepository stockRequestRepository,IUserRepository userRepository, ICurrentUserService currentUserService, IExcelExportService excelExportService)
     {
         _stockRequestRepository = stockRequestRepository;
         _userRepository = userRepository;
@@ -43,8 +39,7 @@ public class ExportStockRequestsQueryHandler : IRequestHandler<ExportStockReques
     public async Task<ExportFileResult> Handle(ExportStockRequestsQuery request, CancellationToken cancellationToken)
     {
         var currentUserId = _currentUserService.UserId;
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
         var locationId = request.LocationId;
         if (currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.SUPER_ADMIN))
@@ -52,16 +47,7 @@ public class ExportStockRequestsQueryHandler : IRequestHandler<ExportStockReques
             locationId = currentUser.Locations.Select(l => l.LocationId).FirstOrDefault();
         }
 
-        var stockRequests = await _stockRequestRepository.GetAllForExportAsync(
-            request.SearchTerm,
-            locationId,
-            request.Status,
-            requestedByUserId: null,
-            request.OnlyHistory,
-            request.StartDate,
-            request.EndDate,
-            ExportLimits.MaxRows,
-            cancellationToken);
+        var stockRequests = await _stockRequestRepository.GetAllForExportAsync(request.SearchTerm, locationId, request.Status, requestedByUserId: null, request.OnlyHistory, request.StartDate, request.EndDate, ExportLimits.MaxRows, cancellationToken);
 
         var columns = new List<ExportColumn<StockRequest>>
         {

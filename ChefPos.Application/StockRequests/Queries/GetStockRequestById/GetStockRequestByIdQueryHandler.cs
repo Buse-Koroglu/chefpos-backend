@@ -12,8 +12,7 @@ public class GetStockRequestByIdQueryHandler : IRequestHandler<GetStockRequestBy
 
     public async Task<StockRequestResponseDto> Handle(GetStockRequestByIdQuery request, CancellationToken cancellationToken)
     {
-        var stockRequest = await _stockRequestRepository.GetByIdAsync(request.StockRequestId, cancellationToken)
-            .OrThrowNotFoundAsync($"Stok talebi bulunamadı: {request.StockRequestId}");
+        var stockRequest = await _stockRequestRepository.GetByIdAsync(request.StockRequestId, cancellationToken).OrThrowNotFoundAsync($"Stok talebi bulunamadı: {request.StockRequestId}");
 
         return StockRequestResponseDto.FromEntity(stockRequest);
     }

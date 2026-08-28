@@ -24,10 +24,7 @@ public class ExportUsersQueryHandler : IRequestHandler<ExportUsersQuery, ExportF
     private readonly ICurrentUserService _currentUserService;
     private readonly IExcelExportService _excelExportService;
 
-    public ExportUsersQueryHandler(
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService,
-        IExcelExportService excelExportService)
+    public ExportUsersQueryHandler(IUserRepository userRepository, ICurrentUserService currentUserService, IExcelExportService excelExportService)
     {
         _userRepository = userRepository;
         _currentUserService = currentUserService;
@@ -36,17 +33,15 @@ public class ExportUsersQueryHandler : IRequestHandler<ExportUsersQuery, ExportF
 
     public async Task<ExportFileResult> Handle(ExportUsersQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
-
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        // adminler için ait oldukları location değerine göre locationId belirlenir.
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
         {
             locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
         }
 
-        var users = await _userRepository.GetAllForExportAsync(
-            request.SearchTerm, request.Role, request.IsActive, locationId, ExportLimits.MaxRows, cancellationToken);
+        var users = await _userRepository.GetAllForExportAsync(request.SearchTerm, request.Role, request.IsActive, locationId, ExportLimits.MaxRows, cancellationToken);
 
         var columns = new List<ExportColumn<User>>
         {

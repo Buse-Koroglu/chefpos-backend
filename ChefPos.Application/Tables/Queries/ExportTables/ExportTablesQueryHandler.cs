@@ -14,11 +14,7 @@ public class ExportTablesQueryHandler : IRequestHandler<ExportTablesQuery, Expor
     private readonly ICurrentUserService _currentUserService;
     private readonly IExcelExportService _excelExportService;
 
-    public ExportTablesQueryHandler(
-        ITableRepository tableRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService,
-        IExcelExportService excelExportService)
+    public ExportTablesQueryHandler(ITableRepository tableRepository,IUserRepository userRepository, ICurrentUserService currentUserService, IExcelExportService excelExportService)
     {
         _tableRepository = tableRepository;
         _userRepository = userRepository;
@@ -28,8 +24,7 @@ public class ExportTablesQueryHandler : IRequestHandler<ExportTablesQuery, Expor
 
     public async Task<ExportFileResult> Handle(ExportTablesQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
@@ -37,8 +32,7 @@ public class ExportTablesQueryHandler : IRequestHandler<ExportTablesQuery, Expor
             locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
         }
 
-        var tables = await _tableRepository.GetAllForExportAsync(
-            request.SearchTerm, locationId, request.IsActive, ExportLimits.MaxRows, cancellationToken);
+        var tables = await _tableRepository.GetAllForExportAsync(request.SearchTerm, locationId, request.IsActive, ExportLimits.MaxRows, cancellationToken);
 
         var columns = new List<ExportColumn<Table>>
         {

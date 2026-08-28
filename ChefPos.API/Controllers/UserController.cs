@@ -15,6 +15,7 @@ using ChefPos.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using static ChefPos.Application.Common.Export.ExportFileResult;
 
 [ApiController]
 [Route("api/users")]
@@ -36,14 +37,7 @@ public class UsersController : ControllerBase
     
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet]
-    public async Task<ActionResult> GetUsers(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Role? role,
-        [FromQuery] bool? isActive,
-        [FromQuery] Guid? locationId,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+    public async Task<ActionResult> GetUsers([FromQuery] string? searchTerm,[FromQuery] Role? role, [FromQuery] bool? isActive, [FromQuery] Guid? locationId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(new GetAllUsersQuery(searchTerm, role, isActive, locationId, pageNumber, pageSize), cancellationToken);
         return Ok(result);
@@ -51,15 +45,10 @@ public class UsersController : ControllerBase
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet("export")]
-    public async Task<IActionResult> Export(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Role? role,
-        [FromQuery] bool? isActive,
-        [FromQuery] Guid? locationId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Export([FromQuery] string? searchTerm, [FromQuery] Role? role, [FromQuery] bool? isActive, [FromQuery] Guid? locationId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new ExportUsersQuery(searchTerm, role, isActive, locationId), cancellationToken);
-        return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
+        return File(result.Content, ContentType, result.FileName);
     }
 
     [Authorize(Roles = "ADMIN")]

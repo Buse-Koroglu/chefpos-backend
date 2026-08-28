@@ -34,24 +34,14 @@ public class TablesController : ControllerBase
 
     [Authorize(Roles = "ADMIN,WAITER")]
     [HttpGet]
-    public async Task<ActionResult> GetTablesByLocation(
-        [FromQuery] Guid locationId,
-        [FromQuery] bool includeInactive,
-        CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult> GetTablesByLocation([FromQuery] Guid locationId, [FromQuery] bool includeInactive,CancellationToken cancellationToken) {
         var result = await _mediator.Send(new GetTablesByLocationQuery(locationId, includeInactive), cancellationToken);
         return Ok(result);
     }
 
     [Authorize(Roles = "ADMIN")]
     [HttpGet("paged")]
-    public async Task<ActionResult> GetTablesPaged(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Guid? locationId,
-        [FromQuery] bool? isActive,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+    public async Task<ActionResult> GetTablesPaged([FromQuery] string? searchTerm, [FromQuery] Guid? locationId, [FromQuery] bool? isActive, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(new GetTablesPagedQuery(searchTerm, locationId, isActive, pageNumber, pageSize), cancellationToken);
         return Ok(result);
@@ -59,11 +49,7 @@ public class TablesController : ControllerBase
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet("export")]
-    public async Task<IActionResult> Export(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Guid? locationId,
-        [FromQuery] bool? isActive,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Export([FromQuery] string? searchTerm, [FromQuery] Guid? locationId, [FromQuery] bool? isActive, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new ExportTablesQuery(searchTerm, locationId, isActive), cancellationToken);
         return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);

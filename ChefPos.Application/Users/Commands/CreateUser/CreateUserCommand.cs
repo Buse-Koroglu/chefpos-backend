@@ -4,7 +4,7 @@ using MediatR;
 
 namespace ChefPos.Application.Users.Commands.CreateUser;
 
-public class CreateUserCommand : IRequest<UserResponseDto>
+public class CreateUserCommand : IRequest<UserCreatedResponseDto>
 {
     public string PersonalId { get; set; } = default!;
     public string FirstName { get; set; } = default!;

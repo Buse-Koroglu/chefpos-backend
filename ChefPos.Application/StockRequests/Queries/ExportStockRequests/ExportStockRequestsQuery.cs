@@ -13,14 +13,7 @@ public class ExportStockRequestsQuery : IRequest<ExportFileResult>
     public DateTime? StartDate { get; }
     public DateTime? EndDate { get; }
 
-    public ExportStockRequestsQuery(
-        string? searchTerm,
-        Guid? locationId,
-        StockRequestStatus? status,
-        bool onlyHistory,
-        DateTime? startDate,
-        DateTime? endDate)
-    {
+    public ExportStockRequestsQuery(string? searchTerm, Guid? locationId, StockRequestStatus? status, bool onlyHistory, DateTime? startDate, DateTime? endDate) {
         SearchTerm = searchTerm;
         LocationId = locationId;
         Status = status;

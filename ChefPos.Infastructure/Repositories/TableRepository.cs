@@ -33,13 +33,7 @@ public class TableRepository : ITableRepository
         return await query.OrderBy(t => t.TableNumber).ToListAsync(cancellationToken);
     }
 
-    public async Task<(List<Table> Items, int TotalCount)> GetAllPagedAsync(
-        string? searchTerm,
-        Guid? locationId,
-        bool? isActive,
-        int pageNumber,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<(List<Table> Items, int TotalCount)> GetAllPagedAsync(string? searchTerm, Guid? locationId, bool? isActive, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = _context.Tables.AsQueryable();
 
@@ -56,22 +50,13 @@ public class TableRepository : ITableRepository
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+        var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         return (items, totalCount);
     }
 
-    public async Task<List<Table>> GetAllForExportAsync(
-        string? searchTerm,
-        Guid? locationId,
-        bool? isActive,
-        int maxRows,
-        CancellationToken cancellationToken)
-    {
-        var query = _context.Tables.AsNoTracking().Include(t => t.Location).AsQueryable();
+    public async Task<List<Table>> GetAllForExportAsync(string? searchTerm, Guid? locationId, bool? isActive, int maxRows,CancellationToken cancellationToken) {
+        var query = _context.Tables.AsNoTracking().Include(t => t.Location).AsQueryable(); // çektiğimiz entity'nin change tracker tarafından takip edilmeisni önler ve performnas artımı sağlar.
 
         if (locationId.HasValue)
             query = query.Where(t => t.LocationId == locationId.Value);
@@ -91,8 +76,7 @@ public class TableRepository : ITableRepository
 
     public async Task<bool> ExistsByNumberAsync(Guid locationId, int tableNumber, Guid? excludeTableId, CancellationToken cancellationToken)
     {
-        return await _context.Tables.AnyAsync(
-            t => t.LocationId == locationId && t.TableNumber == tableNumber && t.Id != excludeTableId, cancellationToken);
+        return await _context.Tables.AnyAsync(t => t.LocationId == locationId && t.TableNumber == tableNumber && t.Id != excludeTableId, cancellationToken);
     }
 
     public async Task AddAsync(Table table, CancellationToken cancellationToken)

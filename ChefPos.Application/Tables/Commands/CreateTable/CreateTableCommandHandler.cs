@@ -15,11 +15,7 @@ public class CreateTableCommandHandler : IRequestHandler<CreateTableCommand, Tab
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public CreateTableCommandHandler(
-        ITableRepository tableRepository,
-        ILocationRepository locationRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public CreateTableCommandHandler(ITableRepository tableRepository,ILocationRepository locationRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _tableRepository = tableRepository;
         _locationRepository = locationRepository;
@@ -29,11 +25,9 @@ public class CreateTableCommandHandler : IRequestHandler<CreateTableCommand, Tab
 
     public async Task<TableResponseDto> Handle(CreateTableCommand request, CancellationToken cancellationToken)
     {
-        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken)
-            .OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
+        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
         {

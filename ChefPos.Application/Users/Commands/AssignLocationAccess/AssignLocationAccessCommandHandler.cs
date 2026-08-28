@@ -12,10 +12,7 @@ public class AssignLocationAccessCommandHandler : IRequestHandler<AssignLocation
     private readonly ILocationRepository _locationRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public AssignLocationAccessCommandHandler(
-        IUserRepository userRepository,
-        ILocationRepository locationRepository,
-        ICurrentUserService currentUserService)
+    public AssignLocationAccessCommandHandler(IUserRepository userRepository, ILocationRepository locationRepository, ICurrentUserService currentUserService)
     {
         _userRepository = userRepository;
         _locationRepository = locationRepository;

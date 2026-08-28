@@ -46,10 +46,7 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Include(u => u.Locations)
             .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u =>
-                u.IsActive &&
-                u.UserRoles.Any(r => r.Role == Role.STOCK_MANAGER) &&
-                u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
+            .FirstOrDefaultAsync(u => u.IsActive && u.UserRoles.Any(r => r.Role == Role.STOCK_MANAGER) && u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
     }
     
     public async Task<User?> GetAdminByLocationAsync(Guid locationId, CancellationToken cancellationToken)
@@ -57,9 +54,7 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Include(u => u.Locations)
             .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u =>
-                u.UserRoles.Any(r => r.Role == Role.ADMIN) &&
-                u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
+            .FirstOrDefaultAsync(u => u.UserRoles.Any(r => r.Role == Role.ADMIN) && u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
     }
 
     public async Task<User?> GetSuperAdminAsync(CancellationToken cancellationToken)
@@ -67,30 +62,23 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Include(u => u.Locations)
             .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u =>
-                u.UserRoles.Any(r => r.Role == Role.SUPER_ADMIN), cancellationToken);
+            .FirstOrDefaultAsync(u => u.UserRoles.Any(r => r.Role == Role.SUPER_ADMIN), cancellationToken);
     }
 
-    public async Task<(List<User> Items, int TotalCount)> GetAllPagedAsync(
-        string? searchTerm,
-        Role? role,
-        bool? isActive,
-        Guid? locationId,
-        int pageNumber,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<(List<User> Users, int TotalCount)> GetAllPagedAsync(string? searchTerm, Role? role, bool? isActive, Guid? locationId, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = _context.Users
             .Include(u => u.UserRoles)
-            .Include(u => u.Locations)
-            .AsQueryable();
+            .Include(u => u.Locations).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
             query = query.Where(u =>
                 EF.Functions.ILike(u.FirstName, $"%{searchTerm}%") ||
                 EF.Functions.ILike(u.LastName, $"%{searchTerm}%") ||
                 EF.Functions.ILike(u.FirstName + " " + u.LastName, $"%{searchTerm}%") ||
                 EF.Functions.ILike(u.PersonalId, $"%{searchTerm}%"));
+        }
 
         if (role.HasValue)
             query = query.Where(u => u.UserRoles.Any(ur => ur.Role == role.Value));
@@ -105,33 +93,26 @@ public class UserRepository : IUserRepository
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+        var users = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
-        return (items, totalCount);
+        return (users, totalCount);
     }
-    public async Task<List<User>> GetAllForExportAsync(
-        string? searchTerm,
-        Role? role,
-        bool? isActive,
-        Guid? locationId,
-        int maxRows,
-        CancellationToken cancellationToken)
+    public async Task<List<User>> GetAllForExportAsync(string? searchTerm,Role? role,bool? isActive,Guid? locationId,int maxRows,CancellationToken cancellationToken)
     {
         var query = _context.Users
-            .AsNoTracking()
+            .AsNoTracking() // çektiğimiz entity'nin change tracker tarafından takip edilmeisni önler ve performnas artımı sağlar.
             .Include(u => u.UserRoles)
             .Include(u => u.Locations).ThenInclude(l => l.Location)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
             query = query.Where(u =>
                 EF.Functions.ILike(u.FirstName, $"%{searchTerm}%") ||
                 EF.Functions.ILike(u.LastName, $"%{searchTerm}%") ||
                 EF.Functions.ILike(u.FirstName + " " + u.LastName, $"%{searchTerm}%") ||
                 EF.Functions.ILike(u.PersonalId, $"%{searchTerm}%"));
+        }
 
         if (role.HasValue)
             query = query.Where(u => u.UserRoles.Any(ur => ur.Role == role.Value));
@@ -143,18 +124,16 @@ public class UserRepository : IUserRepository
             query = query.Where(u => u.Locations.Any(l => l.LocationId == locationId.Value));
 
         var totalCount = await query.CountAsync(cancellationToken);
+        
         if (totalCount > maxRows)
             throw new ValidationException(ExportLimits.ExceededMessage);
 
-        return await query
-            .OrderByDescending(u => u.CreatedAt)
-            .ToListAsync(cancellationToken);
+        return await query.OrderByDescending(u => u.CreatedAt).ToListAsync(cancellationToken);
     }
 
     public async Task<List<(Guid LocationId, int EmployeeCount)>> GetEmployeeCountsByLocationAsync(CancellationToken cancellationToken)
     {
-        var result = await _context.UserLocations
-            .GroupBy(ul => ul.LocationId)
+        var result = await _context.UserLocations.GroupBy(ul => ul.LocationId)
             .Select(g => new { LocationId = g.Key, Count = g.Count() })
             .ToListAsync(cancellationToken);
 

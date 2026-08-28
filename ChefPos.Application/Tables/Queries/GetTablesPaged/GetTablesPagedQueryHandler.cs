@@ -22,8 +22,7 @@ public class GetTablesPagedQueryHandler : IRequestHandler<GetTablesPagedQuery, P
 
     public async Task<PagedResult<TableResponseDto>> Handle(GetTablesPagedQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
@@ -31,8 +30,7 @@ public class GetTablesPagedQueryHandler : IRequestHandler<GetTablesPagedQuery, P
             locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
         }
 
-        var (tables, totalCount) = await _tableRepository.GetAllPagedAsync(
-            request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
+        var (tables, totalCount) = await _tableRepository.GetAllPagedAsync(request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
 
         return new PagedResult<TableResponseDto>
         {

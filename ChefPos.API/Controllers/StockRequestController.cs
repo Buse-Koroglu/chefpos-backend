@@ -64,14 +64,7 @@ public class StockRequestsController : ControllerBase
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet("export")]
-    public async Task<IActionResult> Export(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Guid? locationId,
-        [FromQuery] StockRequestStatus? status,
-        [FromQuery] bool onlyHistory = false,
-        [FromQuery] DateTime? startDate = null,
-        [FromQuery] DateTime? endDate = null,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Export([FromQuery] string? searchTerm, [FromQuery] Guid? locationId, [FromQuery] StockRequestStatus? status, [FromQuery] bool onlyHistory = false, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null, CancellationToken cancellationToken = default)
     {
         var query = new ExportStockRequestsQuery(searchTerm, locationId, status, onlyHistory, startDate, endDate);
         var result = await _mediator.Send(query, cancellationToken);
@@ -80,32 +73,19 @@ public class StockRequestsController : ControllerBase
 
     [Authorize(Roles = "INVENTORY_STAFF,ADMIN")]
     [HttpGet("dashboard-stats")]
-    public async Task<ActionResult<InventoryDashboardStatsDto>>
-        GetInventoryDashboardStats(
-            [FromQuery] Guid? locationId,
-            CancellationToken cancellationToken)
+    public async Task<ActionResult<InventoryDashboardStatsDto>> GetInventoryDashboardStats([FromQuery] Guid locationId, CancellationToken cancellationToken)
     {
-        var query = new GetInventoryDashboardStatsQuery(
-            locationId);
-
-        var result = await _mediator.Send(
-            query,
-            cancellationToken);
-
+        var query = new GetInventoryDashboardStatsQuery(locationId);
+        var result = await _mediator.Send(query,cancellationToken);
         return Ok(result);
     }
 
     [Authorize(Roles = "STOCK_MANAGER,ADMIN")]
     [HttpGet("stock-manager-dashboard-stats")]
-    public async Task<ActionResult<StockManagerDashboardStatsDto>>
-        GetStockManagerDashboardStats(
-            [FromQuery] Guid locationId,
-            CancellationToken cancellationToken)
+    public async Task<ActionResult<StockManagerDashboardStatsDto>> GetStockManagerDashboardStats([FromQuery] Guid locationId, CancellationToken cancellationToken)
     {
         var query = new GetStockManagerDashboardStatsQuery(locationId);
-
         var result = await _mediator.Send(query, cancellationToken);
-
         return Ok(result);
     }
 

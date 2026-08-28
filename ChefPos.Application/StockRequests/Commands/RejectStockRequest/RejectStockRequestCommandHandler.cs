@@ -14,10 +14,7 @@ public class RejectStockRequestCommandHandler : IRequestHandler<RejectStockReque
     private readonly IStockRequestRepository _stockRequestRepository;
     private readonly IUserRepository _userRepository;
 
-    public RejectStockRequestCommandHandler(
-        ICurrentUserService currentUserService,
-        IStockRequestRepository stockRequestRepository,
-        IUserRepository userRepository)
+    public RejectStockRequestCommandHandler(ICurrentUserService currentUserService, IStockRequestRepository stockRequestRepository,IUserRepository userRepository)
     {
         _currentUserService = currentUserService;
         _stockRequestRepository = stockRequestRepository;
@@ -27,11 +24,9 @@ public class RejectStockRequestCommandHandler : IRequestHandler<RejectStockReque
     public async Task<StockRequestResponseDto> Handle(RejectStockRequestCommand request, CancellationToken cancellationToken)
     {
         var currentUserId = _currentUserService.UserId;
-        var stockRequest = await _stockRequestRepository.GetByIdAsync(request.StockRequestId, cancellationToken)
-            .OrThrowNotFoundAsync($"Stok talebi bulunamadı: {request.StockRequestId}");
+        var stockRequest = await _stockRequestRepository.GetByIdAsync(request.StockRequestId, cancellationToken).OrThrowNotFoundAsync($"Stok talebi bulunamadı: {request.StockRequestId}");
 
-        var decidedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
+        var decidedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
         if (!decidedByUser.HasRole(Role.STOCK_MANAGER))
         {

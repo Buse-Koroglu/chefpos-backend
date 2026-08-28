@@ -15,11 +15,7 @@ public class ApproveStockRequestCommandHandler : IRequestHandler<ApproveStockReq
     private readonly IUserRepository _userRepository;
     private readonly IStockMovementRepository _stockMovementRepository;
  
-    public ApproveStockRequestCommandHandler(
-        ICurrentUserService currentUserService,
-        IStockRequestRepository stockRequestRepository,
-        IUserRepository userRepository,
-        IStockMovementRepository stockMovementRepository)
+    public ApproveStockRequestCommandHandler(ICurrentUserService currentUserService,IStockRequestRepository stockRequestRepository, IUserRepository userRepository, IStockMovementRepository stockMovementRepository)
     {
         _currentUserService = currentUserService;
         _stockRequestRepository = stockRequestRepository;
@@ -30,11 +26,9 @@ public class ApproveStockRequestCommandHandler : IRequestHandler<ApproveStockReq
     public async Task<StockRequestResponseDto> Handle(ApproveStockRequestCommand request, CancellationToken cancellationToken)
     {
         var currentUserId = _currentUserService.UserId;
-        var stockRequest = await _stockRequestRepository.GetByIdAsync(request.StockRequestId, cancellationToken)
-            .OrThrowNotFoundAsync($"Stok talebi bulunamadı: {request.StockRequestId}");
+        var stockRequest = await _stockRequestRepository.GetByIdAsync(request.StockRequestId, cancellationToken).OrThrowNotFoundAsync($"Stok talebi bulunamadı: {request.StockRequestId}");
  
-        var decidedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
+        var decidedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
  
         if (!decidedByUser.HasRole(Role.STOCK_MANAGER))
         {
@@ -49,9 +43,7 @@ public class ApproveStockRequestCommandHandler : IRequestHandler<ApproveStockReq
         stockRequest.Approve(currentUserId, request.UnitPrice);
  
         var lot = stockRequest.Ingredient.AddPurchaseLot(stockRequest.RequestedQuantity, request.UnitPrice, stockRequest.Id);
-        var movement = StockMovement.CreatePurchase(
-            stockRequest.IngredientId, stockRequest.LocationId, stockRequest.RequestedQuantity, currentUserId, lot,
-            note: $"Stok talebi onayı: {stockRequest.Id}");
+        var movement = StockMovement.CreatePurchase( stockRequest.IngredientId, stockRequest.LocationId, stockRequest.RequestedQuantity, currentUserId, lot, note: $"Stok talebi onayı: {stockRequest.Id}");
         await _stockMovementRepository.AddAsync(movement, cancellationToken);
  
         await _stockRequestRepository.SaveAllChangesAsync(cancellationToken);

@@ -17,16 +17,12 @@ public class StockRequestRepository : IStockRequestRepository
 
     public async Task<StockRequest?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.StockRequests
-            .Include(sr => sr.Ingredient)
-            .FirstOrDefaultAsync(sr => sr.Id == id, cancellationToken);
+        return await _context.StockRequests.Include(sr => sr.Ingredient).FirstOrDefaultAsync(sr => sr.Id == id, cancellationToken);
     }
 
     public async Task<List<StockRequest>> GetAllByLocationAsync(Guid locationId, StockRequestStatus? status, CancellationToken cancellationToken)
     {
-        var query = _context.StockRequests
-            .Include(sr => sr.Ingredient)
-            .Where(sr => sr.LocationId == locationId);
+        var query = _context.StockRequests.Include(sr => sr.Ingredient).Where(sr => sr.LocationId == locationId);
 
         if (status.HasValue)
         {
@@ -38,10 +34,7 @@ public class StockRequestRepository : IStockRequestRepository
 
     public async Task<bool> HasPendingAsync(Guid ingredientId, Guid locationId, CancellationToken cancellationToken)
     {
-        return await _context.StockRequests.AnyAsync(sr =>
-            sr.IngredientId == ingredientId &&
-            sr.LocationId == locationId &&
-            sr.Status == StockRequestStatus.PENDING, cancellationToken);
+        return await _context.StockRequests.AnyAsync(sr => sr.IngredientId == ingredientId && sr.LocationId == locationId && sr.Status == StockRequestStatus.PENDING, cancellationToken);
     }
 
     public async Task AddAsync(StockRequest stockRequest, CancellationToken cancellationToken)
@@ -49,17 +42,7 @@ public class StockRequestRepository : IStockRequestRepository
         await _context.StockRequests.AddAsync(stockRequest, cancellationToken);
     }
 
-    public async Task<(List<StockRequest> Items, int TotalCount)> GetAllPagedAsync(
-        string? searchTerm,
-        Guid? locationId,
-        StockRequestStatus? status,
-        Guid? requestedByUserId,
-        bool onlyHistory,
-        DateTime? startDate,
-        DateTime? endDate,
-        int pageNumber,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<(List<StockRequest> Items, int TotalCount)> GetAllPagedAsync(string? searchTerm, Guid? locationId, StockRequestStatus? status, Guid? requestedByUserId, bool onlyHistory, DateTime? startDate, DateTime? endDate, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = BuildFilteredQuery(searchTerm, locationId, status, requestedByUserId, onlyHistory, startDate, endDate);
 
@@ -88,23 +71,14 @@ public class StockRequestRepository : IStockRequestRepository
         var query = BuildFilteredQuery(searchTerm, locationId, status, requestedByUserId, onlyHistory, startDate, endDate);
 
         var totalCount = await query.CountAsync(cancellationToken);
-        if (totalCount > maxRows)
-            throw new ValidationException(ExportLimits.ExceededMessage);
+        if (totalCount > maxRows) throw new ValidationException(ExportLimits.ExceededMessage);
 
         return await query.OrderByDescending(sr => sr.CreatedAt).ToListAsync(cancellationToken);
     }
 
-    private IQueryable<StockRequest> BuildFilteredQuery(
-        string? searchTerm,
-        Guid? locationId,
-        StockRequestStatus? status,
-        Guid? requestedByUserId,
-        bool onlyHistory,
-        DateTime? startDate,
-        DateTime? endDate)
+    private IQueryable<StockRequest> BuildFilteredQuery(string? searchTerm, Guid? locationId, StockRequestStatus? status, Guid? requestedByUserId, bool onlyHistory, DateTime? startDate, DateTime? endDate)
     {
-        var query = _context.StockRequests
-            .AsNoTracking()
+        var query = _context.StockRequests .AsNoTracking()
             .Include(sr => sr.Ingredient).ThenInclude(i => i.Lots)
             .Include(sr => sr.Location)
             .Include(sr => sr.RequestedByUser)
@@ -128,7 +102,6 @@ public class StockRequestRepository : IStockRequestRepository
 
         if (onlyHistory)
         {
-            // "Geçmiş Stok Taleplerim" tab'ı: bekleyen dışındaki tüm durumlar (APPROVED / REJECTED)
             query = query.Where(sr => sr.Status != StockRequestStatus.PENDING);
         }
 
@@ -155,82 +128,35 @@ public class StockRequestRepository : IStockRequestRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
-    
-    public async Task<(
-        int PendingRequestsCount,
-        int PastRequestsCount,
-        int TotalStockRequestsCount
-        )> GetInventoryDashboardStatsAsync(
-        Guid userId,
-        Guid? locationId,
-        CancellationToken cancellationToken)
+    // depo görevlisi dashboard için kendi taleplerini içeren bir dash
+    public async Task<(int PendingRequestsCount, int PastRequestsCount, int TotalStockRequestsCount)> GetInventoryDashboardStatsAsync( Guid userId, Guid? locationId, CancellationToken cancellationToken)
     {
-        var query = _context.StockRequests
-            .AsNoTracking()
-            .Where(request =>
-                request.RequestedByUserId == userId);
+        var query = _context.StockRequests.AsNoTracking().Where(request => request.RequestedByUserId == userId);
 
         if (locationId.HasValue)
         {
-            query = query.Where(request =>
-                request.LocationId == locationId.Value);
+            query = query.Where(request => request.LocationId == locationId.Value);
         }
 
-        var pendingCount = await query
-            .CountAsync(
-                request =>
-                    request.Status == StockRequestStatus.PENDING,
-                cancellationToken);
+        var pendingCount = await query.CountAsync(request => request.Status == StockRequestStatus.PENDING,cancellationToken);
 
-        var pastCount = await query
-            .CountAsync(
-                request =>
-                    request.Status == StockRequestStatus.APPROVED ||
-                    request.Status == StockRequestStatus.REJECTED,
-                cancellationToken);
+        var pastCount = await query.CountAsync(request => request.Status == StockRequestStatus.APPROVED || request.Status == StockRequestStatus.REJECTED, cancellationToken);
 
-        var totalCount = await query
-            .CountAsync(cancellationToken);
+        var totalCount = await query.CountAsync(cancellationToken);
 
-        return (
-            pendingCount,
-            pastCount,
-            totalCount
-        );
+        return (pendingCount, pastCount, totalCount);
     }
-
-    public async Task<(
-        int PendingRequestsCount,
-        int PastRequestsCount,
-        int TotalStockRequestsCount
-        )> GetStockManagerDashboardStatsAsync(
-        Guid locationId,
-        CancellationToken cancellationToken)
+    // stok yöneticisi dashboard için lokasyon bazlı tüm talepleri içeren bir dash
+    public async Task<(int PendingRequestsCount, int PastRequestsCount,int TotalStockRequestsCount)> GetStockManagerDashboardStatsAsync(Guid locationId, CancellationToken cancellationToken)
     {
-        var query = _context.StockRequests
-            .AsNoTracking()
-            .Where(request => request.LocationId == locationId);
+        var query = _context.StockRequests.AsNoTracking().Where(request => request.LocationId == locationId);
 
-        var pendingCount = await query
-            .CountAsync(
-                request =>
-                    request.Status == StockRequestStatus.PENDING,
-                cancellationToken);
+        var pendingCount = await query.CountAsync(request => request.Status == StockRequestStatus.PENDING,cancellationToken);
 
-        var pastCount = await query
-            .CountAsync(
-                request =>
-                    request.Status == StockRequestStatus.APPROVED ||
-                    request.Status == StockRequestStatus.REJECTED,
-                cancellationToken);
+        var pastCount = await query.CountAsync(request => request.Status == StockRequestStatus.APPROVED || request.Status == StockRequestStatus.REJECTED, cancellationToken);
 
-        var totalCount = await query
-            .CountAsync(cancellationToken);
+        var totalCount = await query.CountAsync(cancellationToken);
 
-        return (
-            pendingCount,
-            pastCount,
-            totalCount
-        );
+        return (pendingCount, pastCount, totalCount);
     }
 }

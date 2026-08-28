@@ -10,7 +10,7 @@ namespace ChefPos.Infastructure.Security;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
-    private readonly IConfiguration _configuration;
+    private readonly IConfiguration _configuration; 
 
     public JwtTokenGenerator(IConfiguration configuration)
     {
@@ -27,17 +27,17 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         
         var expiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes);
 
-
+        // claim içerisinde user id, personel id ve kullanıcı rolleri bulunuyor. 
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.PersonalId),
-        };
+        };  
         claims.AddRange(user.Roles.Select(r => new Claim(ClaimTypes.Role, r.ToString())));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256); // token'ı bu key ve sha256 algoritması ile imzalayacak.
+        
         var token = new JwtSecurityToken(
             issuer: issuer,
             audience: audience,

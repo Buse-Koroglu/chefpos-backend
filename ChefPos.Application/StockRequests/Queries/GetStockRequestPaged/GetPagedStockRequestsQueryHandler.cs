@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Common.Pagination;
@@ -14,28 +15,18 @@ public class GetPagedStockRequestsQueryHandler
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public GetPagedStockRequestsQueryHandler(
-        IStockRequestRepository stockRequestRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public GetPagedStockRequestsQueryHandler(IStockRequestRepository stockRequestRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _stockRequestRepository = stockRequestRepository;
         _userRepository = userRepository;
         _currentUserService = currentUserService;
     }
 
-    public async Task<PagedResult<AdminStockRequestResponseDto>> Handle(
-        GetPagedStockRequestsQuery request,
-        CancellationToken cancellationToken)
+    public async Task<PagedResult<AdminStockRequestResponseDto>> Handle(GetPagedStockRequestsQuery request, CancellationToken cancellationToken)
     {
         var currentUserId = _currentUserService.UserId;
 
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
-
-        if (currentUser is null)
-        {
-            throw new NotFoundException($"Kullanıcı bulunamadı: {currentUserId}");
-        }
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
         
         var isPrivilegedUser = currentUser.HasRole(Role.ADMIN) || currentUser.HasRole(Role.SUPER_ADMIN) || currentUser.HasRole(Role.STOCK_MANAGER);
 
@@ -49,23 +40,13 @@ public class GetPagedStockRequestsQueryHandler
             locationId = currentUser.Locations.Select(l => l.LocationId).FirstOrDefault();
         }
 
-        var (items, totalCount) = await _stockRequestRepository.GetAllPagedAsync(
-            request.SearchTerm,
-            locationId,
-            request.Status,
-            requestedByUserId,
-            request.OnlyHistory,
-            request.StartDate,
-            request.EndDate,
-            request.PageNumber,
-            request.PageSize,
-            cancellationToken);
+        var (items, totalCount) = await _stockRequestRepository.GetAllPagedAsync(request.SearchTerm, locationId, request.Status, requestedByUserId, request.OnlyHistory, request.StartDate, request.EndDate, request.PageNumber, request.PageSize, cancellationToken);
 
-        var dtos = items.Select(AdminStockRequestResponseDto.FromEntity).ToList();
+        var adminStockRequestResponseDtos = items.Select(AdminStockRequestResponseDto.FromEntity).ToList();
 
         return new PagedResult<AdminStockRequestResponseDto>
         {
-            Items = dtos,
+            Items = adminStockRequestResponseDtos,
             PageNumber = request.PageNumber,
             PageSize = request.PageSize,
             TotalCount = totalCount

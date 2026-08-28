@@ -22,11 +22,9 @@ public class DeactivateTableCommandHandler : IRequestHandler<DeactivateTableComm
 
     public async Task<TableResponseDto> Handle(DeactivateTableCommand request, CancellationToken cancellationToken)
     {
-        var table = await _tableRepository.GetByIdAsync(request.TableId, cancellationToken)
-            .OrThrowNotFoundAsync($"Masa bulunamadı: {request.TableId}");
+        var table = await _tableRepository.GetByIdAsync(request.TableId, cancellationToken).OrThrowNotFoundAsync($"Masa bulunamadı: {request.TableId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(table.LocationId))
         {

@@ -12,4 +12,4 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  postgres_data: # bilgisayarımda bulunan /var/lib/docker/volumes içerisinde postgres_data volume'unu container içerisinde postgresql datalarının bulunduğu /var/lib/postgresql/data klasörüne mount ettim.

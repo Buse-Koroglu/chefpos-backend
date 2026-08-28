@@ -43,14 +43,9 @@ public class AdminStockRequestResponseDto
             Status = stockRequest.Status,
             CreatedAt = stockRequest.CreatedAt,
             RequestedByUserId = stockRequest.RequestedByUserId,
-            RequestedByUserName = stockRequest.RequestedByUser != null
-                ? $"{stockRequest.RequestedByUser.FirstName} {stockRequest.RequestedByUser.LastName}".Trim()
-                : string.Empty,
-
+            RequestedByUserName = stockRequest.RequestedByUser != null ? $"{stockRequest.RequestedByUser.FirstName} {stockRequest.RequestedByUser.LastName}".Trim() : string.Empty,
             DecidedByUserId = stockRequest.DecidedByUserId,
-            DecidedByUserName = stockRequest.DecidedByUser != null
-                ? $"{stockRequest.DecidedByUser.FirstName} {stockRequest.DecidedByUser.LastName}".Trim()
-                : null,
+            DecidedByUserName = stockRequest.DecidedByUser != null ? $"{stockRequest.DecidedByUser.FirstName} {stockRequest.DecidedByUser.LastName}".Trim() : null,
             RejectionReason = stockRequest.RejectionReason,
             DecidedAt = stockRequest.DecidedAt,
             ApprovedUnitPrice = stockRequest.ApprovedUnitPrice,

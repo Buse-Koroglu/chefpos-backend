@@ -19,8 +19,7 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, PagedRe
 
     public async Task<PagedResult<UserResponseDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
@@ -28,27 +27,21 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, PagedRe
             locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
         }
 
-        var (users, totalCount) = await _userRepository.GetAllPagedAsync(
-            request.SearchTerm, request.Role, request.IsActive, locationId, request.PageNumber, request.PageSize, cancellationToken);
+        var (users, totalCount) = await _userRepository.GetAllPagedAsync(request.SearchTerm, request.Role, request.IsActive, locationId, request.PageNumber, request.PageSize, cancellationToken);
 
         var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
 
         var items = users.Select(u =>
         {
-            var dto = UserResponseDto.FromEntity(u);
+            var userResponseDto = UserResponseDto.FromEntity(u);
             if (!isSuperAdmin)
             {
-                dto.LocationIds = dto.LocationIds.Where(id => id == locationId).ToList();
+                userResponseDto.LocationIds = userResponseDto.LocationIds.Where(id => id == locationId).ToList();
             }
-            return dto;
+            return userResponseDto;
         }).ToList();
 
         return new PagedResult<UserResponseDto>
-        {
-            Items = items,
-            TotalCount = totalCount,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        };
+        {Items = items,TotalCount = totalCount,PageNumber = request.PageNumber,PageSize = request.PageSize};
     }
 }

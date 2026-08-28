@@ -27,19 +27,19 @@ public static class DependencyInjection
       services.AddScoped<IIngredientRepository, IngredientRepository>();
       services.AddScoped<IStockRequestRepository,StockRequestRepository>();
       services.AddScoped<ITableRepository, TableRepository>();
-      services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
       services.AddScoped<IStockMovementRepository, StockMovementRepository>();
       services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
       services.AddScoped<IMenuRepository, MenuRepository>();
-      services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
-      services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
-      services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
-      services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
-      services.AddSingleton<IInitialPasswordGenerator, InitialPasswordGenerator>();
+      
+      services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>(); // bu interface ve repository içerisinde IConfiguration servisi kullanıyor ve o servis de Singleton olduğu için JwtTokenGenerator Singleton
+      services.Configure<JwtSettings>(configuration.GetSection("Jwt")); // Options pattern ile conf dosyasındaki jwt değerleri = JwtSettings class 
+      services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>(); // içerisinde bağımlılık olarak sadece jwtSetting (Options Pattern) içerdiği için Singleton
+      services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>(); // içerisinde scoped bağımlılık içermediği için performans için singleton
+      services.AddSingleton<IInitialPasswordGenerator, InitialPasswordGenerator>(); // içerisinde scoped bağımlılık içermediği için performans için singleton
 
-      services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
-      services.AddScoped<IFileStorageService, LocalFileStorageService>();
-      services.AddScoped<IExcelExportService, ExcelExportService>();
+      services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName)); // options attern ile conf dosyasındaki fileStorage değerleri = FileStorageSettings class 
+      services.AddSingleton<IFileStorageService, LocalFileStorageService>(); // bu interface ve servis içerisinde bağımlılık olarak FileStorageSetting içeriyor o da Singleton.
+      services.AddSingleton<IExcelExportService, ExcelExportService>(); // bu interface ve servis içerisinde herhangi bir bağımlılık içermiyor performans ve gereksiz allocate'i önlemek için singleton
 
       return services;
    } 

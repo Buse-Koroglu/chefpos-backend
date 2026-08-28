@@ -13,9 +13,7 @@ public class UserResponseDto
     public bool IsFirstLogin { get; set; }
     public bool IsActive { get; set; }
     public List<Guid> LocationIds { get; set; } = new();
-    
-    public string? GeneratedPassword { get; set; }
- 
+
     public static UserResponseDto FromEntity(User user)
     {
         return new UserResponseDto

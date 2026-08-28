@@ -8,10 +8,7 @@ public class StockManagerDashboardStatsDto
 
     public int TotalStockRequestsCount { get; set; }
 
-    public StockManagerDashboardStatsDto(
-        int pendingRequestsCount,
-        int pastRequestsCount,
-        int totalStockRequestsCount)
+    public StockManagerDashboardStatsDto(int pendingRequestsCount,int pastRequestsCount, int totalStockRequestsCount)
     {
         PendingRequestsCount = pendingRequestsCount;
         PastRequestsCount = pastRequestsCount;

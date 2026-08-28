@@ -15,11 +15,7 @@ public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockReque
     private readonly IIngredientRepository _ingredientRepository;
     private readonly IUserRepository _userRepository;
 
-    public CreateStockRequestCommandHandler(
-        ICurrentUserService currentUserService,
-        IStockRequestRepository stockRequestRepository,
-        IIngredientRepository ingredientRepository,
-        IUserRepository userRepository)
+    public CreateStockRequestCommandHandler(ICurrentUserService currentUserService,IStockRequestRepository stockRequestRepository, IIngredientRepository ingredientRepository, IUserRepository userRepository)
     {
         _currentUserService = currentUserService;
         _stockRequestRepository = stockRequestRepository;
@@ -30,11 +26,9 @@ public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockReque
     public async Task<StockRequestResponseDto> Handle(CreateStockRequestCommand request, CancellationToken cancellationToken)
     {
         var currentUserId = _currentUserService.UserId;
-        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
+        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
-        var requestedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
+        var requestedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
         if (!requestedByUser.HasRole(Role.INVENTORY_STAFF))
         {

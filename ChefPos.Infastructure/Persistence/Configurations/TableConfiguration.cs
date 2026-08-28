@@ -10,9 +10,7 @@ public class TableConfiguration : IEntityTypeConfiguration<Table>
     {
         builder.HasKey(t => t.Id);
         builder.Property(t => t.TableNumber).IsRequired();
-
         builder.HasOne(t => t.Location).WithMany().HasForeignKey(t => t.LocationId).OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasIndex(t => new { t.LocationId, t.TableNumber }).IsUnique();
+        builder.HasIndex(t => new { t.LocationId, t.TableNumber }).IsUnique(); // bir location'da her bir masa numarası unique olmalı.
     }
 }

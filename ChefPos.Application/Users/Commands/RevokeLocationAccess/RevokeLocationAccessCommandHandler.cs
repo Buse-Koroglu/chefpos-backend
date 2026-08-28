@@ -19,8 +19,7 @@ public class RevokeLocationAccessCommandHandler : IRequestHandler<RevokeLocation
     public async Task<UserResponseDto> Handle(RevokeLocationAccessCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
-        if (user is null)
-            throw new NotFoundException($"Kullanıcı bulunamadı: {request.UserId}");
+        if (user is null) throw new NotFoundException($"Kullanıcı bulunamadı: {request.UserId}");
 
         if (user.HasRole(Role.ADMIN) || user.HasRole(Role.SUPER_ADMIN))
         {

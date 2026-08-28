@@ -19,12 +19,10 @@ public class DeactivateUserCommandHandler : IRequestHandler<DeactivateUserComman
     public async Task<UserResponseDto> Handle(DeactivateUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
-        if (user is null)
-            throw new NotFoundException($"Kullanıcı bulunamadı: {request.UserId}");
+        if (user is null) throw new NotFoundException($"Kullanıcı bulunamadı: {request.UserId}");
 
         var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken);
-        if (actingUser is null)
-            throw new NotFoundException($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        if (actingUser is null) throw new NotFoundException($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) &&
             !user.Locations.Select(l => l.LocationId).Any(id => actingUser.Locations.Any(al => al.LocationId == id)))

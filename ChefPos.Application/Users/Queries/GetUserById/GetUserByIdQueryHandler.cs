@@ -20,11 +20,9 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserRes
 
     public async Task<UserResponseDto> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {request.Id}");
+        var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {request.Id}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
         var actingUserLocationIds = actingUser.Locations.Select(l => l.LocationId).ToHashSet();
@@ -34,12 +32,11 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserRes
             throw new ValidationException("Bu kullanıcıyı görüntüleme yetkiniz yok.");
         }
 
-        var dto = UserResponseDto.FromEntity(user);
+        var userResponseDto = UserResponseDto.FromEntity(user);
         if (!isSuperAdmin)
         {
-            dto.LocationIds = dto.LocationIds.Where(id => actingUserLocationIds.Contains(id)).ToList();
+            userResponseDto.LocationIds = userResponseDto.LocationIds.Where(id => actingUserLocationIds.Contains(id)).ToList();
         }
-
-        return dto;
+        return userResponseDto;
     }
 }
