@@ -2,26 +2,22 @@ using ChefPos.Domain.Common;
 
 namespace ChefPos.Domain.Entities;
 
-public class IngredientLot : BaseEntity
+public class IngredientLot : BaseEntity // bir ingredient için olan tek bir stok alımı kaydı
 {
     public Guid IngredientId { get; private set; }
     public Ingredient Ingredient { get; private set; } = null!;
-
-    public decimal InitialQuantity { get; private set; }
-    public decimal RemainingQuantity { get; private set; }
-    public decimal UnitPrice { get; private set; }
-    public DateTime PurchasedAt { get; private set; }
-
-    public Guid? SourceStockRequestId { get; private set; }
+    public decimal InitialQuantity { get; private set; } // bu alım olmadan ham maddenin önceki miktarı
+    public decimal RemainingQuantity { get; private set; }  // bu alımdan kalan ham madde miktarı
+    public decimal UnitPrice { get; private set; } // bu parti'nin alım fiyatı
+    public DateTime PurchasedAt { get; private set; } 
+    public Guid? SourceStockRequestId { get; private set; } // bu parti hangi stock request sonrası yapıldı
 
     private IngredientLot() { }
 
     public IngredientLot(Guid ingredientId, decimal quantity, decimal unitPrice, Guid? sourceStockRequestId = null, DateTime? purchasedAt = null)
     {
-        if (quantity <= 0)
-            throw new ArgumentOutOfRangeException(nameof(quantity), "Parti miktarı pozitif olmalı.");
-        if (unitPrice < 0)
-            throw new ArgumentOutOfRangeException(nameof(unitPrice), "Fiyat negatif olamaz.");
+        if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity), "Parti miktarı pozitif olmalı.");
+        if (unitPrice < 0) throw new ArgumentOutOfRangeException(nameof(unitPrice), "Fiyat negatif olamaz.");
 
         IngredientId = ingredientId;
         InitialQuantity = quantity;
@@ -31,12 +27,11 @@ public class IngredientLot : BaseEntity
         PurchasedAt = purchasedAt ?? DateTime.UtcNow;
     }
 
-    public bool IsDepleted => RemainingQuantity <= 0;
+    public bool IsFinished => RemainingQuantity <= 0;
 
     internal decimal Consume(decimal amount)
     {
-        if (amount <= 0)
-            throw new ArgumentOutOfRangeException(nameof(amount), "Düşülecek miktar pozitif olmalı.");
+        if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount), "Düşülecek miktar pozitif olmalı.");
 
         var consumed = Math.Min(amount, RemainingQuantity);
         RemainingQuantity -= consumed;
@@ -46,9 +41,7 @@ public class IngredientLot : BaseEntity
 
     internal void UpdateUnitPrice(decimal newUnitPrice)
     {
-        if (newUnitPrice < 0)
-            throw new ArgumentOutOfRangeException(nameof(newUnitPrice), "Fiyat negatif olamaz.");
-
+        if (newUnitPrice < 0) throw new ArgumentOutOfRangeException(nameof(newUnitPrice), "Fiyat negatif olamaz.");
         UnitPrice = newUnitPrice;
         Touch();
     }

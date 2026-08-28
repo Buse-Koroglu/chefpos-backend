@@ -7,44 +7,25 @@ public class StockMovement : BaseEntity
 {
     public Guid IngredientId { get; private set; }
     public Ingredient Ingredient { get; private set; } = null!;
-
     public Guid LocationId { get; private set; }
     public Location Location { get; private set; } = null!;
-
     public StockMovementType Type { get; private set; }
     public decimal Quantity { get; private set; }
-
     public Guid PerformedByUserId { get; private set; }
     public User PerformedByUser { get; private set; } = null!;
-
     public Guid? RelatedOrderId { get; private set; }
-
     public Guid? RelatedProductId { get; private set; }
-
     public string? Note { get; private set; }
 
-    private readonly List<StockMovementLotConsumption> _lotConsumptions = new();
+    private readonly List<StockMovementLotConsumption> _lotConsumptions = new(); // bir stok hareketinin hangi partiler'den ne kadar tükettiğinin listesi
     public IReadOnlyCollection<StockMovementLotConsumption> LotConsumptions => _lotConsumptions;
 
-    public decimal WeightedUnitPrice =>
-        Quantity <= 0
-            ? 0
-            : _lotConsumptions.Sum(c => c.QuantityConsumed * c.UnitPriceAtConsumption) / Quantity;
-
+    public decimal WeightedUnitPrice => Quantity <= 0 ? 0 : _lotConsumptions.Sum(c => c.QuantityConsumed * c.UnitPriceAtConsumption) / Quantity;
     private StockMovement() { }
 
-    private StockMovement(
-        Guid ingredientId,
-        Guid locationId,
-        StockMovementType type,
-        decimal quantity,
-        Guid performedByUserId,
-        Guid? relatedOrderId,
-        Guid? relatedProductId,
-        string? note)
+    private StockMovement(Guid ingredientId, Guid locationId, StockMovementType type, decimal quantity, Guid performedByUserId, Guid? relatedOrderId,Guid? relatedProductId, string? note)
     {
-        if (quantity <= 0)
-            throw new ArgumentOutOfRangeException(nameof(quantity), "Hareket miktarı pozitif olmalı.");
+        if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity), "Hareket miktarı pozitif olmalı.");
 
         IngredientId = ingredientId;
         LocationId = locationId;
@@ -67,8 +48,8 @@ public class StockMovement : BaseEntity
     {
         var total = consumptions.Sum(c => c.Quantity);
         var movement = new StockMovement(ingredientId, locationId, StockMovementType.ORDER_SALE, total, performedByUserId, orderId, null, null);
-        foreach (var (lot, qty) in consumptions)
-            movement._lotConsumptions.Add(new StockMovementLotConsumption(movement.Id, lot.Id, qty, lot.UnitPrice));
+        foreach (var (lot, q) in consumptions)
+            movement._lotConsumptions.Add(new StockMovementLotConsumption(movement.Id, lot.Id, q, lot.UnitPrice));
         return movement;
     }
 
@@ -76,8 +57,8 @@ public class StockMovement : BaseEntity
     {
         var total = consumptions.Sum(c => c.Quantity);
         var movement = new StockMovement(ingredientId, locationId, StockMovementType.MANUAL_DEDUCTION, total, performedByUserId, null, null, note);
-        foreach (var (lot, qty) in consumptions)
-            movement._lotConsumptions.Add(new StockMovementLotConsumption(movement.Id, lot.Id, qty, lot.UnitPrice));
+        foreach (var (lot, q) in consumptions)
+            movement._lotConsumptions.Add(new StockMovementLotConsumption(movement.Id, lot.Id, q, lot.UnitPrice));
         return movement;
     }
 
@@ -85,8 +66,8 @@ public class StockMovement : BaseEntity
     {
         var total = consumptions.Sum(c => c.Quantity);
         var movement = new StockMovement(ingredientId, locationId, StockMovementType.PRODUCTION_DEDUCTION, total, performedByUserId, null, producedProductId, note);
-        foreach (var (lot, qty) in consumptions)
-            movement._lotConsumptions.Add(new StockMovementLotConsumption(movement.Id, lot.Id, qty, lot.UnitPrice));
+        foreach (var (lot, q) in consumptions)
+            movement._lotConsumptions.Add(new StockMovementLotConsumption(movement.Id, lot.Id, q, lot.UnitPrice));
         return movement;
     }
 }

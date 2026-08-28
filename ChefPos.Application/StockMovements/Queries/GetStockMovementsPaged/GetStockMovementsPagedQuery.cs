@@ -13,12 +13,7 @@ public class GetStockMovementsPagedQuery : IRequest<PagedResult<StockMovementRes
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
 
-    public GetStockMovementsPagedQuery(
-        Guid? ingredientId,
-        Guid? locationId,
-        StockMovementType? type,
-        int pageNumber = 1,
-        int pageSize = 20)
+    public GetStockMovementsPagedQuery(Guid? ingredientId, Guid? locationId, StockMovementType? type, int pageNumber = 1,int pageSize = 20)
     {
         IngredientId = ingredientId;
         LocationId = locationId;

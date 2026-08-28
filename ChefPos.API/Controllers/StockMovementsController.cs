@@ -22,13 +22,7 @@ public class StockMovementsController : ControllerBase
 
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("paged")]
-    public async Task<ActionResult<PagedResult<StockMovementResponseDto>>> GetPaged(
-        [FromQuery] Guid? ingredientId,
-        [FromQuery] Guid? locationId,
-        [FromQuery] StockMovementType? type,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+    public async Task<ActionResult<PagedResult<StockMovementResponseDto>>> GetPaged([FromQuery] Guid? ingredientId, [FromQuery] Guid? locationId, [FromQuery] StockMovementType? type, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
         var query = new GetStockMovementsPagedQuery(ingredientId, locationId, type, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);

@@ -1,5 +1,4 @@
 namespace ChefPos.Infastructure.Repositories;
-using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Domain.Enums;
 using ChefPos.Infastructure.Persistence;
@@ -24,13 +23,7 @@ public class StockMovementRepository : IStockMovementRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<(List<StockMovement> Items, int TotalCount)> GetAllPagedAsync(
-        Guid? ingredientId,
-        Guid? locationId,
-        StockMovementType? type,
-        int pageNumber,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<(List<StockMovement> Items, int TotalCount)> GetAllPagedAsync(Guid? ingredientId, Guid? locationId, StockMovementType? type, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = _context.StockMovements
             .Include(m => m.Ingredient)
@@ -51,10 +44,7 @@ public class StockMovementRepository : IStockMovementRepository
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+        var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         return (items, totalCount);
     }

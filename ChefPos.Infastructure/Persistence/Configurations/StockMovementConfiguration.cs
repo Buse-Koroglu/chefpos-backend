@@ -12,23 +12,13 @@ public class StockMovementConfiguration : IEntityTypeConfiguration<StockMovement
         builder.Property(m => m.Quantity).HasPrecision(10, 3);
         builder.Property(m => m.Note).HasMaxLength(500);
 
-        builder.HasOne(m => m.Ingredient)
-            .WithMany()
-            .HasForeignKey(m => m.IngredientId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(m => m.Ingredient).WithMany().HasForeignKey(m => m.IngredientId).OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(m => m.Location)
-            .WithMany()
-            .HasForeignKey(m => m.LocationId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(m => m.Location).WithMany().HasForeignKey(m => m.LocationId).OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(m => m.PerformedByUser)
-            .WithMany()
-            .HasForeignKey(m => m.PerformedByUserId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(m => m.PerformedByUser).WithMany().HasForeignKey(m => m.PerformedByUserId).OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(m => m.LotConsumptions)
-            .WithOne(c => c.StockMovement)
+        builder.HasMany(m => m.LotConsumptions).WithOne(c => c.StockMovement)
             .HasForeignKey(c => c.StockMovementId)
             .OnDelete(DeleteBehavior.Cascade);
 
