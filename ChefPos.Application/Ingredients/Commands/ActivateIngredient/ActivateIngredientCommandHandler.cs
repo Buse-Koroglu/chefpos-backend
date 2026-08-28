@@ -22,17 +22,13 @@ public class ActivateIngredientCommandHandler : IRequestHandler<ActivateIngredie
 
     public async Task<IngredientResponseDto> Handle(ActivateIngredientCommand request,CancellationToken cancellationToken)
     {
-        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
+        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(ingredient.LocationId))
-        {
             throw new ValidationException("Bu ham maddeyi yönetme yetkiniz yok.");
-        }
-
+        
         ingredient.ActivateIngredient();
 
         await _ingredientRepository.SaveAllChangesAsync(cancellationToken);

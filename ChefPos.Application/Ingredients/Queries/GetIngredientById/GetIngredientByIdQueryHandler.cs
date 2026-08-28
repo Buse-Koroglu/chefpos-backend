@@ -13,9 +13,7 @@ public class GetIngredientByIdQueryHandler : IRequestHandler<GetIngredientByIdQu
 
     public async Task<IngredientResponseDto> Handle(GetIngredientByIdQuery request, CancellationToken cancellationToken)
     {
-        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
-
+        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
         return IngredientResponseDto.FromEntity(ingredient);
     }
 }

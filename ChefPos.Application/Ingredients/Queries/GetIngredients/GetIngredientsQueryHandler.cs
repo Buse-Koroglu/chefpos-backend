@@ -16,8 +16,7 @@ public class GetIngredientsQueryHandler : IRequestHandler<GetIngredientsQuery,Li
 
     public async Task<List<IngredientResponseDto>> Handle(GetIngredientsQuery request, CancellationToken cancellationToken)
     {
-        var ingredients =
-            await _ingredientRepository.GetAllByLocationAsync(request.LocationId, request.IncludeInactive,cancellationToken);
+        var ingredients = await _ingredientRepository.GetAllByLocationAsync(request.LocationId, request.IncludeInactive,cancellationToken);
         return ingredients.Select(IngredientResponseDto.FromEntity).ToList();
         
     }

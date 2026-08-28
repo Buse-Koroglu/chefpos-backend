@@ -1,5 +1,5 @@
 namespace ChefPos.Application.Ingredients.DTOs;
-public class RecordProductProductionRequest
+public class ProductProductionRequest
 {
     public Guid ProductId { get; set; }
     public Guid LocationId { get; set; }

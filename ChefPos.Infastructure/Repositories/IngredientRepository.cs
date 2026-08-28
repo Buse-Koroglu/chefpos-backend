@@ -15,16 +15,12 @@ public class IngredientRepository : IIngredientRepository
 
     public async Task<Ingredient?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Ingredients
-            .Include(i => i.Lots)
-            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+        return await _context.Ingredients .Include(i => i.Lots).FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
     }
 
     public async Task<List<Ingredient>> GetAllByLocationAsync(Guid locationId, bool includeInactive, CancellationToken cancellationToken)
     {
-        var query = _context.Ingredients
-            .Include(i => i.Lots)
-            .Where(i => i.LocationId == locationId);
+        var query = _context.Ingredients.Include(i => i.Lots).Where(i => i.LocationId == locationId);
 
         if (!includeInactive)
         {
@@ -53,16 +49,9 @@ public class IngredientRepository : IIngredientRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<(List<Ingredient> Items, int TotalCount)> GetAllPagedAsync(
-        string? searchTerm,
-        Guid? locationId,
-        bool? isActive,
-        int pageNumber,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<(List<Ingredient> Items, int TotalCount)> GetAllPagedAsync(string? searchTerm, Guid? locationId, bool? isActive, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
-        var query = _context.Ingredients
-            .Include(i => i.Location)
+        var query = _context.Ingredients.Include(i => i.Location)
             .Include(i => i.Lots)
             .AsQueryable();
 
@@ -79,23 +68,14 @@ public class IngredientRepository : IIngredientRepository
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+        var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         return (items, totalCount);
     }
 
-    public async Task<List<Ingredient>> GetAllForExportAsync(
-        string? searchTerm,
-        Guid? locationId,
-        bool? isActive,
-        int maxRows,
-        CancellationToken cancellationToken)
+    public async Task<List<Ingredient>> GetAllForExportAsync(string? searchTerm, Guid? locationId, bool? isActive, int maxRows, CancellationToken cancellationToken)
     {
-        var query = _context.Ingredients
-            .AsNoTracking()
+        var query = _context.Ingredients.AsNoTracking()
             .Include(i => i.Location)
             .Include(i => i.Lots)
             .AsQueryable();

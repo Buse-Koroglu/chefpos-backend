@@ -16,8 +16,7 @@ public class UpdateIngredientMinStockThresholdCommandHandler : IRequestHandler<U
 
     public async Task<IngredientResponseDto> Handle(UpdateIngredientMinStockThresholdCommand request, CancellationToken cancellationToken)
     {
-        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
+        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
         ingredient.UpdateMinStockThreshold(request.MinStockThreshold);
 

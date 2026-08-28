@@ -15,11 +15,7 @@ public class RecordManualIngredientDeductionCommandHandler : IRequestHandler<Rec
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public RecordManualIngredientDeductionCommandHandler(
-        IIngredientRepository ingredientRepository,
-        IStockMovementRepository stockMovementRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public RecordManualIngredientDeductionCommandHandler(IIngredientRepository ingredientRepository, IStockMovementRepository stockMovementRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _ingredientRepository = ingredientRepository;
         _stockMovementRepository = stockMovementRepository;
@@ -30,27 +26,19 @@ public class RecordManualIngredientDeductionCommandHandler : IRequestHandler<Rec
     public async Task<IngredientResponseDto> Handle(RecordManualIngredientDeductionCommand request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Note))
-        {
             throw new ValidationException("Elden düşme için bir açıklama/gerekçe girilmelidir.");
-        }
 
         var currentUserId = _currentUserService.UserId;
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
         if (!currentUser.HasRole(Role.INVENTORY_STAFF) && !currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.SUPER_ADMIN))
-        {
             throw new ValidationException("Sadece depo görevlisi, stok yöneticisi veya admin elden stok düşümü yapabilir.");
-        }
-
-        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
+        
+        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
         if (!currentUser.HasRole(Role.SUPER_ADMIN) && !currentUser.HasAccessToLocation(ingredient.LocationId))
-        {
             throw new ValidationException("Bu kullanıcının, hammaddenin bulunduğu yerleşkeye erişimi yok.");
-        }
-
+        
         var consumptions = ingredient.DeductStockFifo(request.Quantity);
         var movement = StockMovement.CreateManualDeduction(ingredient.Id, ingredient.LocationId, currentUserId, consumptions, request.Note);
 

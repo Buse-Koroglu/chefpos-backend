@@ -9,9 +9,7 @@ public class CreateIngredientCommandHandler : IRequestHandler<CreateIngredientCo
     private readonly IIngredientRepository _ingredientRepository;
     private readonly ILocationRepository _locationRepository;
 
-    public CreateIngredientCommandHandler(
-        IIngredientRepository ingredientRepository,
-        ILocationRepository locationRepository)
+    public CreateIngredientCommandHandler(IIngredientRepository ingredientRepository, ILocationRepository locationRepository)
     {
         _ingredientRepository = ingredientRepository;
         _locationRepository = locationRepository;
@@ -20,9 +18,7 @@ public class CreateIngredientCommandHandler : IRequestHandler<CreateIngredientCo
     public async Task<List<IngredientResponseDto>> Handle(CreateIngredientCommand request, CancellationToken cancellationToken)
     {
         if (request.LocationIds is null || request.LocationIds.Count == 0)
-        {
             throw new ValidationException("En az bir yerleşke seçilmelidir.");
-        }
 
         var distinctLocationIds = request.LocationIds.Distinct().ToList();
         var createdIngredients = new List<Ingredient>();
@@ -46,9 +42,8 @@ public class CreateIngredientCommandHandler : IRequestHandler<CreateIngredientCo
         }
 
         foreach (var ingredient in createdIngredients)
-        {
             await _ingredientRepository.AddAsync(ingredient, cancellationToken);
-        }
+        
 
         await _ingredientRepository.SaveAllChangesAsync(cancellationToken);
 

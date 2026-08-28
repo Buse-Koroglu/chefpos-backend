@@ -14,11 +14,7 @@ public class GetKitchenOrdersQueryHandler : IRequestHandler<GetKitchenOrdersQuer
 
     public async Task<List<OrderResponseDto>> Handle(GetKitchenOrdersQuery request, CancellationToken cancellationToken)
     {
-        var orders = await _orderRepository.GetAllByLocationAsync(
-            request.LocationId,
-            request.Status,
-            OrderType.WAITER,
-            cancellationToken);
+        var orders = await _orderRepository.GetAllByLocationAsync(request.LocationId, request.Status, OrderType.WAITER, cancellationToken);
 
         return orders.Select(OrderResponseDto.FromEntity).ToList();
     }

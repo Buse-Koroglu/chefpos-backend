@@ -15,11 +15,7 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PagedResult
         private readonly IUserRepository _userRepository;
         private readonly ICurrentUserService _currentUserService;
 
-        public GetOrdersQueryHandler(
-            IOrderRepository orderRepository,
-            ILocationRepository locationRepository,
-            IUserRepository userRepository,
-            ICurrentUserService currentUserService)
+        public GetOrdersQueryHandler(IOrderRepository orderRepository,ILocationRepository locationRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
         {
             _orderRepository = orderRepository;
             _locationRepository = locationRepository;
@@ -27,49 +23,26 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PagedResult
             _currentUserService = currentUserService;
         }
 
-        public async Task<PagedResult<OrderResponseDto>> Handle(
-            GetOrdersQuery request,
-            CancellationToken cancellationToken)
+        public async Task<PagedResult<OrderResponseDto>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
         {
-            await _locationRepository
-                .GetByIdAsync(request.LocationId, cancellationToken)
-                .OrThrowNotFoundAsync(
-                    $"Yerleşke bulunamadı: {request.LocationId}");
+            await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
 
             var requestingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken);
             if (requestingUser is null)
                 throw new NotFoundException("Kullanıcı bulunamadı.");
 
-            // Sadece garson rolüne sahip kullanıcılar kendi siparişleriyle sınırlandırılır;
-            // kasiyer/admin/mutfak gibi ek rolleri olanlar yerleşkedeki tüm siparişleri görmeye devam eder.
-            var isWaiterOnly = requestingUser.HasRole(Role.WAITER)
-                && !requestingUser.HasRole(Role.CASHIER)
-                && !requestingUser.HasRole(Role.ADMIN)
-                && !requestingUser.HasRole(Role.KITCHEN)
-                && !requestingUser.HasRole(Role.SUPER_ADMIN);
+            // Sadece garson kendi siprişlerini görür
+            // kasiyer/admin/mutfak yerleşkedeki tüm siparişleri görür
+            var isWaiterOnly = requestingUser.HasRole(Role.WAITER) && !requestingUser.HasRole(Role.CASHIER) && !requestingUser.HasRole(Role.ADMIN) && !requestingUser.HasRole(Role.KITCHEN) && !requestingUser.HasRole(Role.SUPER_ADMIN);
 
             var createdByUserId = isWaiterOnly ? requestingUser.Id : request.CreatedByUserId;
 
             var (orders, totalCount) =
-                await _orderRepository.GetAllByLocationPagedAsync(
-                    request.LocationId,
-                    request.Status,
-                    request.Type,
-                    request.PaymentStatus,
-                    request.SearchTerm,
-                    createdByUserId,
-                    request.FromDate,
-                    request.ToDate,
-                    request.PageNumber,
-                    request.PageSize,
-                    cancellationToken);
+                await _orderRepository.GetAllByLocationPagedAsync(request.LocationId, request.Status, request.Type, request.PaymentStatus, request.SearchTerm, createdByUserId, request.FromDate, request.ToDate, request.PageNumber, request.PageSize, cancellationToken);
 
             return new PagedResult<OrderResponseDto>
             {
-                Items = orders
-                    .Select(OrderResponseDto.FromEntity)
-                    .ToList(),
-
+                Items = orders.Select(OrderResponseDto.FromEntity).ToList(),
                 TotalCount = totalCount,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize

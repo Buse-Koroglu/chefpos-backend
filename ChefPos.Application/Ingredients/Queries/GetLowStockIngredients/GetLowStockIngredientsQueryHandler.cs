@@ -12,7 +12,6 @@ public class GetLowStockIngredientsQueryHandler : IRequestHandler<GetLowStockIng
     public async Task<List<IngredientResponseDto>> Handle(GetLowStockIngredientsQuery request, CancellationToken cancellationToken)
     {
         var ingredients = await _ingredientRepository.GetLowStockAsync(request.LocationId, cancellationToken);
-
         return ingredients.Select(IngredientResponseDto.FromEntity).ToList();
     }
 }

@@ -14,10 +14,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public GetOrderByIdQueryHandler(
-        IOrderRepository orderRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public GetOrderByIdQueryHandler(IOrderRepository orderRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _orderRepository = orderRepository;
         _userRepository = userRepository;
@@ -32,11 +29,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
         if (requestingUser is null)
             throw new NotFoundException("Kullanıcı bulunamadı.");
 
-        var isWaiterOnly = requestingUser.HasRole(Role.WAITER)
-            && !requestingUser.HasRole(Role.CASHIER)
-            && !requestingUser.HasRole(Role.ADMIN)
-            && !requestingUser.HasRole(Role.KITCHEN)
-            && !requestingUser.HasRole(Role.SUPER_ADMIN);
+        var isWaiterOnly = requestingUser.HasRole(Role.WAITER) && !requestingUser.HasRole(Role.CASHIER) && !requestingUser.HasRole(Role.ADMIN) && !requestingUser.HasRole(Role.KITCHEN) && !requestingUser.HasRole(Role.SUPER_ADMIN);
 
         if (isWaiterOnly && order.CreatedByUserId != requestingUser.Id)
             throw new ForbiddenException("Bu siparişi görüntüleme yetkiniz yok.");

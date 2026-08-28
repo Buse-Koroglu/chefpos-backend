@@ -30,8 +30,7 @@ public class Order : BaseEntity
     
     private void CalculateTotalPrice() => TotalPrice = _items.Sum(i => i.Price * i.Quantity);
     
-    public static Order CreateByCashier(Guid locationId, Guid cashierId, string customerName)
-        => CreateByStaff(locationId, cashierId, customerName, OrderType.CASHIER, null);
+    public static Order CreateByCashier(Guid locationId, Guid cashierId, string customerName) => CreateByStaff(locationId, cashierId, customerName, OrderType.CASHIER, null);
 
     public static Order CreateByWaiter(Guid locationId, Guid waiterId, string customerName, Table table)
     {
@@ -49,8 +48,7 @@ public class Order : BaseEntity
         return order;
     }
 
-    public static Order CreatePackageByWaiter(Guid locationId, Guid waiterId, string customerName)
-        => CreateByStaff(locationId, waiterId, customerName, OrderType.WAITER, null, isPackage: true);
+    public static Order CreatePackageByWaiter(Guid locationId, Guid waiterId, string customerName) => CreateByStaff(locationId, waiterId, customerName, OrderType.WAITER, null, isPackage: true);
 
     private static Order CreateByStaff(Guid locationId, Guid createdByUserId, string customerName, OrderType orderType, Guid? tableId, bool isPackage = false)
     {

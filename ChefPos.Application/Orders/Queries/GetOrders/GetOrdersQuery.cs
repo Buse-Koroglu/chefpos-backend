@@ -25,25 +25,13 @@ public class GetOrdersQuery : IRequest<PagedResult<OrderResponseDto>>
     public int PageNumber { get; }
     public int PageSize { get; }
 
-    public GetOrdersQuery(
-        Guid locationId,
-        OrderStatus? status,
-        OrderType? type,
-        PaymentStatus? paymentStatus,
-        string? searchTerm,
-        Guid? createdByUserId = null,
-        DateTime? fromDate = null,
-        DateTime? toDate = null,
-        int pageNumber = 1,
-        int pageSize = 20)
+    public GetOrdersQuery(Guid locationId,OrderStatus? status,OrderType? type,PaymentStatus? paymentStatus, string? searchTerm, Guid? createdByUserId = null, DateTime? fromDate = null, DateTime? toDate = null, int pageNumber = 1, int pageSize = 20)
     {
         LocationId = locationId;
         Status = status;
         PaymentStatus = paymentStatus;
         Type = type;
-        SearchTerm = string.IsNullOrWhiteSpace(searchTerm)
-            ? null
-            : searchTerm.Trim();
+        SearchTerm = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm.Trim();
         CreatedByUserId = createdByUserId;
         FromDate = fromDate;
         ToDate = toDate;

@@ -22,19 +22,17 @@ public class Ingredient : BaseEntity
     public decimal? LatestUnitPrice => _lots.OrderByDescending(l => l.PurchasedAt).FirstOrDefault()?.UnitPrice;
 
     public decimal WeightedAverageUnitPrice
-    {
-        get
+    { get
         {
             var remaining = _lots.Where(l => l.RemainingQuantity > 0).ToList();
-            var totalQty = remaining.Sum(l => l.RemainingQuantity);
-            return totalQty <= 0 ? 0 : remaining.Sum(l => l.RemainingQuantity * l.UnitPrice) / totalQty;
+            var totalQuantity = remaining.Sum(l => l.RemainingQuantity);
+            return totalQuantity <= 0 ? 0 : remaining.Sum(l => l.RemainingQuantity * l.UnitPrice) / totalQuantity;
         }
     }
 
     private Ingredient(){}
 
-    public Ingredient(string name, StockUnit unit, decimal initialUnitPrice, Guid locationId, decimal initialStock = 0,
-        decimal minStockThreshold = 0)
+    public Ingredient(string name, StockUnit unit, decimal initialUnitPrice, Guid locationId, decimal initialStock = 0, decimal minStockThreshold = 0)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -69,10 +67,7 @@ public class Ingredient : BaseEntity
 
     public void UpdateDetails(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Ham madde adı boş olamaz.", nameof(name));
-        }
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Ham madde adı boş olamaz.", nameof(name));
         Name = name;
         Touch();
     }
@@ -80,9 +75,7 @@ public class Ingredient : BaseEntity
     public void UpdateMinStockThreshold(decimal minStockThreshold)
     {
         if (minStockThreshold < 0)
-        {
             throw new ArgumentOutOfRangeException(nameof(minStockThreshold), "Minimum stok eşiği negatif olamaz.");
-        }
         MinStockThreshold = minStockThreshold;
         Touch();
     }
@@ -90,13 +83,9 @@ public class Ingredient : BaseEntity
     public IngredientLot AddPurchaseLot(decimal quantity, decimal unitPrice, Guid? sourceStockRequestId = null, DateTime? purchasedAt = null)
     {
         if (quantity <= 0)
-        {
             throw new ArgumentOutOfRangeException(nameof(quantity), "Eklenecek miktar pozitif olmalı.");
-        }
         if (unitPrice < 0)
-        {
             throw new ArgumentOutOfRangeException(nameof(unitPrice), "Fiyat negatif olamaz.");
-        }
 
         var lot = new IngredientLot(Id, quantity, unitPrice, sourceStockRequestId, purchasedAt);
         _lots.Add(lot);
@@ -109,9 +98,7 @@ public class Ingredient : BaseEntity
     {
         var latestLot = _lots.OrderByDescending(l => l.PurchasedAt).FirstOrDefault();
         if (latestLot is null)
-        {
             throw new InvalidOperationException($"'{Name}' için düzenlenecek bir alış kaydı bulunmuyor.");
-        }
 
         latestLot.UpdateUnitPrice(newUnitPrice);
         Touch();
@@ -120,16 +107,11 @@ public class Ingredient : BaseEntity
     public IReadOnlyList<(IngredientLot Lot, decimal Quantity)> DeductStockFifo(decimal amount)
     {
         if (amount <= 0)
-        {
             throw new ArgumentOutOfRangeException(nameof(amount), "Düşülecek miktar pozitif olmalı.");
-        }
-
+        
         if (CurrentStock - amount < 0)
-        {
-            throw new InvalidOperationException(
-                $"Yetersiz stok: '{Name}' için mevcut stok {CurrentStock}, talep edilen {amount}.");
-        }
-
+            throw new InvalidOperationException($"Yetersiz stok: '{Name}' için mevcut stok {CurrentStock}, talep edilen {amount}.");
+        
         var remainingToDeduct = amount;
         var consumptions = new List<(IngredientLot Lot, decimal Quantity)>();
 

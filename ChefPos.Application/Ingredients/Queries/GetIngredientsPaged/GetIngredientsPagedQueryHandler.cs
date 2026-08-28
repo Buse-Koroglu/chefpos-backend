@@ -22,8 +22,7 @@ public class GetIngredientsPagedQueryHandler : IRequestHandler<GetIngredientsPag
 
     public async Task<PagedResult<IngredientAdminResponseDto>> Handle(GetIngredientsPagedQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
@@ -31,8 +30,7 @@ public class GetIngredientsPagedQueryHandler : IRequestHandler<GetIngredientsPag
             locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
         }
 
-        var (ingredients, totalCount) = await _ingredientRepository.GetAllPagedAsync(
-            request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
+        var (ingredients, totalCount) = await _ingredientRepository.GetAllPagedAsync(request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
 
         var items = ingredients.Select(i => new IngredientAdminResponseDto
         {

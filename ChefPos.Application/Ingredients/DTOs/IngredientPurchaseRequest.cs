@@ -1,6 +1,6 @@
 namespace ChefPos.Application.Ingredients.DTOs;
 
-public class RecordIngredientPurchaseRequest
+public class IngredientPurchaseRequest
 {
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }

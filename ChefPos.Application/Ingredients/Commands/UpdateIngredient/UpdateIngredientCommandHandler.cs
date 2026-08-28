@@ -22,16 +22,12 @@ public class UpdateIngredientCommandHandler : IRequestHandler<UpdateIngredientCo
 
     public async Task<IngredientResponseDto> Handle(UpdateIngredientCommand request, CancellationToken cancellationToken)
     {
-        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
+        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(ingredient.LocationId))
-        {
             throw new ValidationException("Bu ham maddeyi yönetme yetkiniz yok.");
-        }
 
         if (!ingredient.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase))
         {
@@ -43,9 +39,7 @@ public class UpdateIngredientCommandHandler : IRequestHandler<UpdateIngredientCo
         }
 
         ingredient.UpdateDetails(request.Name);
-
         await _ingredientRepository.SaveAllChangesAsync(cancellationToken);
-
         return IngredientResponseDto.FromEntity(ingredient);
     }
 }

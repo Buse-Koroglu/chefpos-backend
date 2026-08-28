@@ -141,7 +141,7 @@ public class IngredientsController : ControllerBase
     /// <summary>Yeni bir alış partisi (lot) kaydeder: miktar + o anki fiyat.</summary>
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpPost("{id}/purchases")]
-    public async Task<ActionResult> RecordPurchase([FromRoute] Guid id, RecordIngredientPurchaseRequest body, CancellationToken cancellationToken)
+    public async Task<ActionResult> RecordPurchase([FromRoute] Guid id, IngredientPurchaseRequest body, CancellationToken cancellationToken)
     {
         var command = new RecordIngredientPurchaseCommand(id, body.Quantity, body.UnitPrice, body.Note);
         var result = await _mediator.Send(command, cancellationToken);
@@ -151,7 +151,7 @@ public class IngredientsController : ControllerBase
     /// <summary>Siparişten bağımsız, elle stok düşümü (fire, zayiat, sipariş dışı elle tüketim).</summary>
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpPost("{id}/manual-deduction")]
-    public async Task<ActionResult> RecordManualDeduction([FromRoute] Guid id, RecordManualDeductionRequest body, CancellationToken cancellationToken)
+    public async Task<ActionResult> RecordManualDeduction([FromRoute] Guid id, ManualDeductionRequest body, CancellationToken cancellationToken)
     {
         var command = new RecordManualIngredientDeductionCommand(id, body.Quantity, body.Note);
         var result = await _mediator.Send(command, cancellationToken);
@@ -161,7 +161,7 @@ public class IngredientsController : ControllerBase
     /// <summary>Sipariş dışında üretilen bir ürünün reçetesine göre ham madde stoklarını düşer.</summary>
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpPost("production")]
-    public async Task<ActionResult> RecordProductProduction(RecordProductProductionRequest body, CancellationToken cancellationToken)
+    public async Task<ActionResult> RecordProductProduction(ProductProductionRequest body, CancellationToken cancellationToken)
     {
         var command = new RecordProductProductionCommand(body.ProductId, body.LocationId, body.Quantity, body.Note);
         var result = await _mediator.Send(command, cancellationToken);

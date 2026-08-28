@@ -22,11 +22,9 @@ public class UpdateIngredientPriceCommandHandler : IRequestHandler<UpdateIngredi
 
     public async Task<IngredientResponseDto> Handle(UpdateIngredientPriceCommand request, CancellationToken cancellationToken)
     {
-        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken)
-            .OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
+        var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(ingredient.LocationId))
         {
@@ -34,9 +32,7 @@ public class UpdateIngredientPriceCommandHandler : IRequestHandler<UpdateIngredi
         }
 
         ingredient.UpdateLatestPurchasePrice(request.UnitPrice);
-
         await _ingredientRepository.SaveAllChangesAsync(cancellationToken);
-
         return IngredientResponseDto.FromEntity(ingredient);
     }
 }

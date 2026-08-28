@@ -11,9 +11,7 @@ public class OrderItem : BaseEntity
     public decimal Price { get; private set; }
     public int Quantity { get; private set; }
     
-    private  OrderItem()
-    {
-    }
+    private  OrderItem() { }
 
     internal OrderItem(Guid productId, string name, decimal price, int quantity)
     {

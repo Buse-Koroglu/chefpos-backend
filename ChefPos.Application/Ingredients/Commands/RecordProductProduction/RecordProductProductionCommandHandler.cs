@@ -1,3 +1,4 @@
+using ChefPos.Application.Common.Behaviors;
 using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Ingredients.Commands.RecordProductProduction;
@@ -14,12 +15,7 @@ public class RecordProductProductionCommandHandler : IRequestHandler<RecordProdu
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public RecordProductProductionCommandHandler(
-        IProductRepository productRepository,
-        IStockMovementRepository stockMovementRepository,
-        IIngredientRepository ingredientRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public RecordProductProductionCommandHandler(IProductRepository productRepository, IStockMovementRepository stockMovementRepository, IIngredientRepository ingredientRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _productRepository = productRepository;
         _stockMovementRepository = stockMovementRepository;
@@ -31,43 +27,27 @@ public class RecordProductProductionCommandHandler : IRequestHandler<RecordProdu
     public async Task<List<IngredientResponseDto>> Handle(RecordProductProductionCommand request, CancellationToken cancellationToken)
     {
         if (request.Quantity <= 0)
-        {
             throw new ValidationException("Üretilen adet 0'dan büyük olmalı.");
-        }
 
         var currentUserId = _currentUserService.UserId;
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
-        if (currentUser is null)
-        {
-            throw new NotFoundException($"Kullanıcı bulunamadı: {currentUserId}");
-        }
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
         if (!currentUser.HasRole(Role.INVENTORY_STAFF) && !currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.SUPER_ADMIN))
-        {
             throw new ValidationException("Sadece depo görevlisi, stok yöneticisi veya admin üretim kaydı girebilir.");
-        }
+        
 
         if (!currentUser.HasRole(Role.SUPER_ADMIN) && !currentUser.HasAccessToLocation(request.LocationId))
-        {
             throw new ValidationException("Bu kullanıcının belirtilen yerleşkeye erişimi yok.");
-        }
 
         var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);
         if (product is null)
-        {
             throw new NotFoundException($"Ürün bulunamadı: {request.ProductId}");
-        }
 
         var productLocation = product.ProductLocations.FirstOrDefault(pl => pl.LocationId == request.LocationId);
-        if (productLocation is null)
-        {
-            throw new ValidationException($"'{product.Name}' ürünü bu yerleşkede tanımlı değil.");
-        }
+        if (productLocation is null) throw new ValidationException($"'{product.Name}' ürünü bu yerleşkede tanımlı değil.");
 
         if (!productLocation.ProductItems.Any())
-        {
             throw new ValidationException($"'{product.Name}' ürününün bu yerleşkede tanımlı bir reçetesi (ham madde listesi) yok.");
-        }
 
         var affectedIngredients = new List<Ingredient>();
 
