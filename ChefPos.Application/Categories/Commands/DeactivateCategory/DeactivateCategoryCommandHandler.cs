@@ -15,11 +15,7 @@ public class DeactivateCategoryCommandHandler : IRequestHandler<DeactivateCatego
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public DeactivateCategoryCommandHandler(
-        ICategoryRepository categoryRepository,
-        ILocationRepository locationRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public DeactivateCategoryCommandHandler(ICategoryRepository categoryRepository, ILocationRepository locationRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _categoryRepository = categoryRepository;
         _locationRepository = locationRepository;
@@ -27,27 +23,19 @@ public class DeactivateCategoryCommandHandler : IRequestHandler<DeactivateCatego
         _currentUserService = currentUserService;
     }
 
-    public async Task<CategoryResponseDto> Handle(DeactivateCategoryCommand request,
-        CancellationToken cancellationToken)
+    public async Task<CategoryResponseDto> Handle(DeactivateCategoryCommand request,CancellationToken cancellationToken)
     {
-        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken)
-            .OrThrowNotFoundAsync($"Yerleşke Bulunamadı : {request.LocationId}");
+        await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke Bulunamadı : {request.LocationId}");
 
-        var category = await _categoryRepository.GetByIdAsync(request.Id, cancellationToken)
-            .OrThrowNotFoundAsync($"Kategori bulunamadı : {request.Id}");
+        var category = await _categoryRepository.GetByIdAsync(request.Id, cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı : {request.Id}");
 
         if (!category.BelongsToLocation(request.LocationId))
-        {
             throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
-        }
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
-        {
             throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
-        }
 
         category.DeactivateCategory();
         await _categoryRepository.SaveAllChangesAsync(cancellationToken);

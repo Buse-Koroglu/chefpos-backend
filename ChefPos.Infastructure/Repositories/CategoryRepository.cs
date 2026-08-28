@@ -13,9 +13,7 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Categories
-            .Include(c => c.CategoryLocations)
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return await _context.Categories.Include(c => c.CategoryLocations).FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public async Task<List<Category>> GetAllByLocationAsync(Guid locationId, bool includeInactive, CancellationToken cancellationToken)
@@ -23,10 +21,8 @@ public class CategoryRepository : ICategoryRepository
         var query = _context.Categories.Where(c => c.CategoryLocations.Any(cl => cl.LocationId == locationId));
 
         if (!includeInactive)
-        {
             query = query.Where(c => c.IsActive);
-        }
-
+        
         return await query.OrderBy(c => c.Name).ToListAsync(cancellationToken);
     }
 
@@ -40,17 +36,10 @@ public class CategoryRepository : ICategoryRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<(List<Category> Items, int TotalCount)> GetAllPagedAsync(
-        string? searchTerm,
-        Guid? locationId,
-        bool? isActive,
-        int pageNumber,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<(List<Category> Items, int TotalCount)> GetAllPagedAsync(string? searchTerm, Guid? locationId, bool? isActive, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
-        var query = _context.Categories
-            .Include(c => c.CategoryLocations)
-                .ThenInclude(cl => cl.Location)
+        var query = _context.Categories.Include(c => c.CategoryLocations)
+            .ThenInclude(cl => cl.Location)
             .Include(c => c.Products)
             .AsQueryable();
 
@@ -66,26 +55,15 @@ public class CategoryRepository : ICategoryRepository
         query = query.OrderBy(c => c.Name);
 
         var totalCount = await query.CountAsync(cancellationToken);
-
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
+        var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return (items, totalCount);
     }
 
-    public async Task<List<Category>> GetAllForExportAsync(
-        string? searchTerm,
-        Guid? locationId,
-        bool? isActive,
-        int maxRows,
-        CancellationToken cancellationToken)
+    public async Task<List<Category>> GetAllForExportAsync(string? searchTerm, Guid? locationId, bool? isActive, int maxRows, CancellationToken cancellationToken)
     {
-        var query = _context.Categories
-            .AsNoTracking()
+        var query = _context.Categories.AsNoTracking()
             .Include(c => c.CategoryLocations)
-                .ThenInclude(cl => cl.Location)
+            .ThenInclude(cl => cl.Location)
             .Include(c => c.Products)
             .AsQueryable();
 
@@ -109,9 +87,7 @@ public class CategoryRepository : ICategoryRepository
     {
         var category = await GetByIdAsync(id, cancellationToken);
         if (category is null)
-        {
             throw new KeyNotFoundException("Kategori bulunamadı.");
-        }
         _context.Categories.Remove(category);
     }
 }

@@ -24,13 +24,10 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
     {
         var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken).OrThrowNotFoundAsync($"Kategori Bulunamadı: {request.CategoryId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !category.CategoryLocations.Any(cl => actingUser.HasAccessToLocation(cl.LocationId)))
-        {
             throw new ValidationException("Bu kategoriyi yönetme yetkiniz yok.");
-        }
 
         category.UpdateDetails(request.Name,request.Icon);
         await _categoryRepository.SaveAllChangesAsync(cancellationToken);

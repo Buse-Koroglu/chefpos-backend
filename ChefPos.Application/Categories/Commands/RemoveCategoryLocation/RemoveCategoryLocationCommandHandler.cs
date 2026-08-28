@@ -22,16 +22,12 @@ public class RemoveCategoryLocationCommandHandler : IRequestHandler<RemoveCatego
 
     public async Task<CategoryResponseDto> Handle(RemoveCategoryLocationCommand request, CancellationToken cancellationToken)
     {
-        var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kategori bulunamadı: {request.CategoryId}");
+        var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken).OrThrowNotFoundAsync($"Kategori bulunamadı: {request.CategoryId}");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
-        {
             throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
-        }
 
         category.RemoveLocation(request.LocationId);
         await _categoryRepository.SaveAllChangesAsync(cancellationToken);

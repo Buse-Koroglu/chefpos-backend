@@ -19,15 +19,11 @@ public class Category : BaseEntity
     public Category(string categoryName, IEnumerable<Guid> locationIds, string? icon = null)
     {
         if (string.IsNullOrWhiteSpace(categoryName))
-        {
             throw new ArgumentException("Kategori adı boş bırakılamaz.", nameof(categoryName));
-        }
 
         var distinctLocationIds = locationIds?.Distinct().ToList() ?? new List<Guid>();
         if (distinctLocationIds.Count == 0)
-        {
             throw new ArgumentException("Kategoriye en az bir yerleşke atanmalıdır.", nameof(locationIds));
-        }
 
         Name = categoryName;
         Icon = icon;
@@ -38,9 +34,7 @@ public class Category : BaseEntity
     public void UpdateDetails(string name, string? icon)
     {
         if (string.IsNullOrWhiteSpace(name))
-        {
             throw new ArgumentException("Kategori adı boş bırakılamaz.", nameof(name));
-        }
         Name = name;
         Icon = icon;
         Touch();

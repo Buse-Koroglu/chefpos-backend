@@ -14,11 +14,7 @@ public class ExportCategoriesQueryHandler : IRequestHandler<ExportCategoriesQuer
     private readonly ICurrentUserService _currentUserService;
     private readonly IExcelExportService _excelExportService;
 
-    public ExportCategoriesQueryHandler(
-        ICategoryRepository categoryRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService,
-        IExcelExportService excelExportService)
+    public ExportCategoriesQueryHandler(ICategoryRepository categoryRepository, IUserRepository userRepository, ICurrentUserService currentUserService, IExcelExportService excelExportService)
     {
         _categoryRepository = categoryRepository;
         _userRepository = userRepository;
@@ -28,8 +24,7 @@ public class ExportCategoriesQueryHandler : IRequestHandler<ExportCategoriesQuer
 
     public async Task<ExportFileResult> Handle(ExportCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
         var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
@@ -38,8 +33,7 @@ public class ExportCategoriesQueryHandler : IRequestHandler<ExportCategoriesQuer
             locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
         }
 
-        var categories = await _categoryRepository.GetAllForExportAsync(
-            request.SearchTerm, locationId, request.IsActive, ExportLimits.MaxRows, cancellationToken);
+        var categories = await _categoryRepository.GetAllForExportAsync(request.SearchTerm, locationId, request.IsActive, ExportLimits.MaxRows, cancellationToken);
 
         var columns = new List<ExportColumn<Category>>
         {

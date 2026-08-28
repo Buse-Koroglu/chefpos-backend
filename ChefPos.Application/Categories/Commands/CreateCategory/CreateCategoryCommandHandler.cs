@@ -11,9 +11,7 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
     private readonly ICategoryRepository _categoryRepository;
     private readonly ILocationRepository _locationRepository;
 
-    public CreateCategoryCommandHandler(
-        ICategoryRepository categoryRepository,
-        ILocationRepository locationRepository)
+    public CreateCategoryCommandHandler(ICategoryRepository categoryRepository, ILocationRepository locationRepository)
     {
         _categoryRepository = categoryRepository;
         _locationRepository = locationRepository;
@@ -23,8 +21,7 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
     {
         foreach (var locationId in request.LocationIds.Distinct())
         {
-            await _locationRepository.GetByIdAsync(locationId, cancellationToken)
-                .OrThrowNotFoundAsync($"Yerleşke bulunamadı: {locationId}");
+            await _locationRepository.GetByIdAsync(locationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {locationId}");
         }
 
         var category = new Category(request.Name, request.LocationIds, request.Icon);

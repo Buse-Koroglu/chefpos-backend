@@ -23,17 +23,13 @@ public class GetCategoriesAdminQueryHandler : IRequestHandler<GetCategoriesAdmin
 
     public async Task<PagedResult<CategoryAdminResponseDto>> Handle(GetCategoriesAdminQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
-        {
             locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
-        }
 
-        var (categories, totalCount) = await _categoryRepository.GetAllPagedAsync(
-            request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
+        var (categories, totalCount) = await _categoryRepository.GetAllPagedAsync(request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
 
         var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
 
