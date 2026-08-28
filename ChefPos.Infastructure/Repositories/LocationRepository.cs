@@ -28,12 +28,7 @@ public class LocationRepository : ILocationRepository
         return await query.OrderBy(l => l.Name).ToListAsync(cancellationToken);
     }
     
-    public async Task<(List<Location> Items, int TotalCount)> GetAllPagedAsync(
-        string? searchTerm,
-        bool? isActive,
-        int pageNumber,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<(List<Location> Items, int TotalCount)> GetAllPagedAsync(string? searchTerm, bool? isActive, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = _context.Locations.AsQueryable();
 
@@ -47,11 +42,7 @@ public class LocationRepository : ILocationRepository
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
+        var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return (items, totalCount);
     }
 

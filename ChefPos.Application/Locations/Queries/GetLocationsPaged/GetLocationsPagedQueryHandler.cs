@@ -19,13 +19,11 @@ public class GetLocationsPagedQueryHandler : IRequestHandler<GetLocationsPagedQu
 
     public async Task<PagedResult<LocationResponseDto>> Handle(GetLocationsPagedQuery request, CancellationToken cancellationToken)
     {
-        var (locations, totalCount) = await _locationRepository.GetAllPagedAsync(
-            request.SearchTerm, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
+        var (locations, totalCount) = await _locationRepository.GetAllPagedAsync(request.SearchTerm, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
 
         var employeeCounts = await _userRepository.GetEmployeeCountsByLocationAsync(cancellationToken);
 
-        var items = locations
-            .Select(location =>
+        var items = locations.Select(location =>
             {
                 var count = employeeCounts.FirstOrDefault(x => x.LocationId == location.Id).EmployeeCount;
                 return LocationResponseDto.FromEntity(location, count);

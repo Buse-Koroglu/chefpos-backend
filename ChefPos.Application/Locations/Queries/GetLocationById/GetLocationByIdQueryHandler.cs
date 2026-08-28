@@ -13,8 +13,7 @@ public class GetLocationByIdQueryHandler : IRequestHandler<GetLocationByIdQuery,
 
     public async Task<LocationResponseDto> Handle(GetLocationByIdQuery request, CancellationToken cancellationToken)
     {
-        var location = await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken)
-            .OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
+        var location = await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
 
         return LocationResponseDto.FromEntity(location);
     }

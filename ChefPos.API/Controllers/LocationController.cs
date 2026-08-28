@@ -37,12 +37,7 @@ public class LocationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetLocationsPaged(
-        [FromQuery] string? searchTerm,
-        [FromQuery] bool? isActive,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+    public async Task<ActionResult> GetLocationsPaged([FromQuery] string? searchTerm, [FromQuery] bool? isActive, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
         var query = new GetLocationsPagedQuery(searchTerm, isActive, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);

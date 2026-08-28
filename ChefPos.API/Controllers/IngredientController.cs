@@ -58,13 +58,7 @@ public class IngredientsController : ControllerBase
  
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet("paged")]
-    public async Task<ActionResult<PagedResult<IngredientAdminResponseDto>>> GetIngredientsPaged(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Guid? locationId,
-        [FromQuery] bool? isActive,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+    public async Task<ActionResult<PagedResult<IngredientAdminResponseDto>>> GetIngredientsPaged([FromQuery] string? searchTerm, [FromQuery] Guid? locationId, [FromQuery] bool? isActive, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
         var query = new GetIngredientsPagedQuery(searchTerm, locationId, isActive, pageNumber, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
@@ -73,11 +67,7 @@ public class IngredientsController : ControllerBase
 
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpGet("export")]
-    public async Task<IActionResult> Export(
-        [FromQuery] string? searchTerm,
-        [FromQuery] Guid? locationId,
-        [FromQuery] bool? isActive,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Export([FromQuery] string? searchTerm, [FromQuery] Guid? locationId, [FromQuery] bool? isActive, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new ExportIngredientsQuery(searchTerm, locationId, isActive), cancellationToken);
         return File(result.Content, ChefPos.Application.Common.Export.ExportFileResult.ContentType, result.FileName);
@@ -138,7 +128,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
  
-    /// <summary>Yeni bir alış partisi (lot) kaydeder: miktar + o anki fiyat.</summary>
+    // satın alım sonucu stok değişimi için api
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpPost("{id}/purchases")]
     public async Task<ActionResult> RecordPurchase([FromRoute] Guid id, IngredientPurchaseRequest body, CancellationToken cancellationToken)
@@ -148,7 +138,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
  
-    /// <summary>Siparişten bağımsız, elle stok düşümü (fire, zayiat, sipariş dışı elle tüketim).</summary>
+    // elle stok düşümü için api
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpPost("{id}/manual-deduction")]
     public async Task<ActionResult> RecordManualDeduction([FromRoute] Guid id, ManualDeductionRequest body, CancellationToken cancellationToken)
@@ -157,8 +147,7 @@ public class IngredientsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
- 
-    /// <summary>Sipariş dışında üretilen bir ürünün reçetesine göre ham madde stoklarını düşer.</summary>
+    // sipariş dışı üretimde stokları düşmek için
     [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpPost("production")]
     public async Task<ActionResult> RecordProductProduction(ProductProductionRequest body, CancellationToken cancellationToken)

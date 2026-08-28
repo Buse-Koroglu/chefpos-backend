@@ -7,7 +7,6 @@ public class LocationResponseDto
     public Guid Id { get; set; }
     public string Name { get; set; } = default!;
     public bool IsActive { get; set; }
-    
     public int EmployeeCount { get; set; }
 
 

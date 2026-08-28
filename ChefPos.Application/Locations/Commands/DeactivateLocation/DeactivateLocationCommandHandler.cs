@@ -16,8 +16,7 @@ public class DeactivateLocationCommandHandler : IRequestHandler<DeactivateLocati
 
     public async Task<LocationResponseDto> Handle(DeactivateLocationCommand request, CancellationToken cancellationToken)
     {
-        var location = await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken)
-            .OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
+        var location = await _locationRepository.GetByIdAsync(request.LocationId, cancellationToken).OrThrowNotFoundAsync($"Yerleşke bulunamadı: {request.LocationId}");
 
         location.DeactivateLocation();
 
