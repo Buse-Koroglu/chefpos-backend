@@ -18,10 +18,7 @@ public class Menu : BaseEntity
     public Menu(string name, Guid locationId, string? description = null)
     {
         if (string.IsNullOrWhiteSpace(name))
-        {
             throw new ArgumentException("Menü adı boş olamaz.", nameof(name));
-        }
-
         Name = name;
         LocationId = locationId;
         Description = description;
@@ -31,9 +28,7 @@ public class Menu : BaseEntity
     public void AddProduct(Guid productId)
     {
         if (_menuProducts.Any(mp => mp.ProductId == productId))
-        {
             throw new InvalidOperationException("Bu ürün menüde zaten mevcut.");
-        }
 
         _menuProducts.Add(new MenuProduct(Id, productId, _menuProducts.Count));
         Touch();
@@ -43,9 +38,7 @@ public class Menu : BaseEntity
     {
         var item = _menuProducts.FirstOrDefault(mp => mp.ProductId == productId);
         if (item is null)
-        {
             throw new KeyNotFoundException("Bu ürün menüde bulunamadı.");
-        }
 
         _menuProducts.Remove(item);
         Touch();
@@ -54,9 +47,7 @@ public class Menu : BaseEntity
     public void UpdateDetails(string name, string? description)
     {
         if (string.IsNullOrWhiteSpace(name))
-        {
             throw new ArgumentException("Menü adı boş olamaz.", nameof(name));
-        }
 
         Name = name;
         Description = description;

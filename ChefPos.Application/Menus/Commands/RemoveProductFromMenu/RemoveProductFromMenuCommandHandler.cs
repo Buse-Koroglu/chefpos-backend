@@ -13,10 +13,7 @@ public class RemoveProductFromMenuCommandHandler : IRequestHandler<RemoveProduct
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public RemoveProductFromMenuCommandHandler(
-        IMenuRepository menuRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public RemoveProductFromMenuCommandHandler(IMenuRepository menuRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _menuRepository = menuRepository;
         _userRepository = userRepository;
@@ -25,16 +22,12 @@ public class RemoveProductFromMenuCommandHandler : IRequestHandler<RemoveProduct
 
     public async Task<MenuResponseDto> Handle(RemoveProductFromMenuCommand request, CancellationToken cancellationToken)
     {
-        var menu = await _menuRepository.GetByIdAsync(request.MenuId, cancellationToken)
-            .OrThrowNotFoundAsync("Menü bulunamadı.");
+        var menu = await _menuRepository.GetByIdAsync(request.MenuId, cancellationToken).OrThrowNotFoundAsync("Menü bulunamadı.");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(menu.LocationId))
-        {
             throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
-        }
 
         menu.RemoveProduct(request.ProductId);
         await _menuRepository.SaveAllChangesAsync(cancellationToken);

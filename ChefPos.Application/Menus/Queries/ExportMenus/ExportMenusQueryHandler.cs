@@ -15,11 +15,7 @@ public class ExportMenusQueryHandler : IRequestHandler<ExportMenusQuery, ExportF
     private readonly ICurrentUserService _currentUserService;
     private readonly IExcelExportService _excelExportService;
 
-    public ExportMenusQueryHandler(
-        IMenuRepository menuRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService,
-        IExcelExportService excelExportService)
+    public ExportMenusQueryHandler(IMenuRepository menuRepository, IUserRepository userRepository, ICurrentUserService currentUserService, IExcelExportService excelExportService)
     {
         _menuRepository = menuRepository;
         _userRepository = userRepository;
@@ -29,16 +25,12 @@ public class ExportMenusQueryHandler : IRequestHandler<ExportMenusQuery, ExportF
 
     public async Task<ExportFileResult> Handle(ExportMenusQuery request, CancellationToken cancellationToken)
     {
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
-        {
             throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
-        }
 
-        var menus = await _menuRepository.GetAllForExportAsync(
-            request.LocationId, request.IncludeInactive, ExportLimits.MaxRows, cancellationToken);
+        var menus = await _menuRepository.GetAllForExportAsync(request.LocationId, request.IncludeInactive, ExportLimits.MaxRows, cancellationToken);
 
         var columns = new List<ExportColumn<Menu>>
         {

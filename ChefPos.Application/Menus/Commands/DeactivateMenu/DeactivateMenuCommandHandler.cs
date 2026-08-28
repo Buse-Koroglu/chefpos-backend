@@ -13,10 +13,7 @@ public class DeactivateMenuCommandHandler : IRequestHandler<DeactivateMenuComman
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public DeactivateMenuCommandHandler(
-        IMenuRepository menuRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public DeactivateMenuCommandHandler(IMenuRepository menuRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _menuRepository = menuRepository;
         _userRepository = userRepository;
@@ -25,20 +22,15 @@ public class DeactivateMenuCommandHandler : IRequestHandler<DeactivateMenuComman
 
     public async Task<MenuResponseDto> Handle(DeactivateMenuCommand request, CancellationToken cancellationToken)
     {
-        var menu = await _menuRepository.GetByIdAsync(request.MenuId, cancellationToken)
-            .OrThrowNotFoundAsync("Menü bulunamadı.");
+        var menu = await _menuRepository.GetByIdAsync(request.MenuId, cancellationToken).OrThrowNotFoundAsync("Menü bulunamadı.");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(menu.LocationId))
-        {
             throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
-        }
 
         menu.Deactivate();
         await _menuRepository.SaveAllChangesAsync(cancellationToken);
-
         return MenuResponseDto.FromEntity(menu);
     }
 }

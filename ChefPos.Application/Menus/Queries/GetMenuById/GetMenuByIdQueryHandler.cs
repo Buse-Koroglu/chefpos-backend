@@ -16,8 +16,7 @@ public class GetMenuByIdQueryHandler : IRequestHandler<GetMenuByIdQuery, MenuRes
 
     public async Task<MenuResponseDto> Handle(GetMenuByIdQuery request, CancellationToken cancellationToken)
     {
-        var menu = await _menuRepository.GetByIdAsync(request.MenuId, cancellationToken)
-            .OrThrowNotFoundAsync("Menü bulunamadı.");
+        var menu = await _menuRepository.GetByIdAsync(request.MenuId, cancellationToken).OrThrowNotFoundAsync("Menü bulunamadı.");
 
         return MenuResponseDto.FromEntity(menu);
     }

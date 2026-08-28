@@ -15,11 +15,7 @@ public class CreateProductForMenuCommandHandler : IRequestHandler<CreateProductF
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public CreateProductForMenuCommandHandler(
-        IMenuRepository menuRepository,
-        IProductRepository productRepository,
-        IUserRepository userRepository,
-        ICurrentUserService currentUserService)
+    public CreateProductForMenuCommandHandler(IMenuRepository menuRepository, IProductRepository productRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _menuRepository = menuRepository;
         _productRepository = productRepository;
@@ -29,19 +25,14 @@ public class CreateProductForMenuCommandHandler : IRequestHandler<CreateProductF
 
     public async Task<ProductResponseDto> Handle(CreateProductForMenuCommand request, CancellationToken cancellationToken)
     {
-        var menu = await _menuRepository.GetByIdAsync(request.MenuId, cancellationToken)
-            .OrThrowNotFoundAsync("Menü bulunamadı.");
+        var menu = await _menuRepository.GetByIdAsync(request.MenuId, cancellationToken).OrThrowNotFoundAsync("Menü bulunamadı.");
 
-        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken)
-            .OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(menu.LocationId))
-        {
             throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
-        }
-
+        
         var product = new Product(request.Name, request.Price, categoryId: null, new List<Guid> { menu.LocationId }, request.Description);
-
         await _productRepository.AddAsync(product, cancellationToken);
         menu.AddProduct(product.Id);
         await _productRepository.SaveAllChangesAsync(cancellationToken);

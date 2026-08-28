@@ -14,16 +14,12 @@ public class MenuRepository : IMenuRepository
 
     public async Task<Menu?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Menus
-            .Include(m => m.MenuProducts).ThenInclude(mp => mp.Product)
-            .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
+        return await _context.Menus.Include(m => m.MenuProducts).ThenInclude(mp => mp.Product).FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
     }
 
     public async Task<List<Menu>> GetAllByLocationAsync(Guid locationId, bool includeInactive, CancellationToken cancellationToken)
     {
-        var query = _context.Menus
-            .Include(m => m.MenuProducts).ThenInclude(mp => mp.Product)
-            .Where(m => m.LocationId == locationId);
+        var query = _context.Menus.Include(m => m.MenuProducts).ThenInclude(mp => mp.Product).Where(m => m.LocationId == locationId);
 
         if (!includeInactive)
         {
@@ -33,22 +29,15 @@ public class MenuRepository : IMenuRepository
         return await query.OrderBy(m => m.Name).ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Menu>> GetAllForExportAsync(
-        Guid locationId,
-        bool includeInactive,
-        int maxRows,
-        CancellationToken cancellationToken)
+    public async Task<List<Menu>> GetAllForExportAsync(Guid locationId, bool includeInactive, int maxRows, CancellationToken cancellationToken)
     {
-        var query = _context.Menus
-            .AsNoTracking()
+        var query = _context.Menus.AsNoTracking()
             .Include(m => m.Location)
             .Include(m => m.MenuProducts).ThenInclude(mp => mp.Product)
             .Where(m => m.LocationId == locationId);
 
         if (!includeInactive)
-        {
             query = query.Where(m => m.IsActive);
-        }
 
         var totalCount = await query.CountAsync(cancellationToken);
         if (totalCount > maxRows)
