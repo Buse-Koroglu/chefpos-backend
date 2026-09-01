@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChefPos.Application\ChefPos.Application.csproj" />
-    <ProjectReference Include="..\ChefPos.Infastructure\ChefPos.Infastructure.csproj" />
+    <ProjectReference Include="..\ChefPos.Infrastructure\ChefPos.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

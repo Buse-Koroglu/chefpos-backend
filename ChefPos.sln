@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 #
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChefPos.Domain", "ChefPos.Domain\ChefPos.Domain.csproj", "{0F75F016-3108-40F6-BBC5-0092658785C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChefPos.Infastructure", "ChefPos.Infastructure\ChefPos.Infastructure.csproj", "{C26FC7C6-D628-4B12-8ED1-7CDE2BFFC335}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChefPos.Infrastructure", "ChefPos.Infrastructure\ChefPos.Infrastructure.csproj", "{C26FC7C6-D628-4B12-8ED1-7CDE2BFFC335}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChefPos.API", "ChefPos.API\ChefPos.API.csproj", "{01ACBE4F-E907-4316-9DD6-E7F08B7B522F}"
 EndProject
