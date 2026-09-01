@@ -65,7 +65,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
                 var existingOpenOrder = await _orderRepository.GetOpenOrderByTableIdAsync(table.Id, cancellationToken);
                 if (existingOpenOrder is not null)
                 {
-                    throw new ValidationException($"Bu masanın ödemesi alınmadan yeni bir sipariş oluşturulamaz: Masa {table.TableNumber}");
+                    throw new ValidationException(
+                        $"Bu masanın ödemesi alınmadan yeni bir sipariş oluşturulamaz: Masa {table.TableNumber}",
+                        "TABLE_OCCUPIED");
                 }
 
                 order = Order.CreateByWaiter(request.LocationId, currentUserId, request.CustomerName!, table);

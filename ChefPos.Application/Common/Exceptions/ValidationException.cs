@@ -4,7 +4,7 @@ public class ValidationException : AppException
 {
     public override int StatusCode => 400;
 
-    public ValidationException(string message) : base(message)
+    public ValidationException(string message, string? errorCode = null) : base(message, errorCode)
     {
     }
 }

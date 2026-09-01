@@ -30,6 +30,11 @@ public class GlobalExceptionHandler : IExceptionHandler
             Instance = httpContext.Request.Path
         };
 
+        if (exception is AppException { ErrorCode: not null } appException)
+        {
+            problemDetails.Extensions["errorCode"] = appException.ErrorCode;
+        }
+
         httpContext.Response.StatusCode = statusCode;
 
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);

@@ -44,7 +44,8 @@ public class AssignLocationAccessCommandHandler : IRequestHandler<AssignLocation
             if (existingManager is not null && existingManager.Id != user.Id)
             {
                 throw new ValidationException(
-                    $"Bu şubede zaten bir Yerleşke Stok Yetkilisi atanmış: {existingManager.FirstName} {existingManager.LastName}.");
+                    $"Bu şubede zaten bir Yerleşke Stok Yetkilisi atanmış: {existingManager.FirstName} {existingManager.LastName}.",
+                    "STOCK_MANAGER_CONFLICT");
             }
         }
 
