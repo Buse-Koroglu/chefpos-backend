@@ -1,8 +1,8 @@
 using ChefPos.Domain.Entities;
-using ChefPos.Infastructure.Persistence;
+using ChefPos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChefPos.Infastructure.Repositories;
+namespace ChefPos.Infrastructure.Repositories;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {

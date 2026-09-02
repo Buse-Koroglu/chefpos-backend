@@ -1,19 +1,19 @@
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Common.Settings;
-using ChefPos.Infastructure.Export;
-using ChefPos.Infastructure.Files;
-using ChefPos.Infastructure.Persistence;
-using ChefPos.Infastructure.Repositories;
-using ChefPos.Infastructure.Security;
+using ChefPos.Infrastructure.Export;
+using ChefPos.Infrastructure.Files;
+using ChefPos.Infrastructure.Persistence;
+using ChefPos.Infrastructure.Repositories;
+using ChefPos.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ChefPos.Infastructure;
+namespace ChefPos.Infrastructure;
 
 public static class DependencyInjection
 {
-   public static IServiceCollection AddInfastructure(this IServiceCollection services, IConfiguration configuration)
+   public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
    {
       var connectionString = configuration.GetConnectionString("DefaultConnection");
 

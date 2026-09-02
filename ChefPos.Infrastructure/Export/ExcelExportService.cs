@@ -3,7 +3,7 @@ using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ClosedXML.Excel;
 
-namespace ChefPos.Infastructure.Export;
+namespace ChefPos.Infrastructure.Export;
 
 public class ExcelExportService : IExcelExportService
 {

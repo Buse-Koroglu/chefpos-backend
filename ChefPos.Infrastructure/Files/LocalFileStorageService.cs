@@ -6,7 +6,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 
-namespace ChefPos.Infastructure.Files;
+namespace ChefPos.Infrastructure.Files;
 
 public class LocalFileStorageService : IFileStorageService
 {

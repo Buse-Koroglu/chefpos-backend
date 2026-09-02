@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace ChefPos.Infastructure.Migrations
+namespace ChefPos.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class AddKitchenRole : Migration

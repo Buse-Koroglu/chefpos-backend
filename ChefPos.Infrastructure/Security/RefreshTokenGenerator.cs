@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using ChefPos.Application.Common.Interfaces;
 using Microsoft.Extensions.Options;
 
-namespace ChefPos.Infastructure.Security;
+namespace ChefPos.Infrastructure.Security;
 
 public class RefreshTokenGenerator : IRefreshTokenGenerator
 {

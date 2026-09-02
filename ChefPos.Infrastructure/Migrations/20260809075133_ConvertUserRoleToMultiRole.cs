@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ChefPos.Infastructure.Migrations
+namespace ChefPos.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class ConvertUserRoleToMultiRole : Migration

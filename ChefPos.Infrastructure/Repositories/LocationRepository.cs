@@ -1,6 +1,6 @@
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
-using ChefPos.Infastructure.Persistence;
+using ChefPos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 public class LocationRepository : ILocationRepository

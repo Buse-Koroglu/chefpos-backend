@@ -6,7 +6,7 @@ using ChefPos.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ChefPos.Infastructure.Security;
+namespace ChefPos.Infrastructure.Security;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {

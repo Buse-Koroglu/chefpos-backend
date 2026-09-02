@@ -1,6 +1,6 @@
 using ChefPos.Application.Common.Interfaces;
 
-namespace ChefPos.Infastructure.Security;
+namespace ChefPos.Infrastructure.Security;
 
 public class BCryptPasswordHasher : IPasswordHasher
 {

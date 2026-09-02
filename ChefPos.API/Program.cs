@@ -2,7 +2,7 @@ using ChefPos.API.Middleware;
 using ChefPos.API.Services;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Common.Settings;
-using ChefPos.Infastructure;
+using ChefPos.Infrastructure;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.FileProviders;
@@ -43,7 +43,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-builder.Services.AddInfastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ICurrentUserService, HttpContextCurrentUserService>();
 
 // FileStorageSettings.RootPath is resolved to an absolute path (relative to the content root)

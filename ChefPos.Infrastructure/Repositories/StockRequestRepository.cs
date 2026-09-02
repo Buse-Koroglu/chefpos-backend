@@ -4,7 +4,7 @@ using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Domain.Enums;
-using ChefPos.Infastructure.Persistence;
+using ChefPos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 public class StockRequestRepository : IStockRequestRepository

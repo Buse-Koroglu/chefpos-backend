@@ -1,4 +1,4 @@
-namespace ChefPos.Infastructure.Security;
+namespace ChefPos.Infrastructure.Security;
 
 public class JwtSettings
 {

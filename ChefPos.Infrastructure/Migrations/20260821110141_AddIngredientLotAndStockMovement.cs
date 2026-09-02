@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace ChefPos.Infastructure.Migrations
+namespace ChefPos.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class AddIngredientLotAndStockMovement : Migration

@@ -1,7 +1,7 @@
-namespace ChefPos.Infastructure.Repositories;
+namespace ChefPos.Infrastructure.Repositories;
 using ChefPos.Domain.Entities;
 using ChefPos.Domain.Enums;
-using ChefPos.Infastructure.Persistence;
+using ChefPos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 public class StockMovementRepository : IStockMovementRepository

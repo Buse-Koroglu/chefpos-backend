@@ -2,7 +2,7 @@ using ChefPos.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace ChefPos.Infastructure.Persistence;
+namespace ChefPos.Infrastructure.Persistence;
 
 public class ApplicationDbContext : DbContext
 {

@@ -2,10 +2,10 @@ using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
-using ChefPos.Infastructure.Persistence;
+using ChefPos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChefPos.Infastructure.Repositories;
+namespace ChefPos.Infrastructure.Repositories;
 public class CategoryRepository : ICategoryRepository
 {
     private readonly ApplicationDbContext _context;

@@ -2,7 +2,7 @@ using ChefPos.Application.Common.Exceptions;
 using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
-using ChefPos.Infastructure.Persistence;
+using ChefPos.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 public class IngredientRepository : IIngredientRepository

@@ -2,7 +2,7 @@ using ChefPos.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace ChefPos.Infastructure.Persistence.Configurations;
+namespace ChefPos.Infrastructure.Persistence.Configurations;
 
 public class MenuProductConfiguration : IEntityTypeConfiguration<MenuProduct>
 {
