@@ -32,7 +32,7 @@ public class IngredientsController : ControllerBase
         _mediator = mediator;
     }
  
-    [Authorize(Roles = "SUPER_ADMIN")]
+    [Authorize(Roles = "SUPER_ADMIN,ADMIN")]
     [HttpPost]
     public async Task<ActionResult> CreateIngredient(CreateIngredientCommand command, CancellationToken cancellationToken)
     {
@@ -139,7 +139,7 @@ public class IngredientsController : ControllerBase
     }
  
     // elle stok düşümü için api
-    [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
+    [Authorize(Roles = "STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpPost("{id}/manual-deduction")]
     public async Task<ActionResult> RecordManualDeduction([FromRoute] Guid id, ManualDeductionRequest body, CancellationToken cancellationToken)
     {
@@ -148,7 +148,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
     // sipariş dışı üretimde stokları düşmek için
-    [Authorize(Roles = "ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
+    [Authorize(Roles = "STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpPost("production")]
     public async Task<ActionResult> RecordProductProduction(ProductProductionRequest body, CancellationToken cancellationToken)
     {

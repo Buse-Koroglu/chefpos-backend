@@ -4,6 +4,7 @@ using ChefPos.Application.Common.Interfaces;
 using ChefPos.Application.Common.Pagination;
 using ChefPos.Application.Products.DTOs;
 using ChefPos.Domain.Enums;
+using ChefPos.Application.Products;
 using MediatR;
 
 namespace ChefPos.Application.Products.Queries.GetProductsPaged;
@@ -57,6 +58,7 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
                 Price = p.Price,
                 ImageUrl = p.ImageUrl,
                 IsActive = p.IsActive,
+                IsAvailable = ProductAvailability.IsAvailable(p, locationId),
                 CategoryId = p.CategoryId,
                 CategoryName = p.Category?.Name,
                 LocationIds = visibleLocations.Select(pl => pl.LocationId).ToList(),

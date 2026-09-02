@@ -47,6 +47,7 @@ public class ProductRepository : IProductRepository
     {
         var query = _context.Products.Include(p => p.Category)
             .Include(p => p.ProductLocations).ThenInclude(pl => pl.Location)
+            .Include(p => p.ProductLocations).ThenInclude(pl => pl.ProductItems).ThenInclude(pi => pi.Ingredient)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))

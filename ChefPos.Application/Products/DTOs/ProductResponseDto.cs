@@ -1,3 +1,4 @@
+using ChefPos.Application.Products;
 using ChefPos.Domain.Entities;
 using ChefPos.Domain.Enums;
 
@@ -26,28 +27,11 @@ public class ProductResponseDto
             Description = product.Description,
             ImageUrl = product.ImageUrl,
             IsActive = product.IsActive,
-            IsAvailable = ComputeIsAvailable(product, locationId),
+            IsAvailable = ProductAvailability.IsAvailable(product, locationId),
             CategoryId = product.CategoryId,
             LocationIds = product.LocationIds.ToList(),
             Locations = product.ProductLocations.Select(ProductLocationRecipeDto.FromEntity).ToList()
         };
-    }
-
-    private static bool ComputeIsAvailable(Product product, Guid? locationId)
-    {
-        if (locationId is null)
-        {
-            return true;
-        }
-
-        var productLocation = product.ProductLocations.FirstOrDefault(pl => pl.LocationId == locationId.Value);
-        if (productLocation is null || productLocation.ProductItems.Count == 0)
-        {
-            return true;
-        }
-
-        return productLocation.ProductItems.All(pi =>
-            pi.Ingredient.IsActive && pi.Ingredient.CurrentStock >= pi.QuantityPerServing);
     }
 }
 
