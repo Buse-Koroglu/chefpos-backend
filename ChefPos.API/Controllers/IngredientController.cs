@@ -56,7 +56,7 @@ public class IngredientsController : ControllerBase
         return Ok(result);
     }
  
-    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN,STOCK_MANAGER,INVENTORY_STAFF")]
     [HttpGet("paged")]
     public async Task<ActionResult<PagedResult<IngredientAdminResponseDto>>> GetIngredientsPaged([FromQuery] string? searchTerm, [FromQuery] Guid? locationId, [FromQuery] bool? isActive, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
