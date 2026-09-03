@@ -34,7 +34,7 @@ public class DeactivateCategoryCommandHandler : IRequestHandler<DeactivateCatego
 
         var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
-        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
+        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasRoleAtLocation(Role.ADMIN, request.LocationId))
             throw new ForbiddenException("Bu işleme yetkiniz bulunmamaktır.");
 
         category.DeactivateCategory();

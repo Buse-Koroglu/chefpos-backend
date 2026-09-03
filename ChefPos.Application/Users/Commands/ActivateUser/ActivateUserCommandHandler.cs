@@ -28,7 +28,7 @@ public class ActivateUserCommandHandler : IRequestHandler<ActivateUserCommand, U
             throw new NotFoundException($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         if (!actingUser.HasRole(Role.SUPER_ADMIN) &&
-            !user.Locations.Select(l => l.LocationId).Any(id => actingUser.Locations.Any(al => al.LocationId == id)))
+            !user.Locations.Any(l => actingUser.HasRoleAtLocation(Role.ADMIN, l.LocationId)))
         {
             throw new ValidationException("Bu kullanıcıyı yönetme yetkiniz yok.");
         }

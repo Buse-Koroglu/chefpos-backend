@@ -27,7 +27,7 @@ public class GetTablesPagedQueryHandler : IRequestHandler<GetTablesPagedQuery, P
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
         {
-            locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+            locationId = actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
         }
 
         var (tables, totalCount) = await _tableRepository.GetAllPagedAsync(request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);

@@ -29,7 +29,7 @@ public class ExportTablesQueryHandler : IRequestHandler<ExportTablesQuery, Expor
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
         {
-            locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+            locationId = actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
         }
 
         var tables = await _tableRepository.GetAllForExportAsync(request.SearchTerm, locationId, request.IsActive, ExportLimits.MaxRows, cancellationToken);

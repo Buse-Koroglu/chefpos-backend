@@ -30,14 +30,9 @@ public class CreateStockRequestCommandHandler : IRequestHandler<CreateStockReque
 
         var requestedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
-        if (!requestedByUser.HasRole(Role.INVENTORY_STAFF))
+        if (!requestedByUser.HasRoleAtLocation(Role.INVENTORY_STAFF, ingredient.LocationId))
         {
-            throw new ValidationException("Sadece envanter (INVENTORY_STAFF) personeli stok talebi oluşturabilir.");
-        }
-
-        if (!requestedByUser.HasAccessToLocation(ingredient.LocationId))
-        {
-            throw new ValidationException("Bu kullanıcının, hammaddenin bulunduğu yerleşkeye erişimi yok.");
+            throw new ValidationException("Sadece bu yerleşkenin envanter (INVENTORY_STAFF) personeli stok talebi oluşturabilir.");
         }
 
         if (await _stockRequestRepository.HasPendingAsync(request.IngredientId, ingredient.LocationId, cancellationToken))

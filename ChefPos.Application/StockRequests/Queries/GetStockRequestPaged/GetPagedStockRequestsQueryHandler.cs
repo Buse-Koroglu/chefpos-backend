@@ -37,7 +37,19 @@ public class GetPagedStockRequestsQueryHandler
         var locationId = request.LocationId;
         if (currentUser.HasRole(Role.ADMIN) && !currentUser.HasRole(Role.SUPER_ADMIN))
         {
-            locationId = currentUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+            locationId = currentUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
+        }
+        else if (currentUser.HasRole(Role.STOCK_MANAGER) && !currentUser.HasRole(Role.SUPER_ADMIN))
+        {
+            if (locationId.HasValue)
+            {
+                if (!currentUser.HasRoleAtLocation(Role.STOCK_MANAGER, locationId.Value))
+                    throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
+            }
+            else
+            {
+                locationId = currentUser.LocationIdsForRole(Role.STOCK_MANAGER).FirstOrDefault();
+            }
         }
 
         var (items, totalCount) = await _stockRequestRepository.GetAllPagedAsync(request.SearchTerm, locationId, request.Status, requestedByUserId, request.OnlyHistory, request.StartDate, request.EndDate, request.PageNumber, request.PageSize, cancellationToken);

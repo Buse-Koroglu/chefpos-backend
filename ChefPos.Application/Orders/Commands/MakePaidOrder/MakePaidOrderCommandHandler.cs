@@ -29,14 +29,11 @@ public class MakePaidOrderCommandHandler : IRequestHandler<MakePaidOrderCommand,
         if (requestingUser is null)
             throw new NotFoundException("Kullanıcı bulunamadı.");
 
-        if (!requestingUser.HasRole(Role.CASHIER))
-            throw new ForbiddenException("Ödeme işlemini yalnızca kasiyer gerçekleştirebilir.");
-
         var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken)
             .OrThrowNotFoundAsync($"Sipariş bulunamadı: {request.OrderId}");
 
-        if (!requestingUser.HasAccessToLocation(order.LocationId))
-            throw new ForbiddenException("Bu kullanıcının belirtilen yerleşkede işlem yapma yetkisi yok.");
+        if (!requestingUser.HasRoleAtLocation(Role.CASHIER, order.LocationId))
+            throw new ForbiddenException("Ödeme işlemini yalnızca bu yerleşkenin kasiyeri gerçekleştirebilir.");
 
         order.MarkAsPaid();
         await _orderRepository.SaveAllChangesAsync(cancellationToken);

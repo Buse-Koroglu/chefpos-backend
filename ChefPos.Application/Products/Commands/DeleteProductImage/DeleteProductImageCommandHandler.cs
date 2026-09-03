@@ -28,7 +28,7 @@ public class DeleteProductImageCommandHandler : IRequestHandler<DeleteProductIma
 
         var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
-        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !product.ProductLocations.Any(pl => actingUser.HasAccessToLocation(pl.LocationId)))
+        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !product.ProductLocations.Any(pl => actingUser.HasRoleAtLocation(Role.ADMIN, pl.LocationId)))
         {
             throw new ValidationException("Bu ürünü yönetme yetkiniz yok.");
         }

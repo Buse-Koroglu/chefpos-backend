@@ -41,7 +41,7 @@ public class GrantRoleAtLocationCommandHandler : IRequestHandler<GrantRoleAtLoca
             throw new ValidationException("Bu rolü yalnızca süper yönetici atayabilir.");
         }
 
-        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
+        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasRoleAtLocation(Role.ADMIN, request.LocationId))
         {
             throw new ValidationException("Bu yerleşkede rol atama yetkiniz yok.");
         }

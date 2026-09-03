@@ -36,7 +36,7 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
         var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
         var locationId = isSuperAdmin
             ? request.LocationId
-            : actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+            : actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
 
         // 1. Toplam personel sayısı
         var allUsers = await _userRepository.GetAllAsync(cancellationToken);

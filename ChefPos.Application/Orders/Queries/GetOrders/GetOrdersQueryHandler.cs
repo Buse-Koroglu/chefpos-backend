@@ -31,6 +31,13 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PagedResult
             if (requestingUser is null)
                 throw new NotFoundException("Kullanıcı bulunamadı.");
 
+            var hasLocationAccess = requestingUser.HasRoleAtLocation(Role.CASHIER, request.LocationId)
+                || requestingUser.HasRoleAtLocation(Role.WAITER, request.LocationId)
+                || requestingUser.HasRoleAtLocation(Role.ADMIN, request.LocationId)
+                || requestingUser.HasRoleAtLocation(Role.KITCHEN, request.LocationId);
+            if (!hasLocationAccess)
+                throw new ForbiddenException("Bu yerleşkenin siparişlerini görüntüleme yetkiniz yok.");
+
             // Sadece garson kendi siprişlerini görür
             // kasiyer/admin/mutfak yerleşkedeki tüm siparişleri görür
             var isWaiterOnly = requestingUser.HasRole(Role.WAITER) && !requestingUser.HasRole(Role.CASHIER) && !requestingUser.HasRole(Role.ADMIN) && !requestingUser.HasRole(Role.KITCHEN) && !requestingUser.HasRole(Role.SUPER_ADMIN);

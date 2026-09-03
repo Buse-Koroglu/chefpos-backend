@@ -33,7 +33,11 @@ public class RecordIngredientPurchaseCommandHandler : IRequestHandler<RecordIngr
 
         var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 
-        if (!currentUser.HasRole(Role.SUPER_ADMIN) && !currentUser.HasAccessToLocation(ingredient.LocationId))
+        var hasLocationAccess = currentUser.HasRole(Role.SUPER_ADMIN)
+            || currentUser.HasRoleAtLocation(Role.INVENTORY_STAFF, ingredient.LocationId)
+            || currentUser.HasRoleAtLocation(Role.STOCK_MANAGER, ingredient.LocationId)
+            || currentUser.HasRoleAtLocation(Role.ADMIN, ingredient.LocationId);
+        if (!hasLocationAccess)
             throw new ValidationException("Bu kullanıcının, hammaddenin bulunduğu yerleşkeye erişimi yok.");
 
         var lot = ingredient.AddPurchaseLot(request.Quantity, request.UnitPrice);

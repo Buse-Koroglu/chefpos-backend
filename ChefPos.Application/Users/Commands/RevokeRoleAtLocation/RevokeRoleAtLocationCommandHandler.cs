@@ -31,7 +31,7 @@ public class RevokeRoleAtLocationCommandHandler : IRequestHandler<RevokeRoleAtLo
             throw new ValidationException("Bu rolü yalnızca süper yönetici kaldırabilir.");
         }
 
-        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(request.LocationId))
+        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasRoleAtLocation(Role.ADMIN, request.LocationId))
         {
             throw new ValidationException("Bu yerleşkede rol kaldırma yetkiniz yok.");
         }

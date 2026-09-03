@@ -33,9 +33,12 @@ public class GetStockManagerDashboardStatsQueryHandler : IRequestHandler<GetStoc
             throw new ValidationException("Dashboard'a erişim yetkiniz yok.");
         }
 
-        if (!user.HasRole(Role.SUPER_ADMIN) && !user.HasAccessToLocation(request.LocationId))
+        if (!user.HasRole(Role.SUPER_ADMIN))
         {
-            throw new ValidationException("Bu yerleşkeye erişim yetkiniz yok.");
+            var hasLocationAccess = user.HasRoleAtLocation(Role.STOCK_MANAGER, request.LocationId)
+                || user.HasRoleAtLocation(Role.ADMIN, request.LocationId);
+            if (!hasLocationAccess)
+                throw new ValidationException("Bu yerleşkeye erişim yetkiniz yok.");
         }
 
         var stats = await _stockRequestRepository.GetStockManagerDashboardStatsAsync(request.LocationId, cancellationToken);

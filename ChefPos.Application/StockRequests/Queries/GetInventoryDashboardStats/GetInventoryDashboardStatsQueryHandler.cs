@@ -30,9 +30,12 @@ public class GetInventoryDashboardStatsQueryHandler : IRequestHandler<GetInvento
 
         var locationId = request.LocationId;
 
-        if (locationId.HasValue && !user.HasRole(Role.SUPER_ADMIN) && !user.HasAccessToLocation(locationId.Value))
+        if (locationId.HasValue && !user.HasRole(Role.SUPER_ADMIN))
         {
-            throw new ValidationException("Bu yerleşkeye erişim yetkiniz yok.");
+            var hasLocationAccess = user.HasRoleAtLocation(Role.INVENTORY_STAFF, locationId.Value)
+                || user.HasRoleAtLocation(Role.ADMIN, locationId.Value);
+            if (!hasLocationAccess)
+                throw new ValidationException("Bu yerleşkeye erişim yetkiniz yok.");
         }
 
         var stats = await _stockRequestRepository.GetInventoryDashboardStatsAsync(userId, locationId, cancellationToken);

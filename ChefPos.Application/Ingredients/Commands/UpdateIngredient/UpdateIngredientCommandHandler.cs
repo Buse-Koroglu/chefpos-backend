@@ -26,7 +26,7 @@ public class UpdateIngredientCommandHandler : IRequestHandler<UpdateIngredientCo
 
         var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
-        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(ingredient.LocationId))
+        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasRoleAtLocation(Role.ADMIN, ingredient.LocationId))
             throw new ValidationException("Bu ham maddeyi yönetme yetkiniz yok.");
 
         if (!ingredient.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase))

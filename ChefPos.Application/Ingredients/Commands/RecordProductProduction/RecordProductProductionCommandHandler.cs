@@ -36,7 +36,11 @@ public class RecordProductProductionCommandHandler : IRequestHandler<RecordProdu
             throw new ValidationException("Sadece depo görevlisi, stok yöneticisi veya admin üretim kaydı girebilir.");
         
 
-        if (!currentUser.HasRole(Role.SUPER_ADMIN) && !currentUser.HasAccessToLocation(request.LocationId))
+        var hasLocationAccess = currentUser.HasRole(Role.SUPER_ADMIN)
+            || currentUser.HasRoleAtLocation(Role.INVENTORY_STAFF, request.LocationId)
+            || currentUser.HasRoleAtLocation(Role.STOCK_MANAGER, request.LocationId)
+            || currentUser.HasRoleAtLocation(Role.ADMIN, request.LocationId);
+        if (!hasLocationAccess)
             throw new ValidationException("Bu kullanıcının belirtilen yerleşkeye erişimi yok.");
 
         var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);

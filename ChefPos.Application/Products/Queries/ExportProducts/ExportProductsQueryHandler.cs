@@ -33,12 +33,12 @@ public class ExportProductsQueryHandler : IRequestHandler<ExportProductsQuery, E
         {
             if (locationId.HasValue)
             {
-                if (!actingUser.HasAccessToLocation(locationId.Value))
+                if (!actingUser.HasRoleAtLocation(Role.ADMIN, locationId.Value))
                     throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
             }
             else
             {
-                locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+                locationId = actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
             }
         }
 

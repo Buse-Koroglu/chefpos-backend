@@ -30,7 +30,7 @@ public class ExportCategoriesQueryHandler : IRequestHandler<ExportCategoriesQuer
         var isSuperAdmin = actingUser.HasRole(Role.SUPER_ADMIN);
         if (!isSuperAdmin)
         {
-            locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+            locationId = actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
         }
 
         var categories = await _categoryRepository.GetAllForExportAsync(request.SearchTerm, locationId, request.IsActive, ExportLimits.MaxRows, cancellationToken);

@@ -28,14 +28,9 @@ public class RejectStockRequestCommandHandler : IRequestHandler<RejectStockReque
 
         var decidedByUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {currentUserId}");
 
-        if (!decidedByUser.HasRole(Role.STOCK_MANAGER))
+        if (!decidedByUser.HasRoleAtLocation(Role.STOCK_MANAGER, stockRequest.LocationId))
         {
-            throw new ValidationException("Sadece Yerleşke Stok Yetkilisi rolündeki kullanıcılar stok talebi reddedebilir.");
-        }
-
-        if (!decidedByUser.HasAccessToLocation(stockRequest.LocationId))
-        {
-            throw new ValidationException("Bu kullanıcının, stok talebinin ait olduğu yerleşkede yetkisi yok.");
+            throw new ValidationException("Sadece bu yerleşkenin Stok Yetkilisi stok talebi reddedebilir.");
         }
 
         stockRequest.Reject(currentUserId, request.Reason);

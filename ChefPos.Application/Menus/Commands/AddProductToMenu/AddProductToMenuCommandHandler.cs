@@ -30,7 +30,7 @@ public class AddProductToMenuCommandHandler : IRequestHandler<AddProductToMenuCo
 
         var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
-        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(menu.LocationId))
+        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasRoleAtLocation(Role.ADMIN, menu.LocationId))
             throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
 
         if (!product.BelongsToLocation(menu.LocationId))

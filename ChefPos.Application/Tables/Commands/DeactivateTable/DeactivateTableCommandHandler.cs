@@ -26,7 +26,7 @@ public class DeactivateTableCommandHandler : IRequestHandler<DeactivateTableComm
 
         var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
-        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasAccessToLocation(table.LocationId))
+        if (!actingUser.HasRole(Role.SUPER_ADMIN) && !actingUser.HasRoleAtLocation(Role.ADMIN, table.LocationId))
         {
             throw new ValidationException("Bu masayı yönetme yetkiniz yok.");
         }

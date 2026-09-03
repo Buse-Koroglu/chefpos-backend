@@ -39,16 +39,13 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             throw new NotFoundException("Kullanıcı bulunamadı.");
         }
         
-        if (!requestingUser.HasAccessToLocation(request.LocationId))
-            throw new ForbiddenException("Bu kullanıcının belirtilen yerleşkede işlem yapma yetkisi yok.");
- 
         Order order;
         switch (request.RequestedAs)
         {
-            case Role.CASHIER when requestingUser.HasRole(Role.CASHIER):
+            case Role.CASHIER when requestingUser.HasRoleAtLocation(Role.CASHIER, request.LocationId):
                 order = Order.CreateByCashier(request.LocationId, currentUserId, request.CustomerName!);
                 break;
-            case Role.WAITER when requestingUser.HasRole(Role.WAITER):
+            case Role.WAITER when requestingUser.HasRoleAtLocation(Role.WAITER, request.LocationId):
                 if (request.IsPackage)
                 {
                     order = Order.CreatePackageByWaiter(request.LocationId, currentUserId, request.CustomerName!);

@@ -27,7 +27,7 @@ public class GetCategoriesAdminQueryHandler : IRequestHandler<GetCategoriesAdmin
 
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
-            locationId = actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
+            locationId = actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
 
         var (categories, totalCount) = await _categoryRepository.GetAllPagedAsync(request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);
 

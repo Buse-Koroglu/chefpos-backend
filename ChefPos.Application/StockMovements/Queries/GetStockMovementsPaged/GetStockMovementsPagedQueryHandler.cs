@@ -33,9 +33,13 @@ public class GetStockMovementsPagedQueryHandler
             throw new ValidationException("Stok hareketlerini görüntüleme yetkiniz yok.");
         }
 
-        if (!currentUser.HasRole(Role.SUPER_ADMIN) && request.LocationId.HasValue && !currentUser.HasAccessToLocation(request.LocationId.Value))
+        if (!currentUser.HasRole(Role.SUPER_ADMIN) && request.LocationId.HasValue)
         {
-            throw new ValidationException("Bu yerleşkeye erişim yetkiniz yok.");
+            var hasLocationAccess = currentUser.HasRoleAtLocation(Role.STOCK_MANAGER, request.LocationId.Value)
+                || currentUser.HasRoleAtLocation(Role.INVENTORY_STAFF, request.LocationId.Value)
+                || currentUser.HasRoleAtLocation(Role.ADMIN, request.LocationId.Value);
+            if (!hasLocationAccess)
+                throw new ValidationException("Bu yerleşkeye erişim yetkiniz yok.");
         }
 
         var (items, totalCount) = await _stockMovementRepository.GetAllPagedAsync(request.IngredientId,request.LocationId, request.Type, request.PageNumber, request.PageSize, cancellationToken);

@@ -39,13 +39,10 @@ public class CompleteOrderCommandHandler : IRequestHandler<CompleteOrderCommand,
         var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken)
             .OrThrowNotFoundAsync($"Sipariş bulunamadı : {request.OrderId}");
 
-        if (!requestingUser.HasAccessToLocation(order.LocationId))
-            throw new ForbiddenException("Bu kullanıcının belirtilen yerleşkede işlem yapma yetkisi yok.");
-
         var canComplete = order.OrderType switch
         {
-            OrderType.CASHIER => requestingUser.HasRole(Role.CASHIER),
-            OrderType.WAITER or OrderType.SELF_SERVICE => requestingUser.HasRole(Role.KITCHEN),
+            OrderType.CASHIER => requestingUser.HasRoleAtLocation(Role.CASHIER, order.LocationId),
+            OrderType.WAITER or OrderType.SELF_SERVICE => requestingUser.HasRoleAtLocation(Role.KITCHEN, order.LocationId),
             _ => false
         };
 
