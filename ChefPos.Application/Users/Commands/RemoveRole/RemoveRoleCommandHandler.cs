@@ -20,16 +20,18 @@ public class RemoveUserRoleCommandHandler : IRequestHandler<RemoveRoleCommand, U
 
     public async Task<UserResponseDto> Handle(RemoveRoleCommand request, CancellationToken cancellationToken)
     {
+        if (request.Role != Role.SUPER_ADMIN)
+        {
+            throw new ValidationException("Bu uç nokta yalnızca süper yönetici rolü içindir; diğer roller için yerleşkeye özel rol kaldırma kullanılmalıdır.");
+        }
+
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {request.UserId}");
 
-        if (request.Role == Role.ADMIN || request.Role == Role.SUPER_ADMIN)
-        {
-            var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
-            if (!actingUser.HasRole(Role.SUPER_ADMIN))
-            {
-                throw new ValidationException("Bu rolü yalnızca süper yönetici kaldırabilir.");
-            }
+        if (!actingUser.HasRole(Role.SUPER_ADMIN))
+        {
+            throw new ValidationException("Bu rolü yalnızca süper yönetici kaldırabilir.");
         }
 
         user.RemoveRole(request.Role);

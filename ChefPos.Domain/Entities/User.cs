@@ -22,7 +22,10 @@ public class User :  BaseEntity
 
     private readonly List<UserLocation> _locations = new(); // bir personel birden fazla lokasyonda bulunabilir.
     public IReadOnlyCollection<UserLocation> Locations => _locations;
-    
+
+    private readonly List<UserLocationRole> _locationRoles = new(); // bir rolün hangi yerleşkede geçerli olduğunu tutar.
+    public IReadOnlyCollection<UserLocationRole> LocationRoles => _locationRoles;
+
     private User() { }
 
     public User(string personalId, string firstName, string lastName,string password, IEnumerable<Role>roles)
@@ -76,22 +79,69 @@ public class User :  BaseEntity
 
     public void DeactivateUser() { IsActive = false; Touch(); }
     public void ActivateUser() { IsActive = true; Touch(); }
-    
+
     public bool HasRole(Role role) => _roles.Any(r => r.Role == role);
- 
+
     public void AddRole(Role role)
     {
         if (HasRole(role)) return;
         _roles.Add(new UserRole(Id, role));
         Touch();
     }
- 
+
     public void RemoveRole(Role role)
     {
+        if (_locationRoles.Any(lr => lr.Role == role))
+            throw new InvalidOperationException("Bu rol bir veya daha fazla yerleşkede atanmış; önce ilgili yerleşke atamalarını kaldırın.");
         if (_roles.Count <= 1) throw new InvalidOperationException("Kullanıcının en az bir rolü olmalıdır.");
         var removedRole = _roles.FirstOrDefault(r => r.Role == role);
         if (removedRole is null) return;
         _roles.Remove(removedRole);
+        Touch();
+    }
+
+    public bool HasRoleAtLocation(Role role, Guid locationId) => _locationRoles.Any(lr => lr.Role == role && lr.LocationId == locationId);
+
+    public IEnumerable<Guid> LocationIdsForRole(Role role) => _locationRoles.Where(lr => lr.Role == role).Select(lr => lr.LocationId);
+
+    public void GrantRoleAtLocation(Role role, Guid locationId)
+    {
+        if (role == Role.SUPER_ADMIN)
+            throw new InvalidOperationException("Süper yönetici rolü bir yerleşkeye atanamaz.");
+        if (HasRoleAtLocation(role, locationId))
+            throw new InvalidOperationException("Kullanıcı zaten bu yerleşkede bu role sahip.");
+
+        _locationRoles.Add(new UserLocationRole(Id, locationId, role));
+
+        if (!HasRole(role))
+            _roles.Add(new UserRole(Id, role));
+        if (!HasAccessToLocation(locationId))
+            _locations.Add(new UserLocation(Id, locationId));
+
+        Touch();
+    }
+
+    public void RevokeRoleAtLocation(Role role, Guid locationId)
+    {
+        var locationRole = _locationRoles.FirstOrDefault(lr => lr.Role == role && lr.LocationId == locationId);
+        if (locationRole is null) return;
+
+        if (_locationRoles.Count <= 1 && !HasRole(Role.SUPER_ADMIN))
+            throw new InvalidOperationException("Kullanıcının en az bir rol-yerleşke ataması olmalıdır.");
+
+        _locationRoles.Remove(locationRole);
+
+        if (_locationRoles.All(lr => lr.Role != role))
+        {
+            var legacyRole = _roles.FirstOrDefault(r => r.Role == role);
+            if (legacyRole is not null) _roles.Remove(legacyRole);
+        }
+        if (_locationRoles.All(lr => lr.LocationId != locationId))
+        {
+            var legacyLocation = _locations.FirstOrDefault(l => l.LocationId == locationId);
+            if (legacyLocation is not null) _locations.Remove(legacyLocation);
+        }
+
         Touch();
     }
 

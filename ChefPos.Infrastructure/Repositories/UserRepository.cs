@@ -18,12 +18,12 @@ public class UserRepository : IUserRepository
     
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Users.Include(u => u.Locations).Include(u=>u.UserRoles).FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        return await _context.Users.Include(u => u.Locations).Include(u=>u.UserRoles).Include(u => u.LocationRoles).FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
     public async Task<User?> GetByPersonalIdAsync(string personalId, CancellationToken cancellationToken)
     {
-        return await _context.Users.Include(u => u.Locations).Include(u=>u.UserRoles).FirstOrDefaultAsync(u => u.PersonalId == personalId, cancellationToken);
+        return await _context.Users.Include(u => u.Locations).Include(u=>u.UserRoles).Include(u => u.LocationRoles).FirstOrDefaultAsync(u => u.PersonalId == personalId, cancellationToken);
     }
 
     public async Task AddAsync(User user, CancellationToken cancellationToken)
@@ -36,25 +36,28 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Include(u => u.Locations)
             .Include(u => u.UserRoles)
+            .Include(u => u.LocationRoles)
             .OrderBy(u => u.FirstName)
             .ThenBy(u => u.LastName)
             .ToListAsync(cancellationToken);
     }
-    
+
     public async Task<User?> GetStockManagerByLocationAsync(Guid locationId, CancellationToken cancellationToken)
     {
         return await _context.Users
             .Include(u => u.Locations)
             .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u => u.IsActive && u.UserRoles.Any(r => r.Role == Role.STOCK_MANAGER) && u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
+            .Include(u => u.LocationRoles)
+            .FirstOrDefaultAsync(u => u.IsActive && u.LocationRoles.Any(lr => lr.Role == Role.STOCK_MANAGER && lr.LocationId == locationId), cancellationToken);
     }
-    
+
     public async Task<User?> GetAdminByLocationAsync(Guid locationId, CancellationToken cancellationToken)
     {
         return await _context.Users
             .Include(u => u.Locations)
             .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u => u.UserRoles.Any(r => r.Role == Role.ADMIN) && u.Locations.Any(l => l.LocationId == locationId), cancellationToken);
+            .Include(u => u.LocationRoles)
+            .FirstOrDefaultAsync(u => u.LocationRoles.Any(lr => lr.Role == Role.ADMIN && lr.LocationId == locationId), cancellationToken);
     }
 
     public async Task<User?> GetSuperAdminAsync(CancellationToken cancellationToken)
@@ -62,6 +65,7 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Include(u => u.Locations)
             .Include(u => u.UserRoles)
+            .Include(u => u.LocationRoles)
             .FirstOrDefaultAsync(u => u.UserRoles.Any(r => r.Role == Role.SUPER_ADMIN), cancellationToken);
     }
 
@@ -69,7 +73,8 @@ public class UserRepository : IUserRepository
     {
         var query = _context.Users
             .Include(u => u.UserRoles)
-            .Include(u => u.Locations).AsQueryable();
+            .Include(u => u.Locations)
+            .Include(u => u.LocationRoles).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -80,14 +85,15 @@ public class UserRepository : IUserRepository
                 EF.Functions.ILike(u.PersonalId, $"%{searchTerm}%"));
         }
 
-        if (role.HasValue)
+        if (role.HasValue && locationId.HasValue)
+            query = query.Where(u => u.LocationRoles.Any(lr => lr.Role == role.Value && lr.LocationId == locationId.Value));
+        else if (role.HasValue)
             query = query.Where(u => u.UserRoles.Any(ur => ur.Role == role.Value));
+        else if (locationId.HasValue)
+            query = query.Where(u => u.Locations.Any(l => l.LocationId == locationId.Value));
 
         if (isActive.HasValue)
             query = query.Where(u => u.IsActive == isActive.Value);
-
-        if (locationId.HasValue)
-            query = query.Where(u => u.Locations.Any(l => l.LocationId == locationId.Value));
 
         query = query.OrderByDescending(u => u.CreatedAt);
 
@@ -103,6 +109,7 @@ public class UserRepository : IUserRepository
             .AsNoTracking() // çektiğimiz entity'nin change tracker tarafından takip edilmeisni önler ve performnas artımı sağlar.
             .Include(u => u.UserRoles)
             .Include(u => u.Locations).ThenInclude(l => l.Location)
+            .Include(u => u.LocationRoles)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -114,14 +121,15 @@ public class UserRepository : IUserRepository
                 EF.Functions.ILike(u.PersonalId, $"%{searchTerm}%"));
         }
 
-        if (role.HasValue)
+        if (role.HasValue && locationId.HasValue)
+            query = query.Where(u => u.LocationRoles.Any(lr => lr.Role == role.Value && lr.LocationId == locationId.Value));
+        else if (role.HasValue)
             query = query.Where(u => u.UserRoles.Any(ur => ur.Role == role.Value));
+        else if (locationId.HasValue)
+            query = query.Where(u => u.Locations.Any(l => l.LocationId == locationId.Value));
 
         if (isActive.HasValue)
             query = query.Where(u => u.IsActive == isActive.Value);
-
-        if (locationId.HasValue)
-            query = query.Where(u => u.Locations.Any(l => l.LocationId == locationId.Value));
 
         var totalCount = await query.CountAsync(cancellationToken);
         

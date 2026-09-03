@@ -21,5 +21,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasMany(u => u.UserRoles).WithOne(r => r.User).HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(u => u.UserRoles).HasField("_roles").UsePropertyAccessMode(PropertyAccessMode.Field); // orders property'sini kullanma, verileri doğrudan _orders field'ına yaz/oku.
         builder.Ignore(u => u.Roles); // veritabanına işlenmemesi için
+        builder.HasMany(u => u.LocationRoles).WithOne(lr => lr.User).HasForeignKey(lr => lr.UserId).OnDelete(DeleteBehavior.Cascade);
+        builder.Navigation(u => u.LocationRoles).HasField("_locationRoles").UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

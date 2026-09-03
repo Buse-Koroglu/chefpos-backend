@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<UserLocation> UserLocations => Set<UserLocation>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<UserLocationRole> UserLocationRoles => Set<UserLocationRole>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();

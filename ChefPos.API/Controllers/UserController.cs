@@ -3,8 +3,10 @@ using ChefPos.Application.Users.Commands.AddRole;
 using ChefPos.Application.Users.Commands.AssignLocationAccess;
 using ChefPos.Application.Users.Commands.CreateUser;
 using ChefPos.Application.Users.Commands.DeactivateUser;
+using ChefPos.Application.Users.Commands.GrantRoleAtLocation;
 using ChefPos.Application.Users.Commands.RemoveRole;
 using ChefPos.Application.Users.Commands.RevokeLocationAccess;
+using ChefPos.Application.Users.Commands.RevokeRoleAtLocation;
 using ChefPos.Application.Users.DTOs;
 using ChefPos.Application.Users.Queries.GetAdminByLocation;
 using ChefPos.Application.Users.Queries.ExportUsers;
@@ -87,7 +89,7 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpDelete("{id}/locations/{locationId}")]
     public async Task<ActionResult> RevokeLocationAccess([FromRoute] Guid id, [FromRoute] Guid locationId, CancellationToken cancellationToken)
     {
@@ -96,6 +98,24 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
     
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpPost("{id}/location-roles")]
+    public async Task<ActionResult> GrantRoleAtLocation([FromRoute] Guid id, GrantRoleAtLocationRequest body, CancellationToken cancellationToken)
+    {
+        var command = new GrantRoleAtLocationCommand(id, body.Role, body.LocationId);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
+    [HttpDelete("{id}/location-roles/{role}/{locationId}")]
+    public async Task<ActionResult> RevokeRoleAtLocation([FromRoute] Guid id, [FromRoute] Role role, [FromRoute] Guid locationId, CancellationToken cancellationToken)
+    {
+        var command = new RevokeRoleAtLocationCommand(id, role, locationId);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
     [HttpPost("{id}/roles")]
     public async Task<ActionResult> AddRole([FromRoute] Guid id, AddRoleRequest body, CancellationToken cancellationToken)

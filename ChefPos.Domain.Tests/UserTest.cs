@@ -5,7 +5,7 @@ namespace ChefPos.Domain.Tests;
 
 public class UserTest
 {
-    private const string PersonalId = "E001";
+    private const string PersonalId = "12345678901";
     private const string Name = "Mock Name";
     private const string Surname = "Mock Surname";
     private const string Password = "Mock Password";
@@ -15,7 +15,7 @@ public class UserTest
     {
         var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
  
-        Assert.Equal("E001", user.PersonalId);
+        Assert.Equal(PersonalId, user.PersonalId);
         Assert.True(user.IsFirstLogin);
         Assert.True(user.IsActive);
     }
@@ -122,5 +122,102 @@ public class UserTest
         user.ActivateUser();
         Assert.True(user.IsActive);
     }
-    
+
+    [Fact]
+    public void GrantRoleAtLocationAddsLocationRoleAndSyncsLegacyProjections()
+    {
+        var locationId = Guid.NewGuid();
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
+
+        user.GrantRoleAtLocation(Role.KITCHEN, locationId);
+
+        Assert.True(user.HasRoleAtLocation(Role.KITCHEN, locationId));
+        Assert.True(user.HasRole(Role.KITCHEN));
+        Assert.True(user.HasAccessToLocation(locationId));
+    }
+
+    [Fact]
+    public void GrantRoleAtLocationThrowsWhenSameRoleAndLocationAlreadyGranted()
+    {
+        var locationId = Guid.NewGuid();
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
+        user.GrantRoleAtLocation(Role.KITCHEN, locationId);
+
+        Assert.Throws<InvalidOperationException>(() => user.GrantRoleAtLocation(Role.KITCHEN, locationId));
+    }
+
+    [Fact]
+    public void GrantRoleAtLocationThrowsForSuperAdmin()
+    {
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
+        Assert.Throws<InvalidOperationException>(() => user.GrantRoleAtLocation(Role.SUPER_ADMIN, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void RevokeRoleAtLocationRemovesOnlyTheGivenPairAndKeepsOthersIntact()
+    {
+        var merkez = Guid.NewGuid();
+        var yenimahalle = Guid.NewGuid();
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
+        user.GrantRoleAtLocation(Role.KITCHEN, merkez);
+        user.GrantRoleAtLocation(Role.ADMIN, yenimahalle);
+
+        user.RevokeRoleAtLocation(Role.ADMIN, yenimahalle);
+
+        Assert.False(user.HasRoleAtLocation(Role.ADMIN, yenimahalle));
+        Assert.False(user.HasRole(Role.ADMIN));
+        Assert.False(user.HasAccessToLocation(yenimahalle));
+        Assert.True(user.HasRoleAtLocation(Role.KITCHEN, merkez));
+        Assert.True(user.HasRole(Role.KITCHEN));
+        Assert.True(user.HasAccessToLocation(merkez));
+    }
+
+    [Fact]
+    public void RevokeRoleAtLocationKeepsLegacyRoleWhenSameRoleGrantedAtAnotherLocation()
+    {
+        var merkez = Guid.NewGuid();
+        var yenimahalle = Guid.NewGuid();
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
+        user.GrantRoleAtLocation(Role.KITCHEN, merkez);
+        user.GrantRoleAtLocation(Role.KITCHEN, yenimahalle);
+
+        user.RevokeRoleAtLocation(Role.KITCHEN, yenimahalle);
+
+        Assert.True(user.HasRole(Role.KITCHEN));
+        Assert.False(user.HasAccessToLocation(yenimahalle));
+        Assert.True(user.HasAccessToLocation(merkez));
+    }
+
+    [Fact]
+    public void RevokeRoleAtLocationDoesNothingWhenPairNotFound()
+    {
+        var locationId = Guid.NewGuid();
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
+        user.GrantRoleAtLocation(Role.KITCHEN, locationId);
+
+        user.RevokeRoleAtLocation(Role.ADMIN, Guid.NewGuid());
+
+        Assert.True(user.HasRoleAtLocation(Role.KITCHEN, locationId));
+    }
+
+    [Fact]
+    public void RevokeRoleAtLocationThrowsWhenItIsTheLastLocationRoleAndUserIsNotSuperAdmin()
+    {
+        var locationId = Guid.NewGuid();
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
+        user.GrantRoleAtLocation(Role.KITCHEN, locationId);
+
+        Assert.Throws<InvalidOperationException>(() => user.RevokeRoleAtLocation(Role.KITCHEN, locationId));
+    }
+
+    [Fact]
+    public void RemoveRoleThrowsWhenRoleStillGrantedAtALocation()
+    {
+        var locationId = Guid.NewGuid();
+        var user = new User(PersonalId, Name, Surname, Password, new[] { Role.CASHIER });
+        user.GrantRoleAtLocation(Role.KITCHEN, locationId);
+
+        Assert.Throws<InvalidOperationException>(() => user.RemoveRole(Role.KITCHEN));
+    }
+
 }

@@ -13,6 +13,7 @@ public class UserResponseDto
     public bool IsFirstLogin { get; set; }
     public bool IsActive { get; set; }
     public List<Guid> LocationIds { get; set; } = new();
+    public List<UserLocationRoleDto> LocationRoles { get; set; } = new();
 
     public static UserResponseDto FromEntity(User user)
     {
@@ -25,7 +26,8 @@ public class UserResponseDto
             Roles = user.Roles.ToList(),
             IsFirstLogin = user.IsFirstLogin,
             IsActive = user.IsActive,
-            LocationIds = user.Locations.Select(l => l.LocationId).ToList()
+            LocationIds = user.Locations.Select(l => l.LocationId).ToList(),
+            LocationRoles = user.LocationRoles.Select(lr => new UserLocationRoleDto { Role = lr.Role, LocationId = lr.LocationId }).ToList()
         };
     }
 }

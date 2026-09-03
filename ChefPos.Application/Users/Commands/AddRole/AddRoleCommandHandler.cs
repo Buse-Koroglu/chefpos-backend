@@ -19,35 +19,29 @@ public class AddRoleCommandHandler : IRequestHandler<AddRoleCommand, UserRespons
 
     public async Task<UserResponseDto> Handle(AddRoleCommand request, CancellationToken cancellationToken)
     {
+        if (request.Role != Role.SUPER_ADMIN)
+        {
+            throw new ValidationException("Bu uç nokta yalnızca süper yönetici rolü içindir; diğer roller için yerleşkeye özel rol atama kullanılmalıdır.");
+        }
+
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {request.UserId}");
 
-        if (request.Role == Role.ADMIN || request.Role == Role.SUPER_ADMIN)
-        {
-            var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
+        var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
-            if (!actingUser.HasRole(Role.SUPER_ADMIN))
-            {
-                throw new ValidationException("Bu rolü yalnızca süper yönetici atayabilir.");
-            }
+        if (!actingUser.HasRole(Role.SUPER_ADMIN))
+        {
+            throw new ValidationException("Bu rolü yalnızca süper yönetici atayabilir.");
         }
 
-        if (request.Role == Role.SUPER_ADMIN)
+        var existingSuperAdmin = await _userRepository.GetSuperAdminAsync(cancellationToken);
+        if (existingSuperAdmin is not null && existingSuperAdmin.Id != user.Id)
         {
-            var existingSuperAdmin = await _userRepository.GetSuperAdminAsync(cancellationToken);
-            if (existingSuperAdmin is not null && existingSuperAdmin.Id != user.Id)
-            {
-                throw new ValidationException($"Sistemde zaten bir süper yönetici var: {existingSuperAdmin.FirstName} {existingSuperAdmin.LastName}.");
-            }
-
-            if (user.HasRole(Role.ADMIN))
-            {
-                throw new ValidationException("Yönetici rolüne sahip bir kullanıcı süper yönetici yapılamaz. Önce yöneticilik rolünü kaldırın.");
-            }
+            throw new ValidationException($"Sistemde zaten bir süper yönetici var: {existingSuperAdmin.FirstName} {existingSuperAdmin.LastName}.");
         }
 
-        if (request.Role == Role.ADMIN && user.HasRole(Role.SUPER_ADMIN))
+        if (user.HasRole(Role.ADMIN))
         {
-            throw new ValidationException("Süper yönetici bir yerleşkenin yöneticisi olamaz.");
+            throw new ValidationException("Yönetici rolüne sahip bir kullanıcı süper yönetici yapılamaz. Önce yöneticilik rolünü kaldırın.");
         }
 
         user.AddRole(request.Role);
