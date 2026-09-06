@@ -1,3 +1,5 @@
+using ChefPos.Application.Common.Exceptions;
+using ChefPos.Application.Common.Export;
 using ChefPos.Application.Common.Interfaces;
 using ChefPos.Domain.Entities;
 using ChefPos.Infrastructure.Persistence;
@@ -44,6 +46,23 @@ public class LocationRepository : ILocationRepository
 
         var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return (items, totalCount);
+    }
+
+    public async Task<List<Location>> GetAllForExportAsync(string? searchTerm, bool? isActive, int maxRows, CancellationToken cancellationToken)
+    {
+        var query = _context.Locations.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(l => EF.Functions.ILike(l.Name, $"%{searchTerm}%"));
+
+        if (isActive.HasValue)
+            query = query.Where(l => l.IsActive == isActive.Value);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        if (totalCount > maxRows)
+            throw new ValidationException(ExportLimits.ExceededMessage);
+
+        return await query.OrderBy(l => l.Name).ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Location location, CancellationToken cancellationToken)

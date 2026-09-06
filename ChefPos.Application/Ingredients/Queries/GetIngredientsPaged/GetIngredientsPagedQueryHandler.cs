@@ -25,9 +25,17 @@ public class GetIngredientsPagedQueryHandler : IRequestHandler<GetIngredientsPag
         var actingUser = await _userRepository.GetByIdAsync(_currentUserService.UserId, cancellationToken).OrThrowNotFoundAsync($"Kullanıcı bulunamadı: {_currentUserService.UserId}");
 
         var locationId = request.LocationId;
-        if (!actingUser.HasRole(Role.SUPER_ADMIN))
+        if (actingUser.HasRole(Role.ADMIN) && !actingUser.HasRole(Role.SUPER_ADMIN))
         {
             locationId = actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
+        }
+        else if (actingUser.HasRole(Role.STOCK_MANAGER) && !actingUser.HasRole(Role.SUPER_ADMIN))
+        {
+            locationId = actingUser.LocationIdsForRole(Role.STOCK_MANAGER).FirstOrDefault();
+        }
+        else if (actingUser.HasRole(Role.INVENTORY_STAFF) && !actingUser.HasRole(Role.SUPER_ADMIN))
+        {
+            locationId = actingUser.LocationIdsForRole(Role.INVENTORY_STAFF).FirstOrDefault();
         }
 
         var (ingredients, totalCount) = await _ingredientRepository.GetAllPagedAsync(request.SearchTerm, locationId, request.IsActive, request.PageNumber, request.PageSize, cancellationToken);

@@ -29,14 +29,20 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
         var locationId = request.LocationId;
         if (!actingUser.HasRole(Role.SUPER_ADMIN))
         {
+            var isAdmin = actingUser.HasRole(Role.ADMIN);
             if (locationId.HasValue)
             {
-                if (!actingUser.HasRoleAtLocation(Role.ADMIN, locationId.Value))
+                var hasAccess = isAdmin
+                    ? actingUser.HasRoleAtLocation(Role.ADMIN, locationId.Value)
+                    : actingUser.HasAccessToLocation(locationId.Value);
+                if (!hasAccess)
                     throw new ValidationException("Bu yerleşke için işlem yapma yetkiniz yok.");
             }
             else
             {
-                locationId = actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault();
+                locationId = isAdmin
+                    ? actingUser.LocationIdsForRole(Role.ADMIN).FirstOrDefault()
+                    : actingUser.Locations.Select(l => l.LocationId).FirstOrDefault();
             }
         }
 

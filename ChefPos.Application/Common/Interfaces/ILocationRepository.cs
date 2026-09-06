@@ -13,6 +13,11 @@ public interface ILocationRepository
                 int pageNumber,
                 int pageSize,
                 CancellationToken cancellationToken);
+        Task<List<Location>> GetAllForExportAsync(
+                string? searchTerm,
+                bool? isActive,
+                int maxRows,
+                CancellationToken cancellationToken);
         Task AddAsync(Location location, CancellationToken cancellationToken);
         Task SaveAllChangesAsync(CancellationToken cancellationToken);
 }

@@ -3,11 +3,13 @@ using ChefPos.Application.Locations.Commands.CreateLocation;
 using ChefPos.Application.Locations.Commands.DeactivateLocation;
 using ChefPos.Application.Locations.Commands.UpdateLocation;
 using ChefPos.Application.Locations.DTOs;
+using ChefPos.Application.Locations.Queries.ExportLocations;
 using ChefPos.Application.Locations.Queries.GetLocations;
 using ChefPos.Application.Locations.Queries.GetLocationsPaged;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static ChefPos.Application.Common.Export.ExportFileResult;
 
 [ApiController]
 [Route("api/locations")]
@@ -44,6 +46,14 @@ public class LocationsController : ControllerBase
         return Ok(result);
     }
     
+
+    [Authorize(Roles = "SUPER_ADMIN")]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export([FromQuery] string? searchTerm, [FromQuery] bool? isActive, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ExportLocationsQuery(searchTerm, isActive), cancellationToken);
+        return File(result.Content, ContentType, result.FileName);
+    }
 
     [Authorize(Roles = "SUPER_ADMIN")]
     [HttpPut("{id}")]
