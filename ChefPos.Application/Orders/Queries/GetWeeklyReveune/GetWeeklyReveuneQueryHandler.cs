@@ -8,17 +8,23 @@ public class GetWeeklyRevenueQueryHandler : IRequestHandler<GetWeeklyRevenueQuer
     private static readonly string[] DayNames = { "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma" };
 
     private readonly IOrderRepository _orderRepository;
+    private readonly IBusinessClock _businessClock;
 
-    public GetWeeklyRevenueQueryHandler(IOrderRepository orderRepository) => _orderRepository = orderRepository;
+    public GetWeeklyRevenueQueryHandler(IOrderRepository orderRepository, IBusinessClock businessClock)
+    {
+        _orderRepository = orderRepository;
+        _businessClock = businessClock;
+    }
 
     public async Task<WeeklyRevenueResponseDto> Handle(GetWeeklyRevenueQuery request, CancellationToken cancellationToken)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = _businessClock.Today;
         var diff = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
         var monday = today.AddDays(-diff);
         var saturdayExclusive = monday.AddDays(5);
 
-        var dailyProfits = await _orderRepository.GetDailyProfitAsync(request.LocationId, monday, saturdayExclusive, cancellationToken);
+        var dailyProfits = await _orderRepository.GetDailyProfitAsync(
+            request.LocationId, _businessClock.ToUtc(monday), _businessClock.ToUtc(saturdayExclusive), cancellationToken);
         var profitByDate = dailyProfits.ToDictionary(x => x.Date, x => x.Profit);
 
         var days = new List<DailyRevenueDto>();

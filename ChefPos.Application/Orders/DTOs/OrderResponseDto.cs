@@ -15,6 +15,7 @@ public class OrderResponseDto
     public List<OrderItemResponseDto> Items { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
+    public DateTime? PaidAt { get; set; }
     public Guid? TableId { get; set; }
     public int? TableNumber { get; set; }
     public Guid? CreatedByUserId { get; set; }
@@ -35,6 +36,7 @@ public class OrderResponseDto
             Items = order.Items.Select(OrderItemResponseDto.FromEntity).ToList(),
             CreatedAt = order.CreatedAt,
             CompletedAt = order.CompletedAt,
+            PaidAt = order.PaidAt,
             TableId = order.TableId,
             TableNumber = order.Table?.TableNumber,
             CreatedByUserId = order.CreatedByUserId,

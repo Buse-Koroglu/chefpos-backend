@@ -16,7 +16,7 @@ public class CashierDashboardController : ControllerBase
         _mediator = mediator;
     }
  
-    [Authorize(Roles = "CASHIER,ADMIN")]
+    [Authorize(Roles = "CASHIER")]
     [HttpGet("cashier")]
     public async Task<ActionResult> GetCashierDashboard([FromQuery] Guid locationId, CancellationToken cancellationToken)
     {
@@ -25,7 +25,7 @@ public class CashierDashboardController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "CASHIER,ADMIN")]
+    [Authorize(Roles = "CASHIER")]
     [HttpGet("weekly-revenue")]
     public async Task<ActionResult> GetWeeklyRevenue([FromQuery] Guid locationId, CancellationToken cancellationToken)
     {

@@ -53,7 +53,7 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "CASHIER,WAITER,ADMIN")]
+    [Authorize(Roles = "CASHIER,WAITER")]
     [HttpGet("{id}")]
     public async Task<ActionResult> GetOrderById(Guid id, CancellationToken cancellationToken)
     {
@@ -61,15 +61,24 @@ public class OrdersController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "KITCHEN,ADMIN")]
+    [Authorize(Roles = "KITCHEN")]
     [HttpGet("kitchen")]
-    public async Task<ActionResult> GetKitchenOrders([FromQuery] Guid locationId, [FromQuery] OrderStatus? status, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetKitchenOrders(
+        [FromQuery] Guid locationId,
+        [FromQuery] OrderStatus? status,
+        [FromQuery] OrderType[]? types,
+        [FromQuery] string? searchTerm,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetKitchenOrdersQuery(locationId, status), cancellationToken);
+        var result = await _mediator.Send(
+            new GetKitchenOrdersQuery(locationId, status, types, searchTerm, pageNumber, pageSize),
+            cancellationToken);
         return Ok(result);
     }
     
-    [Authorize(Roles = "CASHIER,WAITER,ADMIN,KITCHEN")]
+    [Authorize(Roles = "CASHIER,WAITER,KITCHEN")]
     [HttpGet]
     public async Task<ActionResult> GetOrders(
         [FromQuery] Guid locationId,

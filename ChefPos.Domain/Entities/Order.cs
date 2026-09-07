@@ -20,6 +20,7 @@ public class Order : BaseEntity
     public bool IsPackage { get; private set; }
 
     public DateTime? CompletedAt { get; private set; }
+    public DateTime? PaidAt { get; private set; }
 
     private readonly List<OrderItem> _items = new();
     public IReadOnlyCollection<OrderItem> Items => _items;
@@ -132,6 +133,7 @@ public class Order : BaseEntity
             throw new InvalidOperationException($"Sipariş tamamlandığı ve iptal edildiği durumundayken tamamlanamaz.");
 
         OrderStatus = OrderStatus.COMPLETED;
+        CompletedAt = DateTime.UtcNow;
         Touch();
     }
 
@@ -150,7 +152,7 @@ public class Order : BaseEntity
             throw new InvalidOperationException("Sipariş zaten ödenmiş.");
 
         PaymentStatus = PaymentStatus.PAID;
-        CompletedAt = DateTime.UtcNow;
+        PaidAt = DateTime.UtcNow;
         Touch();
     }
     

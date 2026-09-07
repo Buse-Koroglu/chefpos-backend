@@ -5,6 +5,7 @@ using ChefPos.Infrastructure.Files;
 using ChefPos.Infrastructure.Persistence;
 using ChefPos.Infrastructure.Repositories;
 using ChefPos.Infrastructure.Security;
+using ChefPos.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,9 @@ public static class DependencyInjection
       services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName)); // options attern ile conf dosyasındaki fileStorage değerleri = FileStorageSettings class 
       services.AddSingleton<IFileStorageService, LocalFileStorageService>(); // bu interface ve servis içerisinde bağımlılık olarak FileStorageSetting içeriyor o da Singleton.
       services.AddSingleton<IExcelExportService, ExcelExportService>(); // bu interface ve servis içerisinde herhangi bir bağımlılık içermiyor performans ve gereksiz allocate'i önlemek için singleton
+
+      services.Configure<BusinessSettings>(configuration.GetSection(BusinessSettings.SectionName)); // options pattern ile conf dosyasındaki business değerleri = BusinessSettings class
+      services.AddSingleton<IBusinessClock, BusinessClock>(); // içerisinde scoped bağımlılık içermediği için performans için singleton
 
       return services;
    } 

@@ -13,19 +13,22 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
     private readonly IProductRepository _productRepository;
     private readonly ILocationRepository _locationRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IBusinessClock _businessClock;
 
     public GetDashboardSummaryQueryHandler(
         IUserRepository userRepository,
         IOrderRepository orderRepository,
         IProductRepository productRepository,
         ILocationRepository locationRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IBusinessClock businessClock)
     {
         _userRepository = userRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _locationRepository = locationRepository;
         _currentUserService = currentUserService;
+        _businessClock = businessClock;
     }
 
     public async Task<DashboardSummaryDto> Handle(GetDashboardSummaryQuery request, CancellationToken cancellationToken)
@@ -53,13 +56,14 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
             topSellingProductName = product?.Name;
         }
 
-        var today = DateTime.UtcNow.Date;
+        var today = _businessClock.Today;
         var daysSinceMonday = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
         var mondayOfThisWeek = today.AddDays(-daysSinceMonday);
         var fridayOfThisWeek = mondayOfThisWeek.AddDays(4);
         var toDateExclusive = fridayOfThisWeek.AddDays(1);
 
-        var dailyProfitRaw = await _orderRepository.GetDailyProfitAsync(locationId, mondayOfThisWeek, toDateExclusive, cancellationToken);
+        var dailyProfitRaw = await _orderRepository.GetDailyProfitAsync(
+            locationId, _businessClock.ToUtc(mondayOfThisWeek), _businessClock.ToUtc(toDateExclusive), cancellationToken);
 
         var weeklyRevenue = Enumerable.Range(0, 5)
             .Select(offset =>

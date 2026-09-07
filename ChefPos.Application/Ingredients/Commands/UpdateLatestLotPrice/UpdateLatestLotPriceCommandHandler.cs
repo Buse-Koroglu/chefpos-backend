@@ -7,20 +7,20 @@ using MediatR;
 
 namespace ChefPos.Application.Ingredients.Commands.UpdateIngredientPrice;
 
-public class UpdateIngredientPriceCommandHandler : IRequestHandler<UpdateIngredientPriceCommand, IngredientResponseDto>
+public class UpdateLatestLotPriceCommandHandler : IRequestHandler<UpdateLatestLotPriceCommand, IngredientResponseDto>
 {
     private readonly IIngredientRepository _ingredientRepository;
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public UpdateIngredientPriceCommandHandler(IIngredientRepository ingredientRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
+    public UpdateLatestLotPriceCommandHandler(IIngredientRepository ingredientRepository, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _ingredientRepository = ingredientRepository;
         _userRepository = userRepository;
         _currentUserService = currentUserService;
     }
 
-    public async Task<IngredientResponseDto> Handle(UpdateIngredientPriceCommand request, CancellationToken cancellationToken)
+    public async Task<IngredientResponseDto> Handle(UpdateLatestLotPriceCommand request, CancellationToken cancellationToken)
     {
         var ingredient = await _ingredientRepository.GetByIdAsync(request.IngredientId, cancellationToken).OrThrowNotFoundAsync($"Ham madde bulunamadı: {request.IngredientId}");
 

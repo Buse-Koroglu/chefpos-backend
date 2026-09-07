@@ -29,9 +29,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
         if (requestingUser is null)
             throw new NotFoundException("Kullanıcı bulunamadı.");
 
-        var hasLocationAccess = requestingUser.HasRoleAtLocation(Role.CASHIER, order.LocationId)
-            || requestingUser.HasRoleAtLocation(Role.WAITER, order.LocationId)
-            || requestingUser.HasRoleAtLocation(Role.ADMIN, order.LocationId);
+        var hasLocationAccess = requestingUser.HasRoleAtLocation(Role.CASHIER, order.LocationId) || requestingUser.HasRoleAtLocation(Role.WAITER, order.LocationId);
         if (!hasLocationAccess)
             throw new ForbiddenException("Bu siparişi görüntüleme yetkiniz yok.");
 

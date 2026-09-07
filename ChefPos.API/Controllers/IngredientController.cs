@@ -93,10 +93,13 @@ public class IngredientsController : ControllerBase
     
  
     [Authorize(Roles = "ADMIN,SUPER_ADMIN")]
-    [HttpPatch("{id}/price")]
-    public async Task<ActionResult> UpdatePrice([FromRoute] Guid id, UpdateIngredientPriceRequest body, CancellationToken cancellationToken)
+    [HttpPatch("{id}/latest-lot-price")]
+    public async Task<ActionResult> UpdateLatestLotPrice(
+        [FromRoute] Guid id, 
+        UpdateLatestLotPriceRequest body, 
+        CancellationToken cancellationToken)
     {
-        var command = new UpdateIngredientPriceCommand(id, body.UnitPrice);
+        var command = new UpdateLatestLotPriceCommand(id, body.UnitPrice);
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
