@@ -32,11 +32,15 @@ public class OrderRepository : IOrderRepository
     {
         var types = orderTypes.ToArray();
 
+        var todayStart = _businessClock.ToUtc(_businessClock.Today);
+        var todayEnd = _businessClock.ToUtc(_businessClock.Today.AddDays(1));
+
         var query = _context.Orders
             .Include(o => o.Items)
             .Include(o => o.Table)
             .Where(o => o.LocationId == locationId)
-            .Where(o => types.Contains(o.OrderType));
+            .Where(o => types.Contains(o.OrderType))
+            .Where(o => o.CreatedAt >= todayStart && o.CreatedAt < todayEnd);
 
         if (status.HasValue)
         {
@@ -206,13 +210,14 @@ public class OrderRepository : IOrderRepository
         var orders = await _context.Orders
             .Where(o => o.LocationId == locationId
                      && o.OrderStatus == OrderStatus.COMPLETED
-                     && o.CompletedAt != null
-                     && o.CompletedAt >= fromDate
-                     && o.CompletedAt < toDateExclusive)
+                     && o.PaymentStatus == PaymentStatus.PAID
+                     && o.PaidAt != null
+                     && o.PaidAt >= fromDate
+                     && o.PaidAt < toDateExclusive)
             .Select(o => new
             {
                 o.Id,
-                CompletedAt = o.CompletedAt!.Value,
+                PaidAt = o.PaidAt!.Value,
                 Revenue = o.TotalPrice
             })
             .ToListAsync(cancellationToken);
@@ -238,7 +243,7 @@ public class OrderRepository : IOrderRepository
             .ToDictionaryAsync(x => x.OrderId, x => x.Cost, cancellationToken);
 
         return orders
-            .GroupBy(o => _businessClock.GetBusinessDate(o.CompletedAt))
+            .GroupBy(o => _businessClock.GetBusinessDate(o.PaidAt))
             .Select(g => (
                 Date: g.Key,
                 Profit: g.Sum(o => o.Revenue - (costByOrderId.TryGetValue(o.Id, out var cost) ? cost : 0m))
